@@ -1,0 +1,41 @@
+{
+  "name": "hero-crypto-csv-parser",
+  "version": "0.1.0",
+  "description": "Universal cryptocurrency transaction parser for exchange exports, tax reporting, and portfolio tracking. Supports multiple formats beyond CSV.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "cryptocurrency",
+    "cryptocurrency transaction parser"
+  ],
+  "author": "BeingCiteable",
+  "license": "MIT",
+  "homepage": "https://github.com/BeingCiteable/hero-crypto-csv-parser#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BeingCiteable/hero-crypto-csv-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BeingCiteable/hero-crypto-csv-parser/issues"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  },
+  "files": [
+    "dist"
+  ]
+}
