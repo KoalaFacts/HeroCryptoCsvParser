@@ -1,4 +1,6 @@
 import { BatchEntryRecord } from './BatchEntryRecord';
+import { PluginPipeline } from '../plugins/PluginPipeline';
+import { pluginRegistry } from '../plugins/PluginRegistry';
 
 export interface ParseOptions {
   hasHeaders?: boolean;  // If true, first line is treated as headers and skipped (default: true)
@@ -62,17 +64,28 @@ export abstract class SourceParser<TRecord extends BatchEntryRecord<TRecord>> {
     const endIndex = Math.min(lines.length, dataStartIndex + maxRows);
     result.metadata.totalRows = endIndex - dataStartIndex;
     
+    // Create plugin pipeline for processing
+    const pipeline = new PluginPipeline(pluginRegistry.getPlugins());
+    
     // Process each line
     for (let i = dataStartIndex; i < endIndex; i++) {
       const line = lines[i];
       
       if (!line.trim()) continue;
       
+      // Process line through plugin pipeline
+      const processedLine = pipeline.executeLine(line, i + 1);
+      if (processedLine === null) continue; // Plugin filtered out this line
+      
       try {
-        const parseResult = BatchEntryRecord.parse(this.RecordClass, line);
+        const parseResult = BatchEntryRecord.parse(this.RecordClass, processedLine);
         
         if (parseResult.isValid && parseResult.data) {
-          result.records.push(parseResult.data);
+          // Process record through plugin pipeline
+          const processedRecord = pipeline.executeRecord(parseResult.data, i + 1);
+          if (processedRecord === null) continue; // Plugin filtered out this record
+          
+          result.records.push(processedRecord);
           result.metadata.parsedRows++;
         } else {
           result.errors.push({

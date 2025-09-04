@@ -11,15 +11,9 @@ export {
 
 export * from './types/transactions/index';
 
-export {
-  TransactionCategorizer,
-  TransactionCategorizerContext,
-  ParserPlugin
-} from './types/plugin';
-
 export { 
   SourceParser, 
-  ParseOptions as SourceParseOptions, 
+  ParseOptions,
   ParseResult
 } from './core/SourceParser';
 
@@ -42,7 +36,10 @@ export {
 
 export { BinanceSource, BinanceTransactionRecord, BinanceAdapter } from './sources/binance';
 
-export { PluginRegistry } from './core/PluginRegistry';
+export { Plugin } from './plugins/Plugin';
+export { PipelineContext } from './plugins/PipelineContext';
+export { PluginPipeline } from './plugins/PluginPipeline';
+export { PluginRegistry, pluginRegistry } from './plugins/PluginRegistry';
 
 import { BinanceSource as BinanceSourceInstance } from './sources/binance';
 import { Source, SourceProcessResult } from './core/Source';

@@ -46,18 +46,36 @@ export class ValidationResult<T = void> {
     return result;
   }
 
-  static failure<T>(error: ValidationError | string): ValidationResult<T> {
+  static failure<T>(error: ValidationError | ValidationError[] | string, data?: T): ValidationResult<T> {
     const result = new ValidationResult<T>();
     if (typeof error === 'string') {
       result.addError({ code: 'VALIDATION_ERROR', message: error });
+    } else if (Array.isArray(error)) {
+      result.addErrors(error);
     } else {
       result.addError(error);
+    }
+    if (data !== undefined) {
+      result.withData(data);
     }
     return result;
   }
 
+  static combine<T>(results: ValidationResult<any>[]): ValidationResult<T> {
+    const combined = new ValidationResult<T>();
+    for (const result of results) {
+      combined.merge(result);
+    }
+    return combined;
+  }
+
   addError(error: ValidationError): this {
     this._errors.push(error);
+    return this;
+  }
+
+  addErrors(errors: ValidationError[]): this {
+    this._errors.push(...errors);
     return this;
   }
 

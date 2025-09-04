@@ -151,8 +151,9 @@ export class FieldValidationBuilder<TRecord, TProperty = any> {
       const value = context.currentValue;
       const isEmpty = value === null || value === undefined || 
                       value === '' || 
+                      (typeof value === 'string' && value.trim() === '') ||
                       (Array.isArray(value) && value.length === 0) ||
-                      (typeof value === 'object' && Object.keys(value).length === 0);
+                      (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0);
       
       if (isEmpty) {
         return ValidationResult.failure({
@@ -188,8 +189,13 @@ export class FieldValidationBuilder<TRecord, TProperty = any> {
 
   minLength(min: number, errorMessage?: string): this {
     this.validationRules.push((context) => {
-      const value = String(context.currentValue || '');
-      if (value.length < min) {
+      const value = context.currentValue;
+      // Skip validation for null/undefined (not required)
+      if (value === null || value === undefined) {
+        return ValidationResult.success();
+      }
+      const strValue = String(value);
+      if (strValue.length < min) {
         return ValidationResult.failure({
           code: this.errorCode || 'MIN_LENGTH',
           message: errorMessage || `Field '${this.fieldName}' must be at least ${min} characters`,
@@ -326,8 +332,7 @@ export class FieldValidationBuilder<TRecord, TProperty = any> {
         const ruleResult = rule(context);
         if (ruleResult.isInvalid) {
           result.merge(ruleResult);
-          // Stop on first failure (fail-fast)
-          break;
+          // Continue to collect all errors
         }
       }
       

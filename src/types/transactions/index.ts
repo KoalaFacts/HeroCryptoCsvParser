@@ -3,7 +3,7 @@ export * from '../common/Asset';
 export * from '../common/Amount';
 export * from '../common/FiatValue';
 export * from '../common/AssetAmount';
-export * from '../common/BaseTransaction';
+export * from './BaseTransaction';
 export * from '../common/TaxEvent';
 export * from '../common/Source';
 

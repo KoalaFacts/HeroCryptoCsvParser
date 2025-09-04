@@ -1,4 +1,4 @@
-import { BaseTransaction } from '../common/BaseTransaction';
+import { BaseTransaction } from './BaseTransaction';
 
 export interface Unknown extends BaseTransaction {
   type: 'UNKNOWN';

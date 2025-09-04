@@ -1,5 +1,7 @@
 import { BatchEntryRecord } from './BatchEntryRecord';
 import { Transaction } from '../types/transactions';
+import { PluginPipeline } from '../plugins/PluginPipeline';
+import { pluginRegistry } from '../plugins/PluginRegistry';
 
 export interface ConversionOptions {
   timezone?: string;
@@ -41,6 +43,9 @@ export abstract class SourceAdapter<TRecord extends BatchEntryRecord<TRecord>> {
       }
     };
     
+    // Create plugin pipeline for processing
+    const pipeline = new PluginPipeline(pluginRegistry.getPlugins());
+    
     // Convert each record
     for (const record of records) {
       try {
@@ -50,6 +55,16 @@ export abstract class SourceAdapter<TRecord extends BatchEntryRecord<TRecord>> {
         result.warnings.push(`Failed to convert record: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
+    
+    // Process transactions through plugin pipeline
+    const processedTransactions: Transaction[] = [];
+    for (let i = 0; i < result.transactions.length; i++) {
+      const processed = pipeline.executeTransaction(result.transactions[i], i);
+      if (processed !== null) {
+        processedTransactions.push(processed);
+      }
+    }
+    result.transactions = processedTransactions;
     
     // Post-process transactions
     result.transactions = this.postProcess(result.transactions, options);

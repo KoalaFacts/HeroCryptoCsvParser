@@ -1,4 +1,4 @@
-import { BaseTransaction } from '../common/BaseTransaction';
+import { BaseTransaction } from './BaseTransaction';
 import { AssetAmount } from '../common/AssetAmount';
 
 export interface Swap extends BaseTransaction {
