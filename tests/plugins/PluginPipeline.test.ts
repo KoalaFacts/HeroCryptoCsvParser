@@ -241,37 +241,18 @@ describe('PluginPipeline', () => {
   });
 
   describe('error handling', () => {
-    it('should continue chain when plugin throws error', () => {
-      const plugin1: Plugin = {
+    it('should throw when plugin throws error', () => {
+      const plugin: Plugin = {
         name: 'error-plugin',
         processLine: (ctx, next) => {
           throw new Error('Plugin error');
         }
       };
 
-      const plugin2: Plugin = {
-        name: 'working-plugin',
-        processLine: (ctx, next) => {
-          ctx.data = 'modified';
-          return next();
-        }
-      };
-
-      registry.register(plugin1);
-      registry.register(plugin2);
+      registry.register(plugin);
       pipeline = new PluginPipeline(registry.getPlugins());
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      
-      const result = pipeline.executeLine('test', 1);
-      
-      expect(result).toBe('modified');
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error in plugin "error-plugin" hook "processLine":',
-        expect.any(Error)
-      );
-
-      consoleSpy.mockRestore();
+      expect(() => pipeline.executeLine('test', 1)).toThrow('Plugin error');
     });
   });
 
