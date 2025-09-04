@@ -3,7 +3,7 @@ import { Source } from '@/core/Source';
 import { SourceParser } from '@/core/SourceParser';
 import { SourceAdapter } from '@/core/SourceAdapter';
 import { BatchEntryRecord } from '@/core/BatchEntryRecord';
-import { Transaction, SpotTrade, Asset, Amount, Source as TransactionSource } from '@/types/transactions';
+import { Transaction, SpotTrade, Asset, Amount, DataSource } from '@/types/transactions';
 
 // Test record
 class TestRecord extends BatchEntryRecord<TestRecord> {
@@ -37,7 +37,7 @@ class TestAdapter extends SourceAdapter<TestRecord> {
       type: 'SPOT_TRADE',
       id: record.id,
       timestamp: new Date('2024-01-01'),
-      source: TransactionSource.BINANCE,
+      source: DataSource.BINANCE,
       taxEvents: [],
       baseAsset: {
         asset: new Asset('TEST'),

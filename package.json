@@ -13,9 +13,10 @@
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "dev": "tsc --watch -p tsconfig.build.json",
     "clean": "rimraf dist",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test": "npm run typecheck && vitest",
+    "test:ui": "npm run typecheck && vitest --ui",
+    "test:coverage": "npm run typecheck && vitest --coverage",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "cryptocurrency",

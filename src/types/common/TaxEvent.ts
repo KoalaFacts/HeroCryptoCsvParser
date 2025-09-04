@@ -1,5 +1,5 @@
 import { AssetAmount } from './AssetAmount';
-import { Source } from './Source';
+import { DataSource } from './DataSource';
 
 export interface TaxEvent {
   type: 'INCOME' | 'CAPITAL_GAIN' | 'CAPITAL_LOSS' | 'EXPENSE';
@@ -16,7 +16,7 @@ export interface TaxEvent {
   
   // References
   transactionId: string;
-  source?: Source;
+  source?: DataSource;
   
   // Tax jurisdiction hints
   jurisdiction?: string;

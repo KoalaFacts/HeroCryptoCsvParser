@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { SourceAdapter, ConversionOptions } from '@/core/SourceAdapter';
 import { BatchEntryRecord } from '@/core/BatchEntryRecord';
-import { Transaction, SpotTrade, Source, Asset, Amount } from '@/types/transactions';
+import { Transaction, SpotTrade, DataSource, Asset, Amount } from '@/types/transactions';
 
 // Test record
 class TestRecord extends BatchEntryRecord<TestRecord> {
@@ -30,7 +30,7 @@ class TestAdapter extends SourceAdapter<TestRecord> {
       type: 'SPOT_TRADE',
       id: `test-${record.id}`,
       timestamp: new Date(record.timestamp),
-      source: Source.BINANCE,
+      source: DataSource.BINANCE,
       taxEvents: [],
       baseAsset: {
         asset: new Asset(record.asset),

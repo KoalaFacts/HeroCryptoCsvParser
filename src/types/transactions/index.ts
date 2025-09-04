@@ -5,7 +5,7 @@ export * from '../common/FiatValue';
 export * from '../common/AssetAmount';
 export * from './BaseTransaction';
 export * from '../common/TaxEvent';
-export * from '../common/Source';
+export * from '../common/DataSource';
 
 // Export transaction types
 export * from './SpotTrade';

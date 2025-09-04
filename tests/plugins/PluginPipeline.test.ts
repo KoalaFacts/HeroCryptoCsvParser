@@ -1,10 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PluginPipeline } from '../../src/plugins/PluginPipeline';
-import { PluginRegistry } from '../../src/plugins/PluginRegistry';
-import { Plugin } from '../../src/plugins/Plugin';
-import { PipelineContext } from '../../src/plugins/PipelineContext';
-import { Transaction } from '../../src/types/transactions';
-import { BatchEntryRecord } from '../../src/core/BatchEntryRecord';
+import { PluginPipeline } from '@/plugins/PluginPipeline';
+import { PluginRegistry } from '@/plugins/PluginRegistry';
+import { Plugin } from '@/plugins/Plugin';
+import { Transfer, Asset, Amount, DataSource } from '@/types/transactions';
+import { BatchEntryRecord } from '@/core/BatchEntryRecord';
 
 class TestRecord extends BatchEntryRecord<TestRecord> {
   public value: string = '';
@@ -167,7 +166,7 @@ describe('PluginPipeline', () => {
       const plugin: Plugin = {
         name: 'modify-record',
         processRecord: (ctx, next) => {
-          if (ctx.data) {
+          if (ctx.data && ctx.data instanceof TestRecord) {
             ctx.data.value = 'modified';
           }
           return next();
@@ -189,7 +188,7 @@ describe('PluginPipeline', () => {
       const plugin: Plugin = {
         name: 'filter-record',
         processRecord: (ctx, next) => {
-          if (ctx.data?.value === 'filter') {
+          if (ctx.data && ctx.data instanceof TestRecord && ctx.data.value === 'filter') {
             ctx.data = null;
           }
           return next();
@@ -215,8 +214,12 @@ describe('PluginPipeline', () => {
       const plugin: Plugin = {
         name: 'modify-transaction',
         processTransaction: (ctx, next) => {
-          if (ctx.data) {
-            ctx.data.amount = 1000;
+          if (ctx.data && ctx.data.type === 'TRANSFER') {
+            const transfer = ctx.data as Transfer;
+            transfer.asset = {
+              asset: new Asset('BTC'),
+              amount: new Amount('1000')
+            };
           }
           return next();
         }
@@ -225,18 +228,22 @@ describe('PluginPipeline', () => {
       registry.register(plugin);
       pipeline = new PluginPipeline(registry.getPlugins());
 
-      const transaction: Transaction = {
-        date: new Date(),
-        type: 'deposit',
-        asset: 'BTC',
-        amount: 100,
-        fee: 0,
-        feeCurrency: 'BTC'
+      const transaction: Transfer = {
+        id: 'test-123',
+        timestamp: new Date(),
+        type: 'TRANSFER',
+        direction: 'IN',
+        asset: {
+          asset: new Asset('BTC'),
+          amount: new Amount('100')
+        },
+        source: DataSource.custom('test', 'exchange'),
+        taxEvents: []
       };
 
       const result = pipeline.executeTransaction(transaction, 0);
       
-      expect(result?.amount).toBe(1000);
+      expect((result as Transfer)?.asset?.amount.toString()).toBe('1000');
     });
   });
 
@@ -308,7 +315,7 @@ describe('PluginPipeline', () => {
       const plugin2: Plugin = {
         name: 'record-only',
         processRecord: (ctx, next) => {
-          if (ctx.data) {
+          if (ctx.data && ctx.data instanceof TestRecord) {
             ctx.data.value = 'modified';
           }
           return next();

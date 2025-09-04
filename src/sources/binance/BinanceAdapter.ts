@@ -1,5 +1,5 @@
 import { SourceAdapter, ConversionOptions } from '../../core/SourceAdapter';
-import { Transaction, SpotTrade, Asset, Amount, Source } from '../../types/transactions';
+import { Transaction, SpotTrade, Asset, Amount, DataSource } from '../../types/transactions';
 import { BinanceTransactionRecord } from './BinanceTransactionRecord';
 
 /**
@@ -19,7 +19,7 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
       type: 'SPOT_TRADE',
       id: `binance-${record.userId}-${record.utcTime}`,
       timestamp: new Date(record.utcTime),
-      source: Source.BINANCE,
+      source: DataSource.BINANCE,
       taxEvents: [],
       baseAsset: {
         asset: new Asset(record.coin),

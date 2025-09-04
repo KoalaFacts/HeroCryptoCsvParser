@@ -68,6 +68,15 @@ export class SourceBuilder<TRecord extends BatchEntryRecord<TRecord>> {
       throw new Error('Source info is required');
     }
 
+    // Validate source info
+    if (!this.info.name || this.info.name.trim() === '') {
+      throw new Error('Source name cannot be empty');
+    }
+    
+    if (!this.info.displayName || this.info.displayName.trim() === '') {
+      throw new Error('Source display name cannot be empty');
+    }
+
     // Create parser if not provided
     const parser = this.parser || this.createDefaultParser();
     

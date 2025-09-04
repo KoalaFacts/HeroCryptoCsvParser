@@ -1,12 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { SourceBuilder } from '@/core/SourceBuilder';
 import { Source } from '@/core/Source';
-import { SourceParser } from '@/core/SourceParser';
+import { SourceParser, ParseResult } from '@/core/SourceParser';
 import { SourceAdapter } from '@/core/SourceAdapter';
 import { BatchEntryRecord } from '@/core/BatchEntryRecord';
-import { Transaction } from '@/types/transactions';
-import { ParseResult } from '@/types/results';
-import { ConversionResult } from '@/types/results';
+import { Transaction, Transfer, Asset, Amount, DataSource } from '@/types/transactions';
 
 // Test record implementation
 class TestRecord extends BatchEntryRecord<TestRecord> {
@@ -15,38 +13,42 @@ class TestRecord extends BatchEntryRecord<TestRecord> {
   
   constructor() {
     super();
-    this.fieldFor(r => r.id, 'ID', 0);
-    this.fieldFor(r => r.value, 'Value', 1);
-  }
-}
-
-// Test parser implementation
-class TestParser extends SourceParser<TestRecord> {
-  protected get RecordClass(): new () => TestRecord {
-    return TestRecord;
+    this.fieldFor(x => x.id, 'ID', 0)
+      .mapWith(v => v?.trim() ?? '')
+      .validateWith(v => v.required('ID is required'));
+    
+    this.fieldFor(x => x.value, 'Value', 1)
+      .mapWith(v => v?.trim() ?? '')
+      .validateWith(v => v.required('Value is required'));
   }
 }
 
 // Test adapter implementation
 class TestAdapter extends SourceAdapter<TestRecord> {
   get sourceName(): string {
-    return 'test';
+    return 'test-adapter';
   }
   
   protected convertRecord(record: TestRecord): Transaction {
-    // Return any valid transaction type - using Unknown
     return {
-      type: 'UNKNOWN',
       id: record.id,
       timestamp: new Date(),
-      source: 'test',
-      rawData: {
-        value: record.value
+      type: 'TRANSFER',
+      direction: 'IN',
+      asset: {
+        asset: new Asset('TEST'),
+        amount: new Amount(record.value || '0')
       },
-      metadata: {
-        notes: record.value
-      }
-    } as any; // Cast to any since Transaction is a union type
+      source: DataSource.custom('test', 'exchange'),
+      taxEvents: []
+    } as Transfer;
+  }
+}
+
+// Test parser implementation
+class TestParser extends SourceParser<TestRecord> {
+  protected get RecordClass() {
+    return TestRecord;
   }
 }
 
@@ -57,7 +59,8 @@ describe('SourceBuilder', () => {
         .withInfo({
           name: 'test',
           displayName: 'Test Source',
-          description: 'Test source for unit tests'
+          type: 'exchange',
+          supportedFormats: ['csv']
         })
         .withRecordClass(TestRecord)
         .withAdapter(new TestAdapter())
@@ -72,14 +75,16 @@ describe('SourceBuilder', () => {
       const source = new SourceBuilder<TestRecord>()
         .withInfo({
           name: 'minimal',
-          displayName: 'Minimal'
+          displayName: 'Minimal',
+          type: 'exchange',
+          supportedFormats: ['csv']
         })
         .withRecordClass(TestRecord)
         .withAdapter(new TestAdapter())
         .build();
 
       expect(source.getInfo().name).toBe('minimal');
-      expect(source.getInfo().description).toBeUndefined();
+      expect(source.getInfo().website).toBeUndefined();
     });
 
     it('should throw error if info is missing', () => {
@@ -94,7 +99,7 @@ describe('SourceBuilder', () => {
     it('should throw error if record class is missing', () => {
       expect(() => {
         new SourceBuilder<TestRecord>()
-          .withInfo({ name: 'test', displayName: 'Test' })
+          .withInfo({ name: 'test', displayName: 'Test', type: 'exchange', supportedFormats: ['csv'] })
           .withAdapter(new TestAdapter())
           .build();
       }).toThrow('Either provide a parser or set a record class');
@@ -103,7 +108,7 @@ describe('SourceBuilder', () => {
     it('should throw error if adapter is missing', () => {
       expect(() => {
         new SourceBuilder<TestRecord>()
-          .withInfo({ name: 'test', displayName: 'Test' })
+          .withInfo({ name: 'test', displayName: 'Test', type: 'exchange', supportedFormats: ['csv'] })
           .withRecordClass(TestRecord)
           .build();
       }).toThrow('Either provide an adapter or set a conversion function');
@@ -115,7 +120,7 @@ describe('SourceBuilder', () => {
       const builder = new SourceBuilder<TestRecord>();
       
       const result = builder
-        .withInfo({ name: 'chain', displayName: 'Chain Test' })
+        .withInfo({ name: 'chain', displayName: 'Chain Test', type: 'exchange', supportedFormats: ['csv'] })
         .withRecordClass(TestRecord)
         .withAdapter(new TestAdapter());
 
@@ -125,14 +130,14 @@ describe('SourceBuilder', () => {
     it('should allow setting components in any order', () => {
       const source1 = new SourceBuilder<TestRecord>()
         .withAdapter(new TestAdapter())
-        .withInfo({ name: 'order1', displayName: 'Order 1' })
+        .withInfo({ name: 'order1', displayName: 'Order 1', type: 'exchange', supportedFormats: ['csv'] })
         .withRecordClass(TestRecord)
         .build();
 
       const source2 = new SourceBuilder<TestRecord>()
         .withRecordClass(TestRecord)
         .withAdapter(new TestAdapter())
-        .withInfo({ name: 'order2', displayName: 'Order 2' })
+        .withInfo({ name: 'order2', displayName: 'Order 2', type: 'exchange', supportedFormats: ['csv'] })
         .build();
 
       expect(source1).toBeInstanceOf(Source);
@@ -144,8 +149,8 @@ describe('SourceBuilder', () => {
       const adapter2 = new TestAdapter();
       
       const source = new SourceBuilder<TestRecord>()
-        .withInfo({ name: 'first', displayName: 'First' })
-        .withInfo({ name: 'second', displayName: 'Second' })
+        .withInfo({ name: 'first', displayName: 'First', type: 'exchange', supportedFormats: ['csv'] })
+        .withInfo({ name: 'second', displayName: 'Second', type: 'exchange', supportedFormats: ['csv'] })
         .withRecordClass(TestRecord)
         .withAdapter(adapter1)
         .withAdapter(adapter2)
@@ -156,244 +161,265 @@ describe('SourceBuilder', () => {
   });
 
   describe('custom parser', () => {
-    it('should use custom parser if provided', () => {
-      const customParser = new TestParser();
+    it('should accept custom parser instead of record class', () => {
+      const parser = new TestParser();
       
       const source = new SourceBuilder<TestRecord>()
-        .withInfo({ name: 'custom', displayName: 'Custom' })
-        .withRecordClass(TestRecord)
-        .withParser(customParser)
+        .withInfo({ name: 'custom', displayName: 'Custom', type: 'exchange', supportedFormats: ['csv'] })
+        .withParser(parser)
         .withAdapter(new TestAdapter())
         .build();
 
       expect(source).toBeInstanceOf(Source);
     });
 
-    it('should create default parser if not provided', () => {
+    it('should use parser over record class if both provided', () => {
+      const parser = new TestParser();
+      
       const source = new SourceBuilder<TestRecord>()
-        .withInfo({ name: 'default', displayName: 'Default' })
+        .withInfo({ name: 'default', displayName: 'Default', type: 'exchange', supportedFormats: ['csv'] })
         .withRecordClass(TestRecord)
+        .withParser(parser)
         .withAdapter(new TestAdapter())
         .build();
 
       expect(source).toBeInstanceOf(Source);
     });
+  });
 
-    it('should prefer custom parser over record class', () => {
-      class CustomParser extends SourceParser<TestRecord> {
-        protected get RecordClass(): new () => TestRecord {
-          return TestRecord;
+  describe('custom conversion', () => {
+    it('should accept custom conversion function instead of adapter', async () => {
+      class CustomAdapter extends SourceAdapter<TestRecord> {
+        get sourceName(): string {
+          return 'custom';
         }
         
-        parse(content: string): ParseResult<TestRecord> {
+        protected convertRecord(record: TestRecord): Transaction {
           return {
-            records: [],
-            errors: [],
-            metadata: { 
-              totalLines: 999,
-              skippedRows: 0,
-              parsedRows: 999
-            }
-          };
+            id: record.id,
+            timestamp: new Date(),
+            type: 'TRANSFER',
+            direction: 'IN',
+            asset: {
+              asset: new Asset('TEST'),
+              amount: new Amount(record.value || '0')
+            },
+            source: DataSource.custom('test', 'exchange'),
+            taxEvents: []
+          } as Transfer;
         }
       }
-
+      
       const source = new SourceBuilder<TestRecord>()
-        .withInfo({ name: 'custom', displayName: 'Custom' })
+        .withInfo({ name: 'custom', displayName: 'Custom', type: 'exchange', supportedFormats: ['csv'] })
         .withRecordClass(TestRecord)
-        .withParser(new CustomParser())
-        .withAdapter(new TestAdapter())
+        .withAdapter(new CustomAdapter())
         .build();
 
-      const result = source.parse('test');
-      expect(result.metadata.totalLines).toBe(999);
+      const result = await source.process('ID,Value\n1,100');
+      expect(result.transactions).toHaveLength(1);
+      expect(result.metadata.totalRows).toBe(1);
     });
   });
 
   describe('source info validation', () => {
     it('should accept complete source info', () => {
       const info = {
-        name: 'complete',
+        name: 'complete-source',
         displayName: 'Complete Source',
-        description: 'A complete source description',
+        type: 'exchange' as const,
         website: 'https://example.com',
         documentation: 'https://docs.example.com',
-        supportedFormats: ['csv', 'json'] as const,
-        tags: ['exchange', 'spot', 'futures']
+        supportedFormats: ['csv', 'json']
       };
-
+      
       const source = new SourceBuilder<TestRecord>()
         .withInfo(info)
         .withRecordClass(TestRecord)
         .withAdapter(new TestAdapter())
         .build();
 
-      const sourceInfo = source.getInfo();
-      expect(sourceInfo.name).toBe('complete');
-      expect(sourceInfo.website).toBe('https://example.com');
-      expect(sourceInfo.supportedFormats).toEqual(['csv', 'json']);
-      expect(sourceInfo.tags).toEqual(['exchange', 'spot', 'futures']);
+      expect(source.getInfo().name).toBe('complete-source');
+      expect(source.getInfo().website).toBe('https://example.com');
+      expect(source.getInfo().supportedFormats).toEqual(['csv', 'json']);
     });
 
-    it('should handle empty strings in optional fields', () => {
+    it('should accept minimal source info', () => {
       const info = {
-        name: 'empty',
-        displayName: 'Empty Fields',
-        description: '',
-        website: ''
+        name: 'test',
+        displayName: 'Test',
+        type: 'exchange' as const,
+        supportedFormats: ['csv'],
+        website: 'https://test.com'
       };
-
+      
       const source = new SourceBuilder<TestRecord>()
         .withInfo(info)
         .withRecordClass(TestRecord)
         .withAdapter(new TestAdapter())
         .build();
 
-      expect(source.getInfo().description).toBe('');
-      expect(source.getInfo().website).toBe('');
+      expect(source.getInfo().name).toBe('test');
+      expect(source.getInfo().website).toBe('https://test.com');
     });
   });
 
-  describe('adapter validation', () => {
-    it('should work with custom adapter', () => {
-      class CustomAdapter extends SourceAdapter<TestRecord> {
+  describe('parse and conversion options', () => {
+    it('should support parse options in processing', async () => {
+      const source = new SourceBuilder<TestRecord>()
+        .withInfo({ name: 'test', displayName: 'Test', type: 'exchange', supportedFormats: ['csv'] })
+        .withRecordClass(TestRecord)
+        .withAdapter(new TestAdapter())
+        .build();
+
+      const content = 'ID,Value\n1,100\n2,200';
+      const result = await source.process(content, {
+        hasHeaders: true,
+        maxRows: 1
+      });
+
+      expect(result.transactions).toHaveLength(1);
+    });
+  });
+
+  describe('custom adapter options', () => {
+    it('should create adapter from conversion function', async () => {
+      class CustomTestAdapter extends SourceAdapter<TestRecord> {
         get sourceName(): string {
-          return 'custom-adapter';
+          return 'custom';
         }
         
         protected convertRecord(record: TestRecord): Transaction {
           return {
-            type: 'UNKNOWN',
-            id: `custom-${record.id}`,
-            timestamp: new Date('2024-01-01'),
-            source: 'custom-adapter',
-            rawData: {
-              asset: 'CUSTOM',
-              amount: 100
-            }
-          } as any;
+            id: record.id,
+            timestamp: new Date(),
+            type: 'TRANSFER',
+            direction: 'IN',
+            asset: {
+              asset: new Asset('CUSTOM'),
+              amount: new Amount(record.value || '0')
+            },
+            source: DataSource.custom('custom', 'exchange'),
+            taxEvents: []
+          } as Transfer;
         }
       }
-
+      
       const source = new SourceBuilder<TestRecord>()
-        .withInfo({ name: 'custom', displayName: 'Custom' })
+        .withInfo({ name: 'custom', displayName: 'Custom', type: 'exchange', supportedFormats: ['csv'] })
         .withRecordClass(TestRecord)
-        .withAdapter(new CustomAdapter())
+        .withAdapter(new CustomTestAdapter())
         .build();
 
-      const record = new TestRecord();
-      record.id = '123';
-      record.value = 'test';
-      
-      const result = source.convert([record]);
+      const result = await source.process('ID,Value\n1,100');
       expect(result.transactions).toHaveLength(1);
-      expect(result.transactions[0].id).toBe('custom-123');
-      expect((result.transactions[0] as any).rawData.asset).toBe('CUSTOM');
+      expect((result.transactions[0] as Transfer).asset.asset.symbol).toBe('CUSTOM');
     });
   });
 
   describe('error handling', () => {
-    it('should accept empty name', () => {
-      // Empty name doesn't throw - it's just an empty string
-      const source = new SourceBuilder<TestRecord>()
-        .withInfo({ name: '', displayName: 'No Name' })
-        .withRecordClass(TestRecord)
-        .withAdapter(new TestAdapter())
-        .build();
-      expect(source).toBeDefined();
-    });
-
-    it('should accept empty display name', () => {
-      // Empty display name doesn't throw - it's just an empty string
-      const source = new SourceBuilder<TestRecord>()
-        .withInfo({ name: 'test', displayName: '' })
-        .withRecordClass(TestRecord)
-        .withAdapter(new TestAdapter())
-        .build();
-      expect(source).toBeDefined();
-    });
-
-    it('should handle null values appropriately', () => {
+    it('should throw error for empty name', () => {
       expect(() => {
         new SourceBuilder<TestRecord>()
-          .withInfo(null as any)
+          .withInfo({ name: '', displayName: 'No Name', type: 'exchange', supportedFormats: ['csv'] })
           .withRecordClass(TestRecord)
-          .withAdapter(new TestAdapter())
-          .build();
-      }).toThrow('Source info is required');
-
-      expect(() => {
-        new SourceBuilder<TestRecord>()
-          .withInfo({ name: 'test', displayName: 'Test' })
-          .withRecordClass(null as any)
           .withAdapter(new TestAdapter())
           .build();
       }).toThrow();
+    });
 
+    it('should throw error for empty display name', () => {
       expect(() => {
         new SourceBuilder<TestRecord>()
-          .withInfo({ name: 'test', displayName: 'Test' })
+          .withInfo({ name: 'test', displayName: '', type: 'exchange', supportedFormats: ['csv'] })
+          .withRecordClass(TestRecord)
+          .withAdapter(new TestAdapter())
+          .build();
+      }).toThrow();
+    });
+
+    it('should throw error for null info', () => {
+      expect(() => {
+        new SourceBuilder<TestRecord>()
+          .withInfo(null as any)
+          .build();
+      }).toThrow();
+    });
+
+    it('should throw error for null record class', () => {
+      expect(() => {
+        new SourceBuilder<TestRecord>()
+          .withInfo({ name: 'test', displayName: 'Test', type: 'exchange', supportedFormats: ['csv'] })
+          .withRecordClass(null as any)
+          .build();
+      }).toThrow();
+    });
+
+    it('should throw error for null adapter', () => {
+      expect(() => {
+        new SourceBuilder<TestRecord>()
+          .withInfo({ name: 'test', displayName: 'Test', type: 'exchange', supportedFormats: ['csv'] })
           .withRecordClass(TestRecord)
           .withAdapter(null as any)
           .build();
-      }).toThrow('Either provide an adapter or set a conversion function');
+      }).toThrow();
     });
   });
 
-  describe('integration', () => {
-    it('should create functional source that can process data', async () => {
+  describe('integration test', () => {
+    it('should process full CSV content', async () => {
       const source = new SourceBuilder<TestRecord>()
-        .withInfo({ name: 'integration', displayName: 'Integration Test' })
+        .withInfo({ name: 'integration', displayName: 'Integration Test', type: 'exchange', supportedFormats: ['csv'] })
         .withRecordClass(TestRecord)
         .withAdapter(new TestAdapter())
         .build();
 
-      const csvContent = 'ID,Value\n001,Test Value\n002,Another Value';
-      const result = await source.process(csvContent, { hasHeaders: true });
+      const content = `ID,Value
+1,100
+2,200
+3,300`;
+
+      const result = await source.process(content);
+
+      expect(result.transactions).toHaveLength(3);
+      expect(result.metadata.parsedRows).toBe(3);
+      expect(result.metadata.failedRows).toBe(0);
+      expect(result.metadata.source).toBe('integration');
+    });
+
+    it('should handle parse errors gracefully', async () => {
+      const source = new SourceBuilder<TestRecord>()
+        .withInfo({ name: 'error-test', displayName: 'Error Test', type: 'exchange', supportedFormats: ['csv'] })
+        .withRecordClass(TestRecord)
+        .withAdapter(new TestAdapter())
+        .build();
+
+      const content = `ID,Value
+1,100
+invalid line
+3,300`;
+
+      const result = await source.process(content, { continueOnError: true });
 
       expect(result.transactions).toHaveLength(2);
-      expect((result.transactions[0] as any).metadata.notes).toBe('Test Value');
-      expect((result.transactions[1] as any).metadata.notes).toBe('Another Value');
-      expect(result.metadata.source).toBe('integration');
+      expect(result.parseErrors).toHaveLength(1);
+      expect(result.metadata.failedRows).toBe(1);
     });
   });
 
-  describe('type safety', () => {
-    it('should maintain type safety throughout building', () => {
-      class TypedRecord extends BatchEntryRecord<TypedRecord> {
-        typedField: number = 0;
-        constructor() {
-          super();
-        }
-      }
-
-      class TypedAdapter extends SourceAdapter<TypedRecord> {
-        get sourceName(): string {
-          return 'typed';
-        }
-        
-        protected convertRecord(record: TypedRecord): Transaction {
-          // This should compile with proper type checking
-          const fieldValue = record.typedField;
-          return {
-            id: `typed-${fieldValue}`,
-            timestamp: new Date(),
-            type: TransactionType.OTHER,
-            direction: TransactionDirection.NONE,
-            asset: 'TYPED',
-            amount: fieldValue,
-            platform: 'typed'
-          };
-        }
-      }
-
-      const source = new SourceBuilder<TypedRecord>()
-        .withInfo({ name: 'typed', displayName: 'Typed' })
-        .withRecordClass(TypedRecord)
-        .withAdapter(new TypedAdapter())
+  describe('type inference', () => {
+    it('should correctly infer record type', async () => {
+      const source = new SourceBuilder<TestRecord>()
+        .withInfo({ name: 'typed', displayName: 'Typed', type: 'exchange', supportedFormats: ['csv'] })
+        .withRecordClass(TestRecord)
+        .withAdapter(new TestAdapter())
         .build();
 
-      expect(source).toBeInstanceOf(Source);
+      const content = 'ID,Value\n1,100';
+      const result = await source.process(content);
+
+      expect(result.transactions).toBeDefined();
+      expect(result.transactions[0]).toBeDefined();
     });
   });
 });

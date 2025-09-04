@@ -1,5 +1,5 @@
 import { TaxEvent } from '../common/TaxEvent';
-import { Source } from '../common/Source';
+import { DataSource } from '../common/DataSource';
 import { TransactionType } from './Transaction';
 
 /**
@@ -25,7 +25,7 @@ export interface BaseTransaction {
   /**
   * Data source (exchange, wallet, protocol, etc.)
   */
-  source: Source;
+  source: DataSource;
 
   /**
    * Tax implications of this transaction
