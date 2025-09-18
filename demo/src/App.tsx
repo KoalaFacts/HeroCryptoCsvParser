@@ -593,6 +593,110 @@ function App() {
               </div>
             </div>
 
+            {/* Community Contribution Section */}
+            <div className="mt-16 px-6">
+              <div className="max-w-6xl mx-auto">
+                <div className="relative bg-gradient-to-br from-orange-50 to-amber-50 rounded-3xl p-12 border border-orange-200/50">
+                  <div className="absolute top-6 right-6">
+                    <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                      Help Us Support Your Exchange
+                    </h2>
+                    <p className="text-xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
+                      We're building universal cryptocurrency parser support! Currently supporting <strong>Binance</strong> with 150+ transaction patterns.
+                      Help us add your favorite exchange by sharing anonymized CSV samples.
+                    </p>
+
+                    {/* Exchange Status Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-green-200">
+                        <div className="text-green-600 font-semibold mb-1">✅ Binance</div>
+                        <div className="text-sm text-gray-600">Full Support</div>
+                      </div>
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-yellow-200">
+                        <div className="text-yellow-600 font-semibold mb-1">🔄 Coinbase</div>
+                        <div className="text-sm text-gray-600">In Progress</div>
+                      </div>
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-blue-200">
+                        <div className="text-blue-600 font-semibold mb-1">📝 Kraken</div>
+                        <div className="text-sm text-gray-600">Samples Needed</div>
+                      </div>
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-purple-200">
+                        <div className="text-purple-600 font-semibold mb-1">🚀 KuCoin</div>
+                        <div className="text-sm text-gray-600">Samples Needed</div>
+                      </div>
+                    </div>
+
+                    {/* How to Contribute */}
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-orange-200/50 mb-8">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-6">How to Contribute</h3>
+                      <div className="grid md:grid-cols-3 gap-6 text-left">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <span className="text-orange-600 font-bold">1</span>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-2">Export Your Data</h4>
+                            <p className="text-gray-600 text-sm">Download transaction history from your exchange (CSV format)</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <span className="text-orange-600 font-bold">2</span>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-2">Anonymize Safely</h4>
+                            <p className="text-gray-600 text-sm">Remove personal data (keep only structure and transaction types)</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <span className="text-orange-600 font-bold">3</span>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-2">Share with Us</h4>
+                            <p className="text-gray-600 text-sm">Open a GitHub issue with your anonymized sample</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                      <a
+                        href="https://github.com/BeingCiteable/HeroCryptoCsvParser/issues/new?assignees=&labels=exchange-request&template=exchange_support_request.md&title=Add+support+for+[Exchange+Name]"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      >
+                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Submit Exchange Request
+                      </a>
+                      <a
+                        href="https://github.com/BeingCiteable/HeroCryptoCsvParser/discussions"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-8 py-4 bg-white text-orange-600 rounded-xl font-semibold hover:bg-orange-50 transition-all duration-200 border border-orange-200"
+                      >
+                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Join Discussion
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Call-to-Action */}
             <div className="mt-16 px-6 relative overflow-hidden">
               <div className="inset-0 bg-gradient-to-r from-primary to-secondary rounded-3xl"></div>
