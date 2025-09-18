@@ -13,9 +13,11 @@ import {
   Fee,
   Interest,
   Unknown,
-  Asset, 
-  Amount, 
-  DataSource 
+  MarginTrade,
+  Loan,
+  Asset,
+  Amount,
+  DataSource
 } from '../../types/transactions';
 import { BinanceTransactionRecord } from './BinanceTransactionRecord';
 import { TransactionCategorizer } from '../../core/TransactionCategorizer';
@@ -67,9 +69,13 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
       if (record.operation.toLowerCase().includes('profit and loss') || 
           record.operation.toLowerCase().includes('funding fee')) {
         if (changeAmount.isNegative()) {
-          return this.createFee(id, timestamp, record, changeAmount);
+          const feeTx = this.createFee(id, timestamp, record, changeAmount);
+          (feeTx as any).originalData = { categorization };
+          return feeTx;
         } else {
-          return this.createInterest(id, timestamp, record, changeAmount);
+          const interestTx = this.createInterest(id, timestamp, record, changeAmount);
+          (interestTx as any).originalData = { categorization };
+          return interestTx;
         }
       }
     }
@@ -77,7 +83,9 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
     // Map categorization result to specific transaction creators
     switch (categorization.type) {
       case 'SPOT_TRADE':
-        return this.createSpotTrade(id, timestamp, record, changeAmount);
+        const spotTradeTx = this.createSpotTrade(id, timestamp, record, changeAmount);
+        (spotTradeTx as any).originalData = { categorization };
+        return spotTradeTx;
         
       case 'TRANSFER':
         const direction = categorization.subType === 'deposit' ? 'IN' : 
@@ -95,7 +103,12 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
         return this.createStakingReward(id, timestamp, record, changeAmount);
         
       case 'SWAP':
-        return this.createSwap(id, timestamp, record, changeAmount);
+        const swapTx = this.createSwap(id, timestamp, record, changeAmount);
+        (swapTx as any).originalData = {
+          categorization,
+          swapType: categorization.subType || 'instant'
+        };
+        return swapTx;
         
       case 'LIQUIDITY_ADD':
         return this.createLiquidityAdd(id, timestamp, record, changeAmount);
@@ -104,14 +117,28 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
         return this.createLiquidityRemove(id, timestamp, record, changeAmount);
         
       case 'AIRDROP':
-        return this.createAirdrop(id, timestamp, record, changeAmount);
+        const airdropTx = this.createAirdrop(id, timestamp, record, changeAmount);
+        (airdropTx as any).originalData = { categorization };
+        return airdropTx;
         
       case 'FEE':
-        return this.createFee(id, timestamp, record, changeAmount);
+        const feeTx = this.createFee(id, timestamp, record, changeAmount);
+        (feeTx as any).originalData = { categorization };
+        return feeTx;
         
       case 'INTEREST':
-        return this.createInterest(id, timestamp, record, changeAmount);
-        
+        const interestTx = this.createInterest(id, timestamp, record, changeAmount);
+        (interestTx as any).originalData = { categorization };
+        return interestTx;
+
+      case 'MARGIN_TRADE':
+        const marginTradeTx = this.createMarginTrade(id, timestamp, record, changeAmount);
+        (marginTradeTx as any).originalData = { categorization };
+        return marginTradeTx;
+
+      case 'LOAN':
+        return this.createLoan(id, timestamp, record, changeAmount);
+
       case 'UNKNOWN':
       default:
         return this.createUnknown(id, timestamp, record, changeAmount);
@@ -413,11 +440,8 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
     // Get the categorization result to check for subType
     const categorization = this.categorizer.categorize(record.operation, record.remark);
     
-    // Determine interest type based on subType or amount sign
-    let interestType: string | 'EARNED' | 'PAID' = changeAmount.isPositive() ? 'EARNED' : 'PAID';
-    if (categorization.subType) {
-      interestType = categorization.subType;
-    }
+    // Determine interest type based on amount sign
+    const interestType: 'EARNED' | 'PAID' = changeAmount.isPositive() ? 'EARNED' : 'PAID';
     
     return {
       type: 'INTEREST',
@@ -510,5 +534,59 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
     // Try to extract order ID or transaction reference
     const match = remark.match(/#(\w+)|Order\s+(\w+)/i);
     return match ? (match[1] || match[2]) : undefined;
+  }
+
+  private createMarginTrade(
+    id: string,
+    timestamp: Date,
+    record: BinanceTransactionRecord,
+    changeAmount: Amount
+  ): MarginTrade {
+    return {
+      type: 'MARGIN_TRADE',
+      id,
+      timestamp,
+      source: DataSource.BINANCE,
+      taxEvents: [],
+      baseAsset: {
+        asset: new Asset(record.coin),
+        amount: changeAmount.abs()
+      },
+      quoteAsset: {
+        asset: new Asset('USDT'), // Default quote asset
+        amount: new Amount('0')
+      },
+      side: changeAmount.isPositive() ? 'BUY' : 'SELL',
+      price: '0', // Would need additional data
+      margin: {
+        leverage: '1', // Would need additional data
+        interestRate: undefined
+      }
+    };
+  }
+
+  private createLoan(
+    id: string,
+    timestamp: Date,
+    record: BinanceTransactionRecord,
+    changeAmount: Amount
+  ): Loan {
+    return {
+      type: 'LOAN',
+      id,
+      timestamp,
+      source: DataSource.BINANCE,
+      taxEvents: [],
+      asset: {
+        asset: new Asset(record.coin),
+        amount: changeAmount.abs()
+      },
+      operation: changeAmount.isPositive() ? 'BORROW' : 'REPAY',
+      loan: {
+        protocol: 'Binance Margin',
+        interestRate: undefined,
+        collateral: undefined
+      }
+    };
   }
 }
