@@ -1,17 +1,28 @@
-# Hero Crypto CSV Parser - Web Demo
+# Hero Crypto CSV Parser - Demo
 
-This is the web demo for the Hero Crypto CSV Parser, built with React, DaisyUI, and Tailwind CSS.
+Interactive web demo for the Hero Crypto CSV Parser library. Transform cryptocurrency transaction exports into standardized, tax-ready formats directly in your browser.
 
-## Features
+## 🚀 Live Demo
 
-- 🎯 **Live Demo** - Try the parser directly in your browser
-- 📊 **Data Source Selection** - Choose from supported exchanges
-- 📝 **CSV Input Panel** - Paste your transaction exports
-- 📈 **Transaction Display** - View parsed results in a clean table
-- 📥 **Export Functionality** - Download processed transactions as CSV
-- 🎨 **Multiple Themes** - Light, dark, cyberpunk, synthwave themes
+**[Try it live →](https://hero-crypto-parser.vercel.app)**
 
-## Development
+## ✨ Features
+
+- **🔄 Universal Exchange Support** - Process Binance transaction exports
+- **🎯 Smart Categorization** - Automatic transaction type detection
+- **📊 CSV Export** - Download processed transactions
+- **🔒 Privacy First** - All processing happens in your browser
+- **⚡ Lightning Fast** - Instant transaction processing
+- **🏷️ Tax Ready** - Standardized format for accounting software
+
+## 🛠️ Development
+
+### Prerequisites
+
+- Node.js 20+
+- npm
+
+### Setup
 
 ```bash
 # Install dependencies
@@ -27,27 +38,64 @@ npm run build
 npm run preview
 ```
 
-## Tech Stack
+### Scripts
 
-- **React 18** - Latest React with hooks
-- **TypeScript** - Full type safety
-- **Vite** - Fast development and build tool
-- **DaisyUI** - Beautiful UI components
-- **Tailwind CSS v4** - Modern utility-first CSS
-- **Hero Crypto CSV Parser** - Core parsing library
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build optimized production bundle
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run code linting
+- `npm run format` - Format code with Biome
 
-## Usage
+## 📦 Deployment
 
-1. Select your exchange (currently Binance is fully supported)
-2. Paste your CSV export in the left panel
-3. Click "Process Transactions" to parse the data
-4. View the results in the right panel
-5. Export processed transactions as CSV
+### Vercel (Recommended)
 
-## Demo URL
+This demo is configured for zero-config deployment on Vercel:
 
-The demo is deployed at: [https://hero-crypto-parser.netlify.app](https://hero-crypto-parser.netlify.app)
+1. **Connect Repository**
+   ```bash
+   # Install Vercel CLI (optional)
+   npm i -g vercel
 
-## Contributing
+   # Deploy from demo directory
+   cd demo
+   vercel
+   ```
 
-This demo showcases the capabilities of the Hero Crypto CSV Parser. To contribute to the core library, visit the [main repository](https://github.com/yourusername/hero-crypto-csv-parser).
+2. **Automatic Deployment**
+   - Push to GitHub repository
+   - Vercel automatically detects and deploys changes
+   - Live URL: `https://your-project.vercel.app`
+
+3. **Custom Domain**
+   - Add custom domain in Vercel dashboard
+   - Automatic HTTPS and CDN included
+
+### Alternative Hosting
+
+**Netlify:**
+```bash
+# Build and deploy
+npm run build
+# Drag and drop `dist` folder to Netlify
+```
+
+**GitHub Pages:**
+```bash
+# Build static files
+npm run build
+# Deploy `dist` folder to gh-pages branch
+```
+
+## 🏗️ Technology Stack
+
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **Tailwind CSS v4** - Styling framework
+- **DaisyUI v5** - Component library
+- **@beingciteable/hero-csv-crypto-parser** - Core parsing library
+
+## 📄 License
+
+MIT License - see the [main project](../README.md) for details.
