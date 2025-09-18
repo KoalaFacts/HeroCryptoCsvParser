@@ -41,7 +41,7 @@ const csv = await exportToCSV(result.transactions, {
 
 ### Web Demo
 
-Try our [live demo](https://hero-crypto-parser.netlify.app) to process transactions directly in your browser - no installation required!
+Try our [live demo](https://hero-crypto-parser.vercel.app) to process transactions directly in your browser - no installation required!
 
 To run the demo locally:
 ```bash
