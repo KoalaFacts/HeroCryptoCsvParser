@@ -1,0 +1,299 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
+jobs:
+  # Job 1: Quality Gates (Type checking, Testing, Building)
+  quality-gates:
+    name: Quality Gates
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20, 22]
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type checking
+        run: npm run typecheck
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        env:
+          CI: true
+
+      - name: Build package
+        run: npm run build
+
+      - name: Upload test coverage (Ubuntu Node 22 only)
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+      - name: Upload build artifacts (Ubuntu Node 22 only)
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifacts
+          path: dist/
+          retention-days: 7
+
+      - name: Verify package integrity
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22
+        run: |
+          npm pack --dry-run
+          echo "Package contents:"
+          tar -tzf $(npm pack --silent) | head -20
+
+  # Job 2: Package Publishing (only on main branch success)
+  publish:
+    name: Publish to NPM
+    needs: quality-gates
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifacts
+          path: dist/
+
+      - name: Check if version changed
+        id: version-check
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+
+          # Check if this version exists on npm
+          if npm view hero-crypto-csv-parser@$CURRENT_VERSION version 2>/dev/null; then
+            echo "Version $CURRENT_VERSION already published"
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          else
+            echo "Version $CURRENT_VERSION not found on npm"
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          fi
+
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Verify package before publishing
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: |
+          echo "Verifying package structure..."
+          ls -la dist/
+
+          # Verify essential files exist
+          if [ ! -f "dist/index.js" ]; then
+            echo "Error: dist/index.js not found"
+            exit 1
+          fi
+
+          if [ ! -f "dist/index.d.ts" ]; then
+            echo "Error: dist/index.d.ts not found"
+            exit 1
+          fi
+
+          echo "Package verification passed"
+
+      - name: Publish to NPM
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.version-check.outputs.should_publish == 'true'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version-check.outputs.current_version }}
+          release_name: Release v${{ steps.version-check.outputs.current_version }}
+          body: |
+            ## Changes in v${{ steps.version-check.outputs.current_version }}
+
+            Please see the [changelog](CHANGELOG.md) for detailed changes.
+
+            ### Installation
+            ```bash
+            npm install hero-crypto-csv-parser@${{ steps.version-check.outputs.current_version }}
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Post-publish verification
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: |
+          echo "Waiting for package to be available..."
+          sleep 30
+
+          # Verify the package was published successfully
+          PUBLISHED_VERSION=$(npm view hero-crypto-csv-parser version)
+          EXPECTED_VERSION="${{ steps.version-check.outputs.current_version }}"
+
+          if [ "$PUBLISHED_VERSION" = "$EXPECTED_VERSION" ]; then
+            echo "✅ Package published successfully: v$PUBLISHED_VERSION"
+          else
+            echo "❌ Package publication verification failed"
+            echo "Expected: v$EXPECTED_VERSION"
+            echo "Published: v$PUBLISHED_VERSION"
+            exit 1
+          fi
+
+  # Job 3: Security and Quality Analysis
+  security-analysis:
+    name: Security Analysis
+    needs: quality-gates
+    runs-on: ubuntu-latest
+    if: always() && needs.quality-gates.result == 'success'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: |
+          echo "Running npm audit..."
+          npm audit --audit-level=moderate || true
+
+      - name: Check for sensitive files
+        run: |
+          echo "Checking for sensitive files..."
+
+          # Check for common sensitive file patterns
+          SENSITIVE_FILES=$(find . -type f \( -name "*.env*" -o -name "*.key" -o -name "*.pem" -o -name "*.p12" -o -name "*.pfx" \) -not -path "./node_modules/*" -not -path "./.git/*" || true)
+
+          if [ -n "$SENSITIVE_FILES" ]; then
+            echo "⚠️ Potentially sensitive files found:"
+            echo "$SENSITIVE_FILES"
+          else
+            echo "✅ No sensitive files detected"
+          fi
+
+      - name: Verify package.json integrity
+        run: |
+          echo "Verifying package.json configuration..."
+
+          # Check for required fields
+          node -e "
+            const pkg = require('./package.json');
+            const required = ['name', 'version', 'description', 'license', 'exports'];
+            const missing = required.filter(field => !pkg[field]);
+
+            if (missing.length > 0) {
+              console.error('Missing required fields:', missing);
+              process.exit(1);
+            }
+
+            // Verify exports configuration
+            if (!pkg.exports['.'] || !pkg.exports['.'].import || !pkg.exports['.'].types) {
+              console.error('Invalid exports configuration');
+              process.exit(1);
+            }
+
+            console.log('✅ Package.json validation passed');
+          "
+
+  # Job 4: Performance Benchmarks (optional)
+  performance:
+    name: Performance Benchmarks
+    needs: quality-gates
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Bundle size analysis
+        run: |
+          echo "Analyzing bundle size..."
+
+          # Get the size of the main export
+          MAIN_SIZE=$(stat -c%s "dist/index.js" 2>/dev/null || stat -f%z "dist/index.js" 2>/dev/null || echo "0")
+          MAIN_SIZE_KB=$((MAIN_SIZE / 1024))
+
+          echo "📦 Bundle Analysis:"
+          echo "Main bundle size: ${MAIN_SIZE_KB}KB"
+
+          # List all files in dist with sizes
+          echo ""
+          echo "📁 Dist contents:"
+          ls -lah dist/ || true
+
+          # Check if bundle size is reasonable (warn if > 1MB)
+          if [ $MAIN_SIZE -gt 1048576 ]; then
+            echo "⚠️ Warning: Bundle size is quite large (>${MAIN_SIZE_KB}KB)"
+          else
+            echo "✅ Bundle size looks good"
+          fi

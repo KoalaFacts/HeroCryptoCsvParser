@@ -1,0 +1,67 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "BeingCiteable"
+    assignees:
+      - "BeingCiteable"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automation"
+    # Group development dependencies
+    groups:
+      dev-dependencies:
+        patterns:
+          - "@types/*"
+          - "@vitest/*"
+          - "typescript"
+          - "vitest"
+          - "rimraf"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group major updates separately for careful review
+      major-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+    # Ignore specific packages that need manual updates
+    ignore:
+      - dependency-name: "node"
+        # Ignore Node.js version updates in package.json engines
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+        # This will be overridden by the major-updates group above
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "BeingCiteable"
+    assignees:
+      - "BeingCiteable"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "github-actions"
+      - "automation"
