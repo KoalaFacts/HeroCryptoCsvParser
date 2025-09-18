@@ -83,9 +83,46 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22
         shell: bash
         run: |
+          echo "Running package integrity verification..."
+
+          # Test dry run first
           npm pack --dry-run
-          echo "Package contents:"
-          tar -tzf $(npm pack --silent) | head -20
+
+          # Create actual package for inspection
+          echo "Creating test package..."
+          PACKAGE_FILE=$(npm pack --silent 2>/dev/null) || {
+            echo "❌ Failed to create package"
+            exit 1
+          }
+
+          if [ -z "$PACKAGE_FILE" ]; then
+            echo "❌ Package file name is empty"
+            exit 1
+          fi
+
+          echo "Package created: $PACKAGE_FILE"
+
+          # Verify package exists and is readable
+          if [ ! -f "$PACKAGE_FILE" ]; then
+            echo "❌ Package file not found: $PACKAGE_FILE"
+            exit 1
+          fi
+
+          # Show package size
+          PACKAGE_SIZE=$(du -h "$PACKAGE_FILE" | cut -f1)
+          echo "Package size: $PACKAGE_SIZE"
+
+          # List package contents safely
+          echo "Package contents (first 20 files):"
+          tar -tzf "$PACKAGE_FILE" 2>/dev/null | head -20 || {
+            echo "⚠️ Could not list package contents, but package was created successfully"
+          }
+
+          # Clean up
+          echo "Cleaning up test package..."
+          rm -f "$PACKAGE_FILE"
+
+          echo "✅ Package integrity verification completed"
 
   # Job 2: Package Publishing (only on main branch success)
   publish:
