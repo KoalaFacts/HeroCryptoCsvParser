@@ -22,6 +22,10 @@ jobs:
   release:
     name: Manual Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: read
 
     steps:
       - name: Checkout repository
@@ -91,26 +95,39 @@ jobs:
 
       - name: Create GitHub Release
         if: github.event.inputs.dry_run == 'false'
-        uses: actions/create-release@v1
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.version.outputs.new_version }}
-          release_name: Release v${{ steps.version.outputs.new_version }}
-          body: |
-            ## Manual Release v${{ steps.version.outputs.new_version }}
+        run: |
+          VERSION="${{ steps.version.outputs.new_version }}"
 
-            This is a manually triggered release.
+          # Create release body
+          cat > release_notes.md << EOF
+          ## 🚀 Manual Release v$VERSION
 
-            ### Installation
-            ```bash
-            npm install @beingciteable/hero-csv-crypto-parser@${{ steps.version.outputs.new_version }}
-            ```
+          This is a manually triggered ${{ github.event.inputs.version_type }} release.
 
-            ### Changes
-            Please check the commit history for detailed changes since the last release.
-          draft: false
-          prerelease: false
+          ### 📦 Installation
+          \`\`\`bash
+          npm install @beingciteable/hero-csv-crypto-parser@$VERSION
+          \`\`\`
+
+          ### 📋 Changes
+          Please check the commit history for detailed changes since the last release.
+
+          ### 🧪 Quality Assurance
+          - ✅ All tests passed
+          - ✅ TypeScript compilation verified
+          - ✅ Build artifacts generated successfully
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/v${{ steps.version.outputs.current_version }}...v$VERSION
+          EOF
+
+          # Create the release
+          gh release create "v$VERSION" \
+            --title "Release v$VERSION" \
+            --notes-file release_notes.md \
+            --latest
 
       - name: Summary
         shell: bash
