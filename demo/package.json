@@ -15,7 +15,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.13",
     "daisyui": "^5.1.13",
-    "hero-crypto-csv-parser": "file:..",
+    "@beingciteable/hero-csv-crypto-parser": "^0.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwindcss": "^4.1.13"

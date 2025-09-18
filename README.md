@@ -218,7 +218,7 @@ npm test -- --grep "binance"
 ## 🗺️ Roadmap
 
 - [x] **Core Engine** - Type-safe parsing and categorization
-- [x] **Binance Integration** - Full support with 150+ patterns
+- [x] **Binance** - Full support with 150+ patterns
 - [x] **Web Demo** - Browser-based processing
 - [ ] **Community Exchanges** - Coinbase, Kraken, KuCoin
 - [ ] **Advanced Features** - Portfolio tracking, PnL calculation
@@ -226,10 +226,7 @@ npm test -- --grep "binance"
 
 ## 🆘 Support
 
-- 📖 **Documentation** - [View full docs](./docs)
 - 🐛 **Bug Reports** - [Open an issue](../../issues)
-- 💡 **Feature Requests** - [Start a discussion](../../discussions)
-- 💬 **Community** - [Join our Discord](https://discord.gg/heroparser)
 
 ## 📄 License
 

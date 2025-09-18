@@ -1,6 +1,6 @@
-import { process } from 'hero-crypto-csv-parser';
-import type { Transaction, SourceProcessResult } from 'hero-crypto-csv-parser';
-import { useId, useState, useEffect, useCallback } from 'react';
+import { process } from '@beingciteable/hero-csv-crypto-parser';
+import type { Transaction, SourceProcessResult } from '@beingciteable/hero-csv-crypto-parser';
+import { useState, useEffect, useCallback } from 'react';
 
 // Helper functions to safely extract properties from different transaction types
 const getTransactionAsset = (tx: Transaction): string => {
@@ -79,7 +79,6 @@ function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const drawerToggleId = useId();
 
   const handleProcess = useCallback(async (source: string, input: string) => {
     if (!input.trim()) {
