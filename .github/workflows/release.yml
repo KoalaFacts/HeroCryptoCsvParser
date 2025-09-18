@@ -38,6 +38,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
+        shell: bash
         run: |
           if [ -f package-lock.json ]; then
             npm ci
@@ -46,11 +47,13 @@ jobs:
           fi
 
       - name: Configure Git
+        shell: bash
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
       - name: Run quality gates
+        shell: bash
         run: |
           npm run typecheck
           npm run test:coverage
@@ -58,6 +61,7 @@ jobs:
 
       - name: Bump version
         id: version
+        shell: bash
         run: |
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "🔍 DRY RUN MODE - No changes will be made"
@@ -109,6 +113,7 @@ jobs:
           prerelease: false
 
       - name: Summary
+        shell: bash
         run: |
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "🔍 **DRY RUN COMPLETED**"
