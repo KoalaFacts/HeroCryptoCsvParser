@@ -12,10 +12,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@beingciteable/hero-csv-crypto-parser": "^0.1.1",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.13",
     "daisyui": "^5.1.13",
-    "@beingciteable/hero-csv-crypto-parser": "^0.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwindcss": "^4.1.13"
@@ -26,6 +26,6 @@
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
     "typescript": "^5.9.2",
-    "vite": "^7.1.5"
+    "vite": "^7.1.6"
   }
 }
