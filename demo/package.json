@@ -1,0 +1,31 @@
+{
+  "name": "demo",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "format": "biome format . --write",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/vite": "^4.1.13",
+    "daisyui": "^5.1.13",
+    "hero-crypto-csv-parser": "file:..",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "tailwindcss": "^4.1.13"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.3",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
+  }
+}
