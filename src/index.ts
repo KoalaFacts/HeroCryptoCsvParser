@@ -41,29 +41,68 @@ export { PipelineContext } from './plugins/PipelineContext';
 export { PluginPipeline } from './plugins/PluginPipeline';
 export { PluginRegistry, pluginRegistry } from './plugins/PluginRegistry';
 
+export { TransactionCategorizer, OperationMapping, CategorizerConfig, createCategorizer } from './core/TransactionCategorizer';
+
+export { CsvExporter, CsvExportOptions, CsvRow, exportToCSV } from './exporters/CsvExporter';
+
 import { BinanceSource as BinanceSourceInstance } from './sources/binance';
 import { Source, SourceProcessResult } from './core/Source';
+import { OperationMapping } from './core/TransactionCategorizer';
 
 const sourceRegistry = new Map<string, Source<any>>([
   ['binance', BinanceSourceInstance],
 ]);
 
+export interface ProcessOptions {
+  // Parsing options
+  hasHeaders?: boolean;
+  skipRows?: number;
+  maxRows?: number;
+  continueOnError?: boolean;
+  
+  // Conversion options
+  timezone?: string;
+  dateFormat?: string;
+  
+  // Categorization customization (for Binance)
+  customMappings?: OperationMapping[];
+  operationOverrides?: Record<string, string>; // Simple operation -> type mapping
+}
+
 export async function process(
   source: string, 
   content: string, 
-  options?: {
-    hasHeaders?: boolean;
-    skipRows?: number;
-    maxRows?: number;
-    continueOnError?: boolean;
-    timezone?: string;
-    dateFormat?: string;
-  }
+  options?: ProcessOptions
 ): Promise<SourceProcessResult> {
-  const sourceInstance = sourceRegistry.get(source.toLowerCase());
+  let sourceInstance = sourceRegistry.get(source.toLowerCase());
   
   if (!sourceInstance) {
     throw new Error(`Unsupported source: ${source}. Supported sources: ${Array.from(sourceRegistry.keys()).join(', ')}`);
+  }
+
+  // For Binance, apply customizations if provided
+  if (source.toLowerCase() === 'binance' && (options?.customMappings || options?.operationOverrides)) {
+    const { createBinanceCategorizer } = await import('./sources/binance/BinanceTransactionCategorizer');
+    const { BinanceAdapter } = await import('./sources/binance/BinanceAdapter');
+    const { BinanceParser } = await import('./sources/binance/BinanceParser');
+    
+    // Create custom categorizer
+    const categorizer = createBinanceCategorizer(options.customMappings, options.operationOverrides);
+    
+    // Create custom adapter with categorizer
+    const customAdapter = new BinanceAdapter(categorizer);
+    
+    // Create temporary source with custom adapter
+    sourceInstance = new Source(
+      { 
+        name: 'binance', 
+        displayName: 'Binance',
+        type: 'exchange',
+        supportedFormats: ['csv']
+      },
+      new BinanceParser(),
+      customAdapter
+    );
   }
 
   return sourceInstance.process(content, options);

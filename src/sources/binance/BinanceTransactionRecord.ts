@@ -39,7 +39,6 @@ export class BinanceTransactionRecord extends BatchEntryRecord<BinanceTransactio
     this.fieldFor((x) => x.account, 'Account', 2)
       .validateWith((v) => v
         .required('Account is required')
-        .regex(/^(Spot|Earn|Funding|Margin|Futures|P2P|.*Wallet).*$/, 'Invalid account type')
       );
 
     // Field 3: Operation

@@ -22,3 +22,4 @@ export const BinanceSource = buildSource<BinanceTransactionRecord>()
 export { BinanceTransactionRecord } from './BinanceTransactionRecord';
 export { BinanceParser } from './BinanceParser';
 export { BinanceAdapter } from './BinanceAdapter';
+export { BinanceTransactionCategorizer, createBinanceCategorizer } from './BinanceTransactionCategorizer';

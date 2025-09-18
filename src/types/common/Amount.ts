@@ -52,7 +52,15 @@ export class Amount {
   }
 
   toString(): string {
-    return this.value;
+    // Remove trailing zeros after decimal point
+    let result = this.value;
+    if (result.includes('.')) {
+      // Remove trailing zeros but keep at least one decimal place
+      result = result.replace(/(\.\d*?)0+$/, '$1');
+      // Remove decimal point if no decimals remain
+      result = result.replace(/\.$/, '');
+    }
+    return result;
   }
 
   toNumber(): number {

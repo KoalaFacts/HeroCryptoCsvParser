@@ -110,6 +110,28 @@ export abstract class SourceAdapter<TRecord extends BatchEntryRecord<TRecord>> {
       if ('fee' in t && t.fee) {
         assets.add(t.fee.asset.toString());
       }
+      if ('received' in t && t.received) {
+        assets.add(t.received.asset.toString());
+      }
+      if ('reward' in t && t.reward) {
+        assets.add(t.reward.asset.toString());
+      }
+      if ('interest' in t && t.interest) {
+        assets.add(t.interest.asset.toString());
+      }
+      if ('from' in t && t.from && 'asset' in t.from) {
+        assets.add(t.from.asset.toString());
+      }
+      if ('to' in t && t.to && 'asset' in t.to) {
+        assets.add(t.to.asset.toString());
+      }
+      if ('assets' in t && Array.isArray(t.assets)) {
+        t.assets.forEach(a => {
+          if (a && a.asset) {
+            assets.add(a.asset.toString());
+          }
+        });
+      }
     });
     result.metadata.uniqueAssets = Array.from(assets).sort();
     
