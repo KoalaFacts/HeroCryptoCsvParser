@@ -145,153 +145,23 @@ function App() {
   };
 
   return (
-    <div className="drawer">
-      <input id={drawerToggleId} type="checkbox" className="drawer-toggle" />
-
-      {/* Sidebar */}
-      <div className="drawer-side">
-        <label
-          htmlFor={drawerToggleId}
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        ></label>
-        <aside className="min-h-full w-64 bg-gradient-to-b from-base-200 to-base-300 text-base-content border-r border-base-300/50">
-          <div className="p-6">
-            <div className="flex items-center space-x-3 mb-8">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div>
-                <span className="text-lg font-bold text-base-content">Hero Crypto</span>
-                <p className="text-xs text-base-content/60 font-medium">CSV Parser</p>
-              </div>
-            </div>
-
-            {/* Navigation Menu */}
-            <nav className="space-y-2">
-              <a className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-primary/10 text-primary border border-primary/20 font-medium transition-all duration-200">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v0M8 5v10a2 2 0 002 2h4a2 2 0 002-2V5" />
-                </svg>
-                <span>CSV Parser</span>
-              </a>
-              <a className="flex items-center space-x-3 px-4 py-3 rounded-xl text-base-content/60 hover:text-base-content hover:bg-base-100/50 font-medium transition-all duration-200">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <span>Analytics</span>
-              </a>
-              <a className="flex items-center space-x-3 px-4 py-3 rounded-xl text-base-content/60 hover:text-base-content hover:bg-base-100/50 font-medium transition-all duration-200">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Reports</span>
-              </a>
-              <a className="flex items-center space-x-3 px-4 py-3 rounded-xl text-base-content/60 hover:text-base-content hover:bg-base-100/50 font-medium transition-all duration-200">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Settings</span>
-              </a>
-            </nav>
-
-            {/* Features List */}
-            <div className="mt-8">
-              <h3 className="font-semibold text-sm uppercase tracking-wider text-base-content/50 mb-4">
-                Key Features
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-base-100/30 transition-colors duration-200">
-                  <div className="w-2 h-2 bg-success rounded-full"></div>
-                  <span className="text-sm font-medium text-base-content/80">Client-side Processing</span>
-                </div>
-                <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-base-100/30 transition-colors duration-200">
-                  <div className="w-2 h-2 bg-success rounded-full"></div>
-                  <span className="text-sm font-medium text-base-content/80">Lightning Fast</span>
-                </div>
-                <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-base-100/30 transition-colors duration-200">
-                  <div className="w-2 h-2 bg-success rounded-full"></div>
-                  <span className="text-sm font-medium text-base-content/80">Tax Software Ready</span>
-                </div>
-                <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-base-100/30 transition-colors duration-200">
-                  <div className="w-2 h-2 bg-warning rounded-full"></div>
-                  <span className="text-sm font-medium text-base-content/80">Multiple Exchanges</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="mt-8">
-              <h3 className="font-semibold text-sm uppercase tracking-wider text-base-content/50 mb-4">
-                Live Stats
-              </h3>
-              <div className="space-y-4">
-                <div className="bg-base-100/30 rounded-xl p-4 border border-base-300/30">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-base-content/60">Transactions</p>
-                      <p className="text-2xl font-bold text-base-content">{transactions.length}</p>
-                    </div>
-                    <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-base-100/30 rounded-xl p-4 border border-base-300/30">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-base-content/60">Unique Assets</p>
-                      <p className="text-2xl font-bold text-base-content">
-                        {transactions.length > 0
-                          ? new Set(transactions.map((t) => getTransactionAsset(t))).size
-                          : 0}
-                      </p>
-                    </div>
-                    <div className="w-8 h-8 bg-secondary/20 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-base-100 via-base-100 to-base-200">
       {/* Page content */}
-      <div className="drawer-content flex flex-col">
+      <div className="flex flex-col">
         {/* Navbar */}
         <div className="bg-white/95 backdrop-blur-md border-b border-base-300/50 w-full sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-6">
+          <div className="max-w-full mx-auto px-6">
             <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-4">
-                <label
-                  htmlFor={drawerToggleId}
-                  className="lg:hidden p-2 rounded-xl hover:bg-base-200/50 transition-colors duration-200 cursor-pointer"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                </label>
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <span className="font-bold text-lg text-base-content">Hero Crypto CSV Parser</span>
-                    <div className="inline-flex items-center ml-3 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
-                      DEMO
-                    </div>
+                </div>
+                <div>
+                  <span className="font-bold text-lg text-base-content">Hero Crypto CSV Parser</span>
+                  <div className="inline-flex items-center ml-3 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                    DEMO
                   </div>
                 </div>
               </div>
@@ -323,46 +193,11 @@ function App() {
         </div>
 
         {/* Main Content */}
-        <div className="min-h-screen bg-gradient-to-br from-base-100 via-base-100 to-base-200">
-
-          {/* Hero Section */}
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5"></div>
-            <div className="relative max-w-7xl mx-auto px-6 py-16 sm:py-24">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
-                  <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-base-content mb-6">
-                  Transform Your <span className="text-primary">Crypto Data</span>
-                </h1>
-                <p className="text-xl text-base-content/70 mb-8 max-w-3xl mx-auto leading-relaxed">
-                  Professional-grade CSV parser that instantly categorizes and standardizes cryptocurrency transactions from major exchanges. Privacy-focused, lightning-fast, and tax-ready.
-                </p>
-                <div className="flex flex-wrap gap-3 justify-center mb-12">
-                  <div className="inline-flex items-center px-4 py-2 bg-success/10 text-success rounded-full text-sm font-medium">
-                    <div className="w-2 h-2 bg-success rounded-full mr-2"></div>
-                    Client-side Processing
-                  </div>
-                  <div className="inline-flex items-center px-4 py-2 bg-info/10 text-info rounded-full text-sm font-medium">
-                    <div className="w-2 h-2 bg-info rounded-full mr-2"></div>
-                    150+ Transaction Types
-                  </div>
-                  <div className="inline-flex items-center px-4 py-2 bg-warning/10 text-warning rounded-full text-sm font-medium">
-                    <div className="w-2 h-2 bg-warning rounded-full mr-2"></div>
-                    Tax Software Ready
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="max-w-7xl mx-auto px-6 pb-16">
-
+        <div className="flex-1">
+          <div className="max-w-full mx-auto">
             {/* Main Processing Interface */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="p-6">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* Left Panel - CSV Input */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-base-300/50 shadow-xl hover:shadow-2xl transition-all duration-300 h-full">
               <div className="p-8 flex flex-col h-full">
@@ -423,7 +258,7 @@ function App() {
                   </div>
                   <div className="relative flex-1">
                     <textarea
-                      className="w-full h-full min-h-[400px] p-4 bg-base-100/50 border border-base-300 rounded-xl font-mono text-sm resize-none overflow-auto focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 placeholder:text-base-content/40"
+                      className="w-full h-full min-h-[500px] p-4 bg-base-100/50 border border-base-300 rounded-xl font-mono text-sm resize-none overflow-auto focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 placeholder:text-base-content/40"
                       placeholder={`Paste your ${selectedSource} CSV data here...\n\nExample format:\nUTC_Time,Account,Operation,Coin,Change,Remark\n2023-01-01 00:00:00,Spot,Buy,BTC,0.001,\"\"\n2023-01-01 00:01:00,Spot,Sell,BTC,-0.001,\"\"`}
                       value={csvInput}
                       onChange={(e) => setCsvInput(e.target.value)}
@@ -436,7 +271,7 @@ function App() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                           </div>
-                          <p className="text-base-content/40 font-medium">Drop your CSV file or paste data</p>
+                          <p className="text-base-content/40 font-medium">Paste your CSV data</p>
                         </div>
                       </div>
                     )}
@@ -529,7 +364,7 @@ function App() {
                     </div>
                     <h3 className="text-2xl font-bold mb-3 text-base-content">Ready to Process</h3>
                     <p className="text-base-content/60 mb-8 max-w-md leading-relaxed">
-                      Paste your transaction data in the left panel to see instant processing and smart categorization
+                      Paste your transaction data in the panel to see instant processing and smart categorization
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-md">
                       <div className="p-4 bg-success/10 rounded-xl border border-success/20">
@@ -702,10 +537,11 @@ function App() {
                 )}
               </div>
             </div>
-          </div>
+              </div>
+            </div>
 
             {/* Features */}
-            <div className="mt-16">
+            <div className="mt-16 px-6">
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold text-base-content mb-4">Why Choose Hero Crypto Parser?</h2>
                 <p className="text-lg text-base-content/60 max-w-2xl mx-auto">Built with privacy, performance, and professional standards in mind</p>
@@ -757,8 +593,8 @@ function App() {
             </div>
 
             {/* Call-to-Action */}
-            <div className="mt-16 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-3xl"></div>
+            <div className="mt-16 px-6 relative overflow-hidden">
+              <div className="inset-0 bg-gradient-to-r from-primary to-secondary rounded-3xl"></div>
               <div className="relative bg-gradient-to-r from-primary/95 to-secondary/95 rounded-3xl p-12 text-center">
                 <h2 className="text-4xl font-bold text-white mb-6">Ready for Production?</h2>
                 <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
@@ -788,7 +624,7 @@ function App() {
             </div>
 
             {/* Footer */}
-            <footer className="mt-20 bg-gradient-to-r from-base-200/50 to-base-300/50 rounded-2xl p-12 text-center border border-base-300/30">
+            <footer className="mt-20 mx-6 mb-6 bg-gradient-to-r from-base-200/50 to-base-300/50 rounded-2xl p-12 text-center border border-base-300/30">
               <div className="max-w-4xl mx-auto">
                 <div className="flex items-center justify-center space-x-3 mb-6">
                   <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center">
@@ -800,21 +636,6 @@ function App() {
                     <h3 className="text-2xl font-bold text-base-content">Hero Crypto Parser</h3>
                     <p className="text-base-content/60 font-medium">Professional Transaction Analysis</p>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-                  <a href="#" className="text-base-content/60 hover:text-base-content transition-colors duration-200 font-medium">
-                    Documentation
-                  </a>
-                  <a href="#" className="text-base-content/60 hover:text-base-content transition-colors duration-200 font-medium">
-                    API Reference
-                  </a>
-                  <a href="#" className="text-base-content/60 hover:text-base-content transition-colors duration-200 font-medium">
-                    Examples
-                  </a>
-                  <a href="#" className="text-base-content/60 hover:text-base-content transition-colors duration-200 font-medium">
-                    Support
-                  </a>
                 </div>
 
                 <div className="pt-6 border-t border-base-300/30">
