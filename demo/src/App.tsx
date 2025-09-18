@@ -1,6 +1,8 @@
 import { process } from '@beingciteable/hero-csv-crypto-parser';
 import type { Transaction, SourceProcessResult } from '@beingciteable/hero-csv-crypto-parser';
 import { useState, useEffect, useCallback } from 'react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 
 // Helper functions to safely extract properties from different transaction types
 const getTransactionAsset = (tx: Transaction): string => {
@@ -647,6 +649,8 @@ function App() {
           </div>
         </div>
       </div>
+      <SpeedInsights />
+      <Analytics />
     </div>
   );
 }
