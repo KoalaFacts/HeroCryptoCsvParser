@@ -129,7 +129,7 @@ jobs:
     name: Publish to NPM
     needs: quality-gates
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
     steps:
       - name: Checkout repository
@@ -166,7 +166,7 @@ jobs:
           CURRENT_VERSION=$(node -p "require('./package.json').version")
 
           # Check if this version exists on npm
-          if npm view hero-crypto-csv-parser@$CURRENT_VERSION version 2>/dev/null; then
+          if npm view @beingciteable/hero-csv-crypto-parser@$CURRENT_VERSION version 2>/dev/null; then
             echo "Version $CURRENT_VERSION already published"
             echo "should_publish=false" >> $GITHUB_OUTPUT
           else
@@ -217,7 +217,7 @@ jobs:
 
             ### Installation
             ```bash
-            npm install hero-crypto-csv-parser@${{ steps.version-check.outputs.current_version }}
+            npm install @beingciteable/hero-csv-crypto-parser@${{ steps.version-check.outputs.current_version }}
             ```
           draft: false
           prerelease: false
@@ -230,7 +230,7 @@ jobs:
           sleep 30
 
           # Verify the package was published successfully
-          PUBLISHED_VERSION=$(npm view hero-crypto-csv-parser version)
+          PUBLISHED_VERSION=$(npm view @beingciteable/hero-csv-crypto-parser version)
           EXPECTED_VERSION="${{ steps.version-check.outputs.current_version }}"
 
           if [ "$PUBLISHED_VERSION" = "$EXPECTED_VERSION" ]; then
