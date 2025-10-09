@@ -1,6 +1,6 @@
 {
-  "name": "@beingciteable/hero-csv-crypto-parser-workspace",
-  "version": "0.2.0",
+  "name": "beingciteable",
+  "version": "1.0.0",
   "private": true,
   "description": "Universal cryptocurrency transaction parser monorepo with core library and demo",
   "type": "module",

@@ -160,11 +160,26 @@ jobs:
             npm install
           fi
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v5
-        with:
-          name: dist-artifacts
-          path: packages/core/dist/
+      - name: Build core package for publishing
+        run: npm run build --workspace=packages/core
+
+      - name: Verify build output before publishing
+        shell: bash
+        run: |
+          echo "Verifying build completed successfully..."
+          ls -la packages/core/dist/
+
+          if [ ! -f "packages/core/dist/index.js" ]; then
+            echo "Error: Build did not generate index.js"
+            exit 1
+          fi
+
+          if [ ! -f "packages/core/dist/index.d.ts" ]; then
+            echo "Error: Build did not generate index.d.ts"
+            exit 1
+          fi
+
+          echo "Build verification passed - ready for publishing"
 
       - name: Check if version changed
         id: version-check
@@ -182,26 +197,6 @@ jobs:
           fi
 
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Verify package before publishing
-        if: steps.version-check.outputs.should_publish == 'true'
-        shell: bash
-        run: |
-          echo "Verifying package structure..."
-          ls -la packages/core/dist/
-
-          # Verify essential files exist
-          if [ ! -f "packages/core/dist/index.js" ]; then
-            echo "Error: packages/core/dist/index.js not found"
-            exit 1
-          fi
-
-          if [ ! -f "packages/core/dist/index.d.ts" ]; then
-            echo "Error: packages/core/dist/index.d.ts not found"
-            exit 1
-          fi
-
-          echo "Package verification passed"
 
       - name: Publish to NPM
         if: steps.version-check.outputs.should_publish == 'true'
