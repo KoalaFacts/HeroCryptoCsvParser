@@ -90,7 +90,7 @@ export const createMockTransaction = (
   // For other transaction types, return base structure
   const baseTransaction: Transaction = {
     id: "test-tx-001",
-    type: type as unknown,
+    type: type,
     timestamp: new Date("2024-01-15T10:30:00Z"),
     source: createMockDataSource(),
     taxEvents: [createMockTaxEvent()],

@@ -9,7 +9,7 @@ export class FieldMapperContext<TRecord> {
   constructor(
     public readonly fieldName: string,
     public readonly fieldIndex: number,
-    public readonly rawValue: string,
+    public readonly rawValue: string | null,
     public readonly record: TRecord,
   ) {}
 }

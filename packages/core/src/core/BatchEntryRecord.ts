@@ -294,7 +294,7 @@ export abstract class BatchEntryRecord<
       this.mapper = (ctx: FieldMapperContext<TRecord>) => {
         const result = new ValidationResult<TRecord>();
         try {
-          const mappedValue = mapper(ctx.rawValue);
+          const mappedValue = mapper(ctx.rawValue ?? "");
           if (mappedValue !== undefined && propertyName) {
             (ctx.record as Record<string, unknown>)[propertyName] = mappedValue;
           }

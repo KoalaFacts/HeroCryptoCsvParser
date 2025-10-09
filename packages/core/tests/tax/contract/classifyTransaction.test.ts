@@ -16,19 +16,20 @@ import type { Transaction } from "@/types/transactions/Transaction";
  */
 describe("T010: Contract Test - classifyTransaction Function", () => {
   // Mock data for testing
-  const createMockTransaction = (type: string = "SPOT_TRADE"): Transaction => ({
-    id: "test-tx-001",
-    type: type as unknown,
-    timestamp: new Date("2024-01-15T10:30:00Z"),
-    source: createMockDataSource("test-exchange", "exchange", "TestExchange"),
-    taxEvents: [],
-    originalData: {
-      side: "sell",
-      amount: "1.5",
-      price: "50000",
-      asset: "BTC",
-    },
-  });
+  const createMockTransaction = (type: string = "SPOT_TRADE"): Transaction =>
+    ({
+      id: "test-tx-001",
+      type: type as Transaction["type"],
+      timestamp: new Date("2024-01-15T10:30:00Z"),
+      source: createMockDataSource("test-exchange", "exchange", "TestExchange"),
+      taxEvents: [],
+      originalData: {
+        side: "sell",
+        amount: "1.5",
+        price: "50000",
+        asset: "BTC",
+      },
+    }) as Transaction;
 
   const createMockPortfolioSnapshot = (): PortfolioSnapshot => ({
     holdings: new Map([
@@ -136,10 +137,10 @@ describe("T010: Contract Test - classifyTransaction Function", () => {
             .classifyTransaction as ClassifyTransactionFunction;
 
         // Test with null transaction
-        expect(() => classifyTransaction(null as unknown, "AU")).toThrow();
+        expect(() => classifyTransaction(null as never, "AU")).toThrow();
 
         // Test with undefined transaction
-        expect(() => classifyTransaction(undefined as unknown, "AU")).toThrow();
+        expect(() => classifyTransaction(undefined as never, "AU")).toThrow();
 
         // Expected to fail until implementation
         expect(false).toBe(true);
@@ -159,12 +160,12 @@ describe("T010: Contract Test - classifyTransaction Function", () => {
 
         // Test with null jurisdiction
         expect(() =>
-          classifyTransaction(mockTransaction, null as unknown),
+          classifyTransaction(mockTransaction, null as never),
         ).toThrow();
 
         // Test with undefined jurisdiction
         expect(() =>
-          classifyTransaction(mockTransaction, undefined as unknown),
+          classifyTransaction(mockTransaction, undefined as never),
         ).toThrow();
 
         // Expected to fail until implementation
@@ -236,7 +237,7 @@ describe("T010: Contract Test - classifyTransaction Function", () => {
       const incompleteTransaction = {
         id: "test",
         // Missing type, timestamp, etc.
-      } as unknown;
+      } as never;
 
       try {
         const classifyTransaction =
@@ -661,7 +662,7 @@ describe("T010: Contract Test - classifyTransaction Function", () => {
         id: "test",
         timestamp: "invalid-date",
         originalData: null,
-      } as unknown;
+      } as never;
 
       try {
         const classifyTransaction =

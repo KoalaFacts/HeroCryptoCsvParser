@@ -115,12 +115,12 @@ describe("T009: Contract Test - calculateCostBasis Function", () => {
 
         // Test with null disposal
         expect(() =>
-          calculateCostBasis(null as unknown, acquisitions, "FIFO"),
+          calculateCostBasis(null as never, acquisitions, "FIFO"),
         ).toThrow();
 
         // Test with undefined disposal
         expect(() =>
-          calculateCostBasis(undefined as unknown, acquisitions, "FIFO"),
+          calculateCostBasis(undefined as never, acquisitions, "FIFO"),
         ).toThrow();
 
         // Expected to fail until implementation
@@ -141,12 +141,12 @@ describe("T009: Contract Test - calculateCostBasis Function", () => {
 
         // Test with null acquisitions
         expect(() =>
-          calculateCostBasis(disposal, null as unknown, "FIFO"),
+          calculateCostBasis(disposal, null as never, "FIFO"),
         ).toThrow();
 
         // Test with undefined acquisitions
         expect(() =>
-          calculateCostBasis(disposal, undefined as unknown, "FIFO"),
+          calculateCostBasis(disposal, undefined as never, "FIFO"),
         ).toThrow();
 
         // Expected to fail until implementation
@@ -180,7 +180,7 @@ describe("T009: Contract Test - calculateCostBasis Function", () => {
 
         // Test invalid method
         expect(() =>
-          calculateCostBasis(disposal, acquisitions, "INVALID" as unknown),
+          calculateCostBasis(disposal, acquisitions, "INVALID" as never),
         ).toThrow(/method|invalid/i);
 
         // Expected to fail until implementation
@@ -518,7 +518,7 @@ describe("T009: Contract Test - calculateCostBasis Function", () => {
         id: "test",
         timestamp: null,
         // Missing other required fields
-      } as unknown;
+      } as never;
 
       try {
         const calculateCostBasis =

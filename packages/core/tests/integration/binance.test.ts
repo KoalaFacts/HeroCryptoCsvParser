@@ -15,6 +15,16 @@ import type {
   Unknown,
 } from "@/types/transactions";
 
+// Helper type for accessing originalData properties in tests
+type TransactionWithOriginalData = {
+  originalData?: {
+    swapType?: unknown;
+    categorizationType?: unknown;
+    categorizationSubType?: unknown;
+    [key: string]: unknown;
+  };
+};
+
 describe("Binance Integration", () => {
   describe("Transaction Type Mapping", () => {
     it("should map Buy/Sell operations to SpotTrade", async () => {
@@ -138,7 +148,9 @@ describe("Binance Integration", () => {
       expect(swap1.from.asset.symbol).toBe("BNB");
       expect(swap1.from.amount.toString()).toBe("5");
       // swapType is stored in originalData
-      expect((swap1 as unknown).originalData?.swapType).toBe("instant");
+      expect(
+        (swap1 as TransactionWithOriginalData).originalData?.swapType,
+      ).toBe("instant");
 
       const swap2 = result.transactions[1] as Swap;
       expect(swap2.type).toBe("SWAP");
@@ -148,7 +160,9 @@ describe("Binance Integration", () => {
       // Dust conversion
       const dustSwap = result.transactions[2] as Swap;
       // dustSwap type is stored in originalData
-      expect((dustSwap as unknown).originalData?.swapType).toBe("dust");
+      expect(
+        (dustSwap as TransactionWithOriginalData).originalData?.swapType,
+      ).toBe("dust");
     });
 
     it("should map Liquidity operations correctly", async () => {
@@ -173,7 +187,8 @@ describe("Binance Integration", () => {
       expect(liquidityReward.type).toBe("INTEREST");
       expect(liquidityReward.interestType).toBe("EARNED");
       expect(
-        (liquidityReward as unknown).originalData?.categorization?.subType,
+        (liquidityReward as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("liquidity");
 
       // Check Liquidity Remove
@@ -376,21 +391,24 @@ describe("Binance Integration", () => {
 
       const p2pBuy = result.transactions[0] as SpotTrade;
       expect(p2pBuy.type).toBe("SPOT_TRADE");
-      expect((p2pBuy as unknown).originalData?.categorization?.subType).toBe(
-        "p2p-buy",
-      );
+      expect(
+        (p2pBuy as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
+      ).toBe("p2p-buy");
 
       const p2pSell = result.transactions[1] as SpotTrade;
       expect(p2pSell.type).toBe("SPOT_TRADE");
-      expect((p2pSell as unknown).originalData?.categorization?.subType).toBe(
-        "p2p-sell",
-      );
+      expect(
+        (p2pSell as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
+      ).toBe("p2p-sell");
 
       const otc = result.transactions[2] as SpotTrade;
       expect(otc.type).toBe("SPOT_TRADE");
-      expect((otc as unknown).originalData?.categorization?.subType).toBe(
-        "otc",
-      );
+      expect(
+        (otc as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
+      ).toBe("otc");
     });
 
     it("should categorize various staking operations with proper priority", async () => {
@@ -437,7 +455,8 @@ describe("Binance Integration", () => {
       const flexInterest = result.transactions[0] as Interest;
       expect(flexInterest.type).toBe("INTEREST");
       expect(
-        (flexInterest as unknown).originalData?.categorization?.subType,
+        (flexInterest as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("flexible-savings");
 
       // Locked rewards should be staking reward
@@ -447,21 +466,24 @@ describe("Binance Integration", () => {
       const launchpool = result.transactions[2] as Interest;
       expect(launchpool.type).toBe("INTEREST");
       expect(
-        (launchpool as unknown).originalData?.categorization?.subType,
+        (launchpool as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("launchpool");
 
       // Savings interest
       const savings = result.transactions[3] as Interest;
       expect(savings.type).toBe("INTEREST");
-      expect((savings as unknown).originalData?.categorization?.subType).toBe(
-        "savings",
-      );
+      expect(
+        (savings as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
+      ).toBe("savings");
 
       // Auto-invest should be swap
       const autoInvest = result.transactions[4] as Swap;
       expect(autoInvest.type).toBe("SWAP");
       expect(
-        (autoInvest as unknown).originalData?.categorization?.subType,
+        (autoInvest as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("auto-invest");
     });
 
@@ -486,7 +508,8 @@ describe("Binance Integration", () => {
       const marginInterest = result.transactions[1] as Fee;
       expect(marginInterest.type).toBe("FEE");
       expect(
-        (marginInterest as unknown).originalData?.categorization?.subType,
+        (marginInterest as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("margin-interest");
 
       // Margin loan
@@ -501,15 +524,17 @@ describe("Binance Integration", () => {
       const unrealizedPnl = result.transactions[4] as Interest;
       expect(unrealizedPnl.type).toBe("INTEREST");
       expect(
-        (unrealizedPnl as unknown).originalData?.categorization?.subType,
+        (unrealizedPnl as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("unrealized-pnl");
 
       // Insurance clear
       const insurance = result.transactions[5] as Fee;
       expect(insurance.type).toBe("FEE");
-      expect((insurance as unknown).originalData?.categorization?.subType).toBe(
-        "insurance",
-      );
+      expect(
+        (insurance as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
+      ).toBe("insurance");
     });
 
     it("should categorize internal transfers between accounts", async () => {
@@ -551,28 +576,28 @@ describe("Binance Integration", () => {
 
       // Check specific sub-types
       expect(
-        (result.transactions[0] as unknown).originalData?.categorization
-          ?.subType,
+        (result.transactions[0] as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("vip");
       expect(
-        (result.transactions[1] as unknown).originalData?.categorization
-          ?.subType,
+        (result.transactions[1] as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("task");
       expect(
-        (result.transactions[2] as unknown).originalData?.categorization
-          ?.subType,
+        (result.transactions[2] as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("competition");
       expect(
-        (result.transactions[3] as unknown).originalData?.categorization
-          ?.subType,
+        (result.transactions[3] as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("event");
       expect(
-        (result.transactions[4] as unknown).originalData?.categorization
-          ?.subType,
+        (result.transactions[4] as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("affiliate");
       expect(
-        (result.transactions[5] as unknown).originalData?.categorization
-          ?.subType,
+        (result.transactions[5] as TransactionWithOriginalData).originalData
+          ?.categorizationSubType,
       ).toBe("voucher");
     });
 
@@ -590,9 +615,10 @@ describe("Binance Integration", () => {
       result.transactions.forEach((tx) => {
         expect(tx.type).toBe("SWAP");
         const swap = tx as Swap;
-        expect((swap as unknown).originalData?.categorization?.subType).toBe(
-          "dust",
-        );
+        expect(
+          (swap as TransactionWithOriginalData).originalData
+            ?.categorizationSubType,
+        ).toBe("dust");
       });
     });
   });
@@ -850,13 +876,16 @@ describe("Binance Integration", () => {
       // Verify specific categorization subtypes are preserved
       const p2pTrade = result.transactions.find(
         (tx) =>
-          (tx as unknown).originalData?.categorization?.subType === "p2p-buy",
+          (tx as TransactionWithOriginalData).originalData
+            ?.categorizationSubType === "p2p-buy",
       );
       expect(p2pTrade).toBeDefined();
       expect(p2pTrade?.type).toBe("SPOT_TRADE");
 
       const vipReward = result.transactions.find(
-        (tx) => (tx as unknown).originalData?.categorization?.subType === "vip",
+        (tx) =>
+          (tx as TransactionWithOriginalData).originalData
+            ?.categorizationSubType === "vip",
       );
       expect(vipReward).toBeDefined();
       expect(vipReward?.type).toBe("INTEREST");

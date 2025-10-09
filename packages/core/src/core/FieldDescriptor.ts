@@ -69,7 +69,7 @@ export class FieldDescriptor<TRecord, TProperty = unknown> {
   ): this {
     this.mapper = (context) => {
       try {
-        const mappedValue = mapper(context.rawValue);
+        const mappedValue = mapper(context.rawValue ?? "");
         if (this.setter) {
           const getterContext = new FieldGetterContext(
             context.fieldName,

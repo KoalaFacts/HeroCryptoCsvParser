@@ -418,7 +418,7 @@ describe("SourceBuilder", () => {
 
     it("should throw error for null info", () => {
       expect(() => {
-        new SourceBuilder<TestRecord>().withInfo(null as unknown).build();
+        new SourceBuilder<TestRecord>().withInfo(null as never).build();
       }).toThrow();
     });
 
@@ -431,7 +431,7 @@ describe("SourceBuilder", () => {
             type: "exchange",
             supportedFormats: ["csv"],
           })
-          .withRecordClass(null as unknown)
+          .withRecordClass(null as never)
           .build();
       }).toThrow();
     });
@@ -446,7 +446,7 @@ describe("SourceBuilder", () => {
             supportedFormats: ["csv"],
           })
           .withRecordClass(TestRecord)
-          .withAdapter(null as unknown)
+          .withAdapter(null as never)
           .build();
       }).toThrow();
     });

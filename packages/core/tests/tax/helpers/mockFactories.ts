@@ -36,17 +36,10 @@ export function createMockAsset(
  */
 export function createMockDataSource(
   id: string,
-  type:
-    | "exchange"
-    | "wallet"
-    | "defi"
-    | "blockchain"
-    | "manual"
-    | "protocol"
-    | "marketplace" = "exchange",
+  type: "exchange" | "wallet" | "defi" | "blockchain" | "manual" = "exchange",
   name?: string,
 ): DataSource {
-  return new DataSource(id, type as unknown, name || id);
+  return new DataSource(id, type, name || id);
 }
 
 /**
@@ -293,27 +286,29 @@ export function createMockLiquidityRemove(
  */
 export function createMockTransaction(
   type: Transaction["type"],
-  overrides?: unknown,
+  overrides?: Partial<Transaction>,
 ): Transaction {
+  // biome-ignore lint/suspicious/noExplicitAny: Type-safe generic override for any transaction type
+  const safeOverrides = overrides as any;
   switch (type) {
     case "SPOT_TRADE":
-      return createMockSpotTrade(overrides);
+      return createMockSpotTrade(safeOverrides);
     case "STAKING_REWARD":
-      return createMockStakingReward(overrides);
+      return createMockStakingReward(safeOverrides);
     case "SWAP":
-      return createMockSwap(overrides);
+      return createMockSwap(safeOverrides);
     case "TRANSFER":
-      return createMockTransfer(overrides);
+      return createMockTransfer(safeOverrides);
     case "AIRDROP":
-      return createMockAirdrop(overrides);
+      return createMockAirdrop(safeOverrides);
     case "INTEREST":
-      return createMockInterest(overrides);
+      return createMockInterest(safeOverrides);
     case "LIQUIDITY_ADD":
-      return createMockLiquidityAdd(overrides);
+      return createMockLiquidityAdd(safeOverrides);
     case "LIQUIDITY_REMOVE":
-      return createMockLiquidityRemove(overrides);
+      return createMockLiquidityRemove(safeOverrides);
     default:
-      return createMockSpotTrade(overrides);
+      return createMockSpotTrade(safeOverrides);
   }
 }
 

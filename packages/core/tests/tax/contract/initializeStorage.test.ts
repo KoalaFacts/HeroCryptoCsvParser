@@ -593,7 +593,7 @@ describe("T011: Contract Test - Storage Adapter Interfaces", () => {
       const invalidTransaction = {
         originalTransaction: null,
         taxTreatment: null,
-      } as unknown;
+      } as never;
 
       try {
         const MockStorageAdapter =

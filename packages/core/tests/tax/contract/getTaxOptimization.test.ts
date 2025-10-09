@@ -209,7 +209,7 @@ describe("T008: Contract Test - getTaxOptimizationStrategies Function", () => {
         // Test invalid risk tolerance
         const invalidConfig = {
           ...mockConfig,
-          riskTolerance: "INVALID" as unknown,
+          riskTolerance: "INVALID" as never,
         };
 
         await expect(
@@ -497,7 +497,7 @@ describe("T008: Contract Test - getTaxOptimizationStrategies Function", () => {
         const invalidConfig = {
           jurisdictionCode: "INVALID",
           transactions: [createMockTaxableTransaction()],
-        } as unknown;
+        } as never;
 
         await expect(
           getTaxOptimizationStrategies(invalidConfig),
@@ -518,7 +518,7 @@ describe("T008: Contract Test - getTaxOptimizationStrategies Function", () => {
           {
             originalTransaction: null,
             taxTreatment: null,
-          } as unknown,
+          } as never,
         ],
       };
 

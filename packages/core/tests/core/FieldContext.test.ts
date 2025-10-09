@@ -55,12 +55,7 @@ describe("FieldContext", () => {
 
     it("should handle null raw value", () => {
       const record = new TestRecord();
-      const context = new FieldMapperContext(
-        "Optional",
-        3,
-        null as unknown as string,
-        record,
-      );
+      const context = new FieldMapperContext("Optional", 3, null, record);
 
       expect(context.rawValue).toBeNull();
     });

@@ -289,7 +289,7 @@ describe("T005: Contract Test - generateTaxReport Function", () => {
           jurisdictionCode: "US", // Not supported according to interface
           taxYear: 2024,
           transactions: [createMockTransaction()],
-        } as unknown;
+        } as never;
 
         await expect(generateTaxReport(invalidConfig)).rejects.toThrow(
           /jurisdiction|supported/i,

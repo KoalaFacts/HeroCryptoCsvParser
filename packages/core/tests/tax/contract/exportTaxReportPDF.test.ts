@@ -144,12 +144,10 @@ describe("T006: Contract Test - exportTaxReportPDF Function", () => {
             .exportTaxReportPDF as ExportTaxReportPDFFunction;
 
         // Test with null report
-        await expect(exportTaxReportPDF(null as unknown)).rejects.toThrow();
+        await expect(exportTaxReportPDF(null as never)).rejects.toThrow();
 
         // Test with undefined report
-        await expect(
-          exportTaxReportPDF(undefined as unknown),
-        ).rejects.toThrow();
+        await expect(exportTaxReportPDF(undefined as never)).rejects.toThrow();
 
         // Expected to fail until implementation
         expect(false).toBe(true);
@@ -169,7 +167,7 @@ describe("T006: Contract Test - exportTaxReportPDF Function", () => {
         const incompleteReport = {
           id: "test-report",
           // Missing required fields
-        } as unknown;
+        } as never;
 
         await expect(exportTaxReportPDF(incompleteReport)).rejects.toThrow();
 
@@ -229,7 +227,7 @@ describe("T006: Contract Test - exportTaxReportPDF Function", () => {
         }
 
         // Test invalid template
-        const invalidOptions = { template: "INVALID" } as unknown;
+        const invalidOptions = { template: "INVALID" } as never;
         await expect(
           exportTaxReportPDF(mockReport, invalidOptions),
         ).rejects.toThrow();
@@ -419,7 +417,7 @@ describe("T006: Contract Test - exportTaxReportPDF Function", () => {
         const invalidReport = {
           ...createMockTaxReport(),
           summary: null,
-        } as unknown;
+        } as never;
 
         await expect(exportTaxReportPDF(invalidReport)).rejects.toThrow(
           /summary|invalid|required/i,
@@ -443,7 +441,7 @@ describe("T006: Contract Test - exportTaxReportPDF Function", () => {
           id: "test",
           jurisdiction: { code: "AU" },
           // Missing other required fields
-        } as unknown;
+        } as never;
 
         await expect(exportTaxReportPDF(malformedReport)).rejects.toThrow();
 

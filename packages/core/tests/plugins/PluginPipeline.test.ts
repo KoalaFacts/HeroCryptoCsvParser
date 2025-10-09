@@ -149,7 +149,7 @@ describe("PluginPipeline", () => {
     });
 
     it("should pass metadata through context", () => {
-      let capturedMetadata: unknown = null;
+      let capturedMetadata: Record<string, unknown> | undefined;
 
       const plugin: Plugin = {
         name: "metadata-capture",
