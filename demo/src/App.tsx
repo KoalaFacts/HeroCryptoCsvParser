@@ -42,7 +42,13 @@ const getTransactionAsset = (tx: Transaction): string => {
 
 const getTransactionQuoteAsset = (tx: Transaction): string | undefined => {
   if ('quoteAsset' in tx && tx.quoteAsset) {
-    return typeof tx.quoteAsset === 'string' ? tx.quoteAsset : tx.quoteAsset.toString();
+    // AssetAmount type
+    if (typeof tx.quoteAsset === 'object' && tx.quoteAsset !== null && 'asset' in tx.quoteAsset) {
+      const asset = (tx.quoteAsset as any).asset;
+      if (!asset) return undefined;
+      return typeof asset === 'string' ? asset : (asset.symbol || String(asset));
+    }
+    return typeof tx.quoteAsset === 'string' ? tx.quoteAsset : String(tx.quoteAsset);
   }
   return undefined;
 };
