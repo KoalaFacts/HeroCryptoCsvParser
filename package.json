@@ -20,6 +20,7 @@
     "lint": "biome check . --diagnostic-level=error",
     "lint:fix": "biome check . --write",
     "format": "biome format . --write",
+    "format:check": "biome format .",
     "test": "npm run lint && npm run typecheck && vitest",
     "test:ui": "npm run typecheck && vitest --ui",
     "test:coverage": "npm run typecheck && vitest --coverage",
