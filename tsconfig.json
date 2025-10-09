@@ -16,7 +16,13 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@/tax/*": ["src/tax/*"],
+      "@/types/*": ["src/types/*"],
+      "@/core/*": ["src/core/*"],
+      "@/sources/*": ["src/sources/*"],
+      "@tests/*": ["tests/*"],
+      "@specs/*": ["specs/*"]
     }
   },
   "include": ["src/**/*", "tests/**/*", "vitest.config.ts"],

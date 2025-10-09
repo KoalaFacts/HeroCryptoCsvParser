@@ -45,6 +45,9 @@ export { TransactionCategorizer, OperationMapping, CategorizerConfig, createCate
 
 export { CsvExporter, CsvExportOptions, CsvRow, exportToCSV } from './exporters/CsvExporter';
 
+// Tax Module Exports
+export * from './tax';
+
 import { BinanceSource as BinanceSourceInstance } from './sources/binance';
 import { Source, SourceProcessResult } from './core/Source';
 import { OperationMapping } from './core/TransactionCategorizer';

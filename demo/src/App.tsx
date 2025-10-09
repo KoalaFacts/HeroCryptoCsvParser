@@ -1,66 +1,118 @@
 import { process } from '@beingciteable/hero-csv-crypto-parser';
 import type { Transaction, SourceProcessResult } from '@beingciteable/hero-csv-crypto-parser';
+import { generateTaxReport, exportSummaryToCSV } from '@beingciteable/hero-csv-crypto-parser/tax';
+import type { TaxReport } from '@beingciteable/hero-csv-crypto-parser/tax';
 import { useState, useEffect, useCallback } from 'react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
+import jsPDF from 'jspdf';
+import { generateSampleCSV } from './utils/generateSampleData';
 
 // Helper functions to safely extract properties from different transaction types
 const getTransactionAsset = (tx: Transaction): string => {
-  // Try to get primary asset from various transaction types
-  if ('baseAsset' in tx && tx.baseAsset) {
-    return typeof tx.baseAsset === 'string' ? tx.baseAsset : tx.baseAsset.toString();
+  // Helper to extract asset symbol from AssetAmount or Asset
+  const extractAsset = (field: any): string | null => {
+    if (!field) return null;
+
+    // If it's an AssetAmount object, extract the asset
+    if (typeof field === 'object' && field !== null && 'asset' in field) {
+      const asset = field.asset;
+      if (typeof asset === 'string') return asset;
+      if (asset && typeof asset === 'object' && 'symbol' in asset) {
+        return asset.symbol || null;
+      }
+    }
+
+    // If it's an Asset object with symbol
+    if (typeof field === 'object' && field !== null && 'symbol' in field) {
+      return field.symbol || null;
+    }
+
+    // If it's a string
+    if (typeof field === 'string') return field;
+
+    return null;
+  };
+
+  // Try different field names based on transaction type
+  const fields = [
+    'fee',        // Fee
+    'reward',     // StakingReward
+    'interest',   // Interest
+    'received',   // Airdrop
+    'asset',      // Transfer, StakingDeposit, StakingWithdrawal
+    'baseAsset',  // SpotTrade
+    'fromAsset',  // Swap
+    'toAsset'     // Swap
+  ];
+
+  for (const fieldName of fields) {
+    if (fieldName in tx) {
+      const result = extractAsset((tx as any)[fieldName]);
+      if (result) return result;
+    }
   }
-  if ('asset' in tx && tx.asset) {
-    return typeof tx.asset === 'string' ? tx.asset : tx.asset.toString();
-  }
-  if ('fromAsset' in tx && tx.fromAsset) {
-    return typeof tx.fromAsset === 'string' ? tx.fromAsset : tx.fromAsset.toString();
-  }
-  if ('toAsset' in tx && tx.toAsset) {
-    return typeof tx.toAsset === 'string' ? tx.toAsset : tx.toAsset.toString();
-  }
+
   return 'N/A';
 };
 
 const getTransactionQuoteAsset = (tx: Transaction): string | undefined => {
   if ('quoteAsset' in tx && tx.quoteAsset) {
-    return typeof tx.quoteAsset === 'string' ? tx.quoteAsset : tx.quoteAsset.toString();
+    // AssetAmount type
+    if (typeof tx.quoteAsset === 'object' && tx.quoteAsset !== null && 'asset' in tx.quoteAsset) {
+      const asset = (tx.quoteAsset as any).asset;
+      if (!asset) return undefined;
+      return typeof asset === 'string' ? asset : (asset.symbol || String(asset));
+    }
+    return typeof tx.quoteAsset === 'string' ? tx.quoteAsset : String(tx.quoteAsset);
   }
   return undefined;
 };
 
 const getTransactionAmount = (tx: Transaction): string => {
-  if ('amount' in tx && tx.amount) {
-    if (typeof tx.amount === 'object' && tx.amount !== null && 'amount' in tx.amount) {
-      // AssetAmount type
-      return (tx.amount.amount as any).toString();
+  // Helper to extract amount from AssetAmount
+  const extractAmount = (field: any): string | null => {
+    if (!field) return null;
+    if (typeof field === 'object' && field !== null && 'amount' in field) {
+      return field.amount?.toString() || null;
     }
-    return tx.amount.toString();
-  }
-  if ('baseAmount' in tx && tx.baseAmount) {
-    if (typeof tx.baseAmount === 'object' && tx.baseAmount !== null && 'amount' in tx.baseAmount) {
-      return (tx.baseAmount.amount as any).toString();
+    if (typeof field === 'object' && field !== null && 'toString' in field) {
+      return field.toString();
     }
-    return tx.baseAmount.toString();
-  }
-  if ('fromAmount' in tx && tx.fromAmount) {
-    if (typeof tx.fromAmount === 'object' && tx.fromAmount !== null && 'amount' in tx.fromAmount) {
-      return (tx.fromAmount.amount as any).toString();
+    return String(field);
+  };
+
+  // Try different field names based on transaction type
+  const fields = [
+    'fee',        // Fee
+    'reward',     // StakingReward
+    'interest',   // Interest
+    'received',   // Airdrop
+    'asset',      // Transfer, StakingDeposit, StakingWithdrawal
+    'baseAsset',  // SpotTrade
+    'amount',     // Generic
+    'baseAmount',
+    'fromAmount',
+    'toAmount'
+  ];
+
+  for (const fieldName of fields) {
+    if (fieldName in tx) {
+      const result = extractAmount((tx as any)[fieldName]);
+      if (result) return result;
     }
-    return tx.fromAmount.toString();
   }
-  if ('toAmount' in tx && tx.toAmount) {
-    if (typeof tx.toAmount === 'object' && tx.toAmount !== null && 'amount' in tx.toAmount) {
-      return (tx.toAmount.amount as any).toString();
-    }
-    return tx.toAmount.toString();
-  }
+
   return 'N/A';
 };
 
 const getTransactionPrice = (tx: Transaction): string | undefined => {
   if ('price' in tx && tx.price) {
-    return tx.price.toString();
+    const priceStr = tx.price.toString();
+    // Only return if price is not zero
+    if (priceStr !== '0' && priceStr !== '0.0' && priceStr !== '0.00') {
+      return priceStr;
+    }
   }
   return undefined;
 };
@@ -81,6 +133,13 @@ function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [taxReport, setTaxReport] = useState<TaxReport | null>(null);
+  const currentYear = new Date().getFullYear();
+  const [taxYear, setTaxYear] = useState(currentYear);
+  const [generatingTaxReport, setGeneratingTaxReport] = useState(false);
+
+  // Generate last 10 financial years dynamically
+  const financialYears = Array.from({ length: 10 }, (_, i) => currentYear - i);
 
   const handleProcess = useCallback(async (source: string, input: string) => {
     if (!input.trim()) {
@@ -142,6 +201,134 @@ function App() {
       URL.revokeObjectURL(url);
     } catch (_err) {
       setError('Export failed');
+    }
+  };
+
+  const handleGenerateTaxReport = async () => {
+    if (transactions.length === 0) return;
+
+    setGeneratingTaxReport(true);
+    setError('');
+
+    try {
+      const report = await generateTaxReport({
+        jurisdictionCode: 'AU',
+        taxYear,
+        transactions,
+        options: {
+          includeOptimization: true,
+          costBasisMethod: 'FIFO',
+          handleDeFi: true,
+        },
+      });
+
+      setTaxReport(report);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Tax report generation failed');
+      setTaxReport(null);
+    } finally {
+      setGeneratingTaxReport(false);
+    }
+  };
+
+  const handleExportTaxReportPDF = () => {
+    if (!taxReport) return;
+
+    try {
+      const doc = new jsPDF();
+
+      // Title
+      doc.setFontSize(20);
+      doc.text('Australian Tax Report', 20, 20);
+
+      // Tax Year
+      doc.setFontSize(12);
+      doc.text(`Financial Year: ${taxYear}-${(taxYear + 1).toString().slice(-2)}`, 20, 30);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 37);
+
+      // Summary Section
+      doc.setFontSize(16);
+      doc.text('Tax Summary', 20, 50);
+
+      doc.setFontSize(11);
+      let yPos = 60;
+
+      doc.text(`Capital Gains: $${taxReport.summary.totalCapitalGains.toLocaleString()}`, 20, yPos);
+      yPos += 7;
+      doc.text(`CGT Discount (50%): $${taxReport.summary.cgtDiscount.toLocaleString()}`, 20, yPos);
+      yPos += 7;
+      doc.text(`Ordinary Income: $${taxReport.summary.ordinaryIncome.toLocaleString()}`, 20, yPos);
+      yPos += 7;
+      doc.text(`Net Taxable Amount: $${taxReport.summary.netTaxableAmount.toLocaleString()}`, 20, yPos);
+      yPos += 15;
+
+      // Asset Summary
+      doc.setFontSize(16);
+      doc.text('Assets Summary', 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      const assetEntries = Array.from(taxReport.summary.byAsset.entries());
+      for (const [asset, summary] of assetEntries.slice(0, 15)) { // Limit to first 15 assets
+        doc.text(`${asset}: Gain $${summary.netGain.toFixed(2)} | Loss $${summary.netLoss.toFixed(2)}`, 25, yPos);
+        yPos += 6;
+        if (yPos > 270) break; // Page limit
+      }
+
+      // Footer
+      doc.setFontSize(8);
+      doc.text('Generated with Hero Crypto CSV Parser', 20, 285);
+      doc.text('https://github.com/BeingCiteable/HeroCryptoCsvParser', 20, 290);
+
+      // Save
+      doc.save(`tax-report-AU-${taxYear}.pdf`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'PDF export failed');
+    }
+  };
+
+  const handleExportTaxReportCSV = async () => {
+    if (!taxReport) return;
+
+    try {
+      const csv = exportSummaryToCSV(taxReport);
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tax-summary-AU-${taxYear}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'CSV export failed');
+    }
+  };
+
+  const handleLoadSample = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Simulate loading effect for better UX
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Generate sample data dynamically based on selected source
+      let sampleData: string;
+
+      if (selectedSource === 'binance') {
+        sampleData = generateSampleCSV();
+      } else {
+        // For other exchanges (not yet implemented), show a message
+        setError(`Sample data for ${selectedSource} is not yet available. Showing Binance sample instead.`);
+        sampleData = generateSampleCSV();
+      }
+
+      setCsvInput(sampleData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate sample data');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -218,18 +405,16 @@ function App() {
                   </div>
 
                   <div className="form-control">
-                    <div className="relative">
-                      <select
-                        className="select select-bordered bg-base-100/50 border-base-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base font-medium"
-                        value={selectedSource}
-                        onChange={(e) => setSelectedSource(e.target.value)}
-                      >
-                        <option value="binance">Binance Exchange</option>
-                        <option value="coinbase" disabled>Coinbase (Coming Soon)</option>
-                        <option value="kraken" disabled>Kraken (Coming Soon)</option>
-                        <option value="kucoin" disabled>KuCoin (Coming Soon)</option>
-                      </select>
-                    </div>
+                    <select
+                      className="select select-lg bg-white border-2 border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-lg font-semibold min-w-[240px] shadow-lg hover:shadow-xl"
+                      value={selectedSource}
+                      onChange={(e) => setSelectedSource(e.target.value)}
+                    >
+                      <option value="binance">Binance Exchange</option>
+                      <option value="coinbase" disabled>Coinbase (Coming Soon)</option>
+                      <option value="kraken" disabled>Kraken (Coming Soon)</option>
+                      <option value="kucoin" disabled>KuCoin (Coming Soon)</option>
+                    </select>
                   </div>
                 </div>
 
@@ -281,6 +466,28 @@ function App() {
 
                 <div className="flex justify-between items-center mt-6">
                   <div className="flex items-center space-x-3">
+                    {!csvInput && (
+                      <button
+                        type="button"
+                        className="inline-flex items-center px-4 py-2 bg-secondary/10 text-secondary rounded-xl font-medium hover:bg-secondary/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleLoadSample}
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <>
+                            <span className="loading loading-spinner loading-sm mr-2"></span>
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                            </svg>
+                            Load Sample Data
+                          </>
+                        )}
+                      </button>
+                    )}
                     {csvInput && (
                       <button
                         type="button"
@@ -319,7 +526,15 @@ function App() {
             </div>
 
             {/* Right Panel - Parsed Transactions */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-base-300/50 shadow-xl hover:shadow-2xl transition-all duration-300 h-full">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-base-300/50 shadow-xl hover:shadow-2xl transition-all duration-300 h-full relative">
+              {loading && (
+                <>
+                  <div className="absolute inset-0 bg-gray-400/20 rounded-2xl z-10 transition-opacity duration-200"></div>
+                  <div className="absolute top-4 right-4 z-20">
+                    <span className="loading loading-spinner loading-md text-primary"></span>
+                  </div>
+                </>
+              )}
               <div className="p-8 flex flex-col h-full">
                 <div className="flex justify-between items-center mb-6">
                   <div className="flex items-center space-x-3">
@@ -445,28 +660,28 @@ function App() {
                     <div className="flex-1 bg-base-100/50 rounded-xl border border-base-300/50 overflow-hidden">
                       <div className="overflow-x-auto max-h-96">
                         <table className="w-full">
-                          <thead className="sticky top-0 bg-base-200/80 backdrop-blur-sm border-b border-base-300/50">
+                          <thead className="sticky top-0 bg-white/85 backdrop-blur-lg border-b-2 border-gray-300 shadow-sm z-10">
                             <tr>
-                              <th className="px-6 py-4 text-left text-sm font-semibold text-base-content/80">Time</th>
-                              <th className="px-6 py-4 text-left text-sm font-semibold text-base-content/80">Type</th>
-                              <th className="px-6 py-4 text-left text-sm font-semibold text-base-content/80">Asset</th>
-                              <th className="px-6 py-4 text-right text-sm font-semibold text-base-content/80">Amount</th>
-                              <th className="px-6 py-4 text-right text-sm font-semibold text-base-content/80">Fee</th>
+                              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Time</th>
+                              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
+                              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Asset</th>
+                              <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Amount</th>
                             </tr>
                           </thead>
                           <tbody>
                             {transactions.map((tx, index) => (
                               <tr
                                 key={index}
-                                className="border-b border-base-300/30 hover:bg-base-200/30 transition-all duration-200"
+                                className="border-b border-base-300/30 hover:bg-base-200/30 transition-all duration-200 animate-fadeIn"
+                                style={{ animationDelay: `${Math.min(index * 20, 500)}ms` }}
                               >
                                 <td className="px-6 py-4">
                                   <div className="flex flex-col">
                                     <span className="font-mono text-sm font-medium text-base-content">
-                                      {new Date(tx.timestamp).toLocaleDateString()}
+                                      {new Date(tx.timestamp).toISOString().split('T')[0]}
                                     </span>
                                     <span className="font-mono text-xs text-base-content/60">
-                                      {new Date(tx.timestamp).toLocaleTimeString()}
+                                      {new Date(tx.timestamp).toISOString().split('T')[1].split('.')[0]} UTC
                                     </span>
                                   </div>
                                 </td>
@@ -474,34 +689,27 @@ function App() {
                                   <span
                                     className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                                       tx.type.includes('BUY') || tx.type.includes('DEPOSIT')
-                                        ? 'bg-success/10 text-success border border-success/20'
+                                        ? 'bg-green-50 text-green-700 border border-green-200'
                                         : tx.type.includes('SELL') || tx.type.includes('WITHDRAWAL')
-                                        ? 'bg-error/10 text-error border border-error/20'
+                                        ? 'bg-red-50 text-red-700 border border-red-200'
                                         : tx.type.includes('FEE')
-                                        ? 'bg-warning/10 text-warning border border-warning/20'
-                                        : 'bg-info/10 text-info border border-info/20'
+                                        ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                        : 'bg-blue-50 text-blue-700 border border-blue-200'
                                     }`}
                                   >
                                     {tx.type}
                                   </span>
                                 </td>
                                 <td className="px-6 py-4">
-                                  <div className="flex items-center space-x-2">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full flex items-center justify-center">
-                                      <span className="text-xs font-bold text-primary">
-                                        {getTransactionAsset(tx).slice(0, 2)}
+                                  <div>
+                                    <span className="font-mono font-semibold text-base-content">
+                                      {getTransactionAsset(tx)}
+                                    </span>
+                                    {getTransactionQuoteAsset(tx) && (
+                                      <span className="text-xs text-base-content/50 ml-1">
+                                        /{getTransactionQuoteAsset(tx)}
                                       </span>
-                                    </div>
-                                    <div>
-                                      <span className="font-mono font-semibold text-base-content">
-                                        {getTransactionAsset(tx)}
-                                      </span>
-                                      {getTransactionQuoteAsset(tx) && (
-                                        <span className="text-xs text-base-content/50 ml-1">
-                                          /{getTransactionQuoteAsset(tx)}
-                                        </span>
-                                      )}
-                                    </div>
+                                    )}
                                   </div>
                                 </td>
                                 <td className="px-6 py-4 text-right">
@@ -516,23 +724,123 @@ function App() {
                                     )}
                                   </div>
                                 </td>
-                                <td className="px-6 py-4 text-right">
-                                  {(() => {
-                                    const fee = getTransactionFee(tx);
-                                    return fee.amount ? (
-                                      <div className="inline-flex items-center px-2 py-1 bg-neutral/10 text-neutral rounded-md text-xs font-medium">
-                                        {fee.amount} {fee.asset}
-                                      </div>
-                                    ) : (
-                                      <span className="text-base-content/40 text-sm">—</span>
-                                    );
-                                  })()}
-                                </td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                       </div>
+                    </div>
+
+                    {/* Tax Report Section - Enhanced */}
+                    <div className="mt-8 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 rounded-2xl p-8 border-2 border-emerald-300/50 shadow-xl">
+                      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                              🇦🇺 Australian Tax Report
+                              <span className="text-xs font-semibold px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-md">
+                                NEW FEATURE
+                              </span>
+                            </h3>
+                            <p className="text-base text-gray-700 mt-1 font-medium">Generate ATO-compliant tax reports with CGT discount calculations</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex flex-col">
+                            <label className="text-xs font-semibold text-gray-600 mb-1">Financial Year</label>
+                            <select
+                              className="select select-lg select-bordered bg-white border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none text-base font-semibold shadow-md hover:shadow-lg transition-all"
+                              value={taxYear}
+                              onChange={(e) => setTaxYear(Number(e.target.value))}
+                            >
+                              {financialYears.map((year) => (
+                                <option key={year} value={year}>
+                                  FY {year}-{(year + 1).toString().slice(-2)}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn btn-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white border-none shadow-xl hover:shadow-2xl transition-all duration-200 mt-5"
+                            onClick={handleGenerateTaxReport}
+                            disabled={generatingTaxReport || transactions.length === 0}
+                          >
+                            {generatingTaxReport ? (
+                              <>
+                                <span className="loading loading-spinner loading-md"></span>
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                Generate Report
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {taxReport && (
+                        <div className="bg-white rounded-lg p-5 border border-emerald-200/50">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div className="bg-emerald-50 rounded-lg p-3">
+                              <p className="text-xs text-emerald-700 font-medium mb-1">Capital Gains</p>
+                              <p className="text-lg font-bold text-emerald-900">
+                                ${taxReport.summary.totalCapitalGains.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="bg-amber-50 rounded-lg p-3">
+                              <p className="text-xs text-amber-700 font-medium mb-1">CGT Discount</p>
+                              <p className="text-lg font-bold text-amber-900">
+                                ${taxReport.summary.cgtDiscount.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="bg-blue-50 rounded-lg p-3">
+                              <p className="text-xs text-blue-700 font-medium mb-1">Ordinary Income</p>
+                              <p className="text-lg font-bold text-blue-900">
+                                ${taxReport.summary.ordinaryIncome.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="bg-purple-50 rounded-lg p-3">
+                              <p className="text-xs text-purple-700 font-medium mb-1">Net Taxable</p>
+                              <p className="text-lg font-bold text-purple-900">
+                                ${taxReport.summary.netTaxableAmount.toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-3 flex-wrap">
+                            <button
+                              type="button"
+                              className="btn btn-md bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200"
+                              onClick={handleExportTaxReportPDF}
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              <span className="font-semibold">Export as PDF</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-md bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200"
+                              onClick={handleExportTaxReportCSV}
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <span className="font-semibold">Export as CSV</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
@@ -593,10 +901,132 @@ function App() {
               </div>
             </div>
 
-            {/* Community Contribution Section */}
+            {/* Two Column Layout for Large Screens */}
             <div className="mt-16 px-6">
-              <div className="max-w-6xl mx-auto">
-                <div className="relative bg-gradient-to-br from-orange-50 to-amber-50 rounded-3xl p-12 border border-orange-200/50">
+              <div className="grid lg:grid-cols-3 gap-8">
+
+                {/* NEW: Tax Reporting Feature - Takes 2/3 width */}
+                <div className="lg:col-span-2 bg-gradient-to-br from-emerald-50 to-teal-50 p-8 lg:p-12 rounded-2xl overflow-hidden relative">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl"></div>
+
+                  <div className="relative">
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                      <h2 className="text-3xl font-bold text-gray-900 mb-3 flex items-center justify-center gap-3">
+                        🇦🇺 Australian Tax Reports
+                        <span className="inline-flex items-center px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold">
+                          🆕 NEW
+                        </span>
+                      </h2>
+                      <p className="text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                        Privacy-first cryptocurrency tax reporting. Generate ATO-compliant reports entirely on your device - no data ever leaves your browser.
+                      </p>
+                    </div>
+
+                    {/* Two-column: Code Example + CTA/Features */}
+                    <div className="grid lg:grid-cols-2 gap-6">
+                      {/* Left: Code Example */}
+                      <div>
+                        <div className="bg-gray-900 rounded-2xl p-5 overflow-hidden h-full">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-emerald-400 font-mono text-xs">tax-report.ts</span>
+                            <span className="text-gray-500 text-xs">TypeScript</span>
+                          </div>
+                          <pre className="text-xs text-gray-300 overflow-x-auto leading-relaxed">
+{`import { generateTaxReport } from
+ 'hero-crypto-csv-parser/tax';
+
+const report = await generateTaxReport({
+  jurisdictionCode: 'AU',
+  taxYear: 2024,
+  transactions: myTransactions
+});
+
+// Capital gains, CGT discounts,
+// net taxable amount - all calculated
+console.log(report.summary);`}
+                          </pre>
+                        </div>
+                      </div>
+
+                      {/* Right: Features & CTA */}
+                      <div className="space-y-6">
+                        {/* Key Features */}
+                        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/30">
+                          <h3 className="text-lg font-bold text-gray-900 mb-4">Key Features</h3>
+                          <div className="space-y-3">
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>100% Privacy</strong> - Zero external API calls</span>
+                            </div>
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>ATO Compliant</strong> - CGT discount & FIFO</span>
+                            </div>
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>Lightning Fast</strong> - 100k+ tx in &lt;30s</span>
+                            </div>
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>DeFi Support</strong> - Staking, yield, LP tokens</span>
+                            </div>
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>PDF & ATO XML</strong> - Professional reports</span>
+                            </div>
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>Tax Optimization</strong> - 5 strategy types</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* CTA Buttons */}
+                        <div className="flex flex-col gap-3">
+                          <a
+                            href="https://github.com/BeingCiteable/HeroCryptoCsvParser#-tax-reporting-new"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
+                          >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Read Documentation
+                          </a>
+                          <a
+                            href="https://github.com/BeingCiteable/HeroCryptoCsvParser/tree/main/docs"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-6 py-3 bg-white text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50 transition-all duration-200 border border-emerald-200 text-sm"
+                          >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            View Examples
+                          </a>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+                {/* Community Contribution Section - Takes 1/3 width */}
+                <div className="relative bg-gradient-to-br from-orange-50 to-amber-50 p-8 lg:p-12 rounded-2xl border border-orange-200/50">
                   <div className="absolute top-6 right-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -606,87 +1036,86 @@ function App() {
                   </div>
 
                   <div className="text-center">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-3">
                       Help Us Support Your Exchange
                     </h2>
-                    <p className="text-xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
+                    <p className="text-lg text-gray-700 mb-6 leading-relaxed">
                       We're building universal cryptocurrency parser support! Currently supporting <strong>Binance</strong> with 150+ transaction patterns.
-                      Help us add your favorite exchange by sharing anonymized CSV samples.
                     </p>
 
                     {/* Exchange Status Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-green-200">
-                        <div className="text-green-600 font-semibold mb-1">✅ Binance</div>
-                        <div className="text-sm text-gray-600">Full Support</div>
+                    <div className="grid grid-cols-2 gap-3 mb-6">
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-green-200">
+                        <div className="text-green-600 font-semibold text-sm mb-1">✅ Binance</div>
+                        <div className="text-xs text-gray-600">Full Support</div>
                       </div>
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-yellow-200">
-                        <div className="text-yellow-600 font-semibold mb-1">🔄 Coinbase</div>
-                        <div className="text-sm text-gray-600">In Progress</div>
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-yellow-200">
+                        <div className="text-yellow-600 font-semibold text-sm mb-1">🔄 Coinbase</div>
+                        <div className="text-xs text-gray-600">In Progress</div>
                       </div>
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-blue-200">
-                        <div className="text-blue-600 font-semibold mb-1">📝 Kraken</div>
-                        <div className="text-sm text-gray-600">Samples Needed</div>
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-blue-200">
+                        <div className="text-blue-600 font-semibold text-sm mb-1">📝 Kraken</div>
+                        <div className="text-xs text-gray-600">Samples Needed</div>
                       </div>
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-purple-200">
-                        <div className="text-purple-600 font-semibold mb-1">🚀 KuCoin</div>
-                        <div className="text-sm text-gray-600">Samples Needed</div>
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-purple-200">
+                        <div className="text-purple-600 font-semibold text-sm mb-1">🚀 KuCoin</div>
+                        <div className="text-xs text-gray-600">Samples Needed</div>
                       </div>
                     </div>
 
                     {/* How to Contribute */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-orange-200/50 mb-8">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-6">How to Contribute</h3>
-                      <div className="grid md:grid-cols-3 gap-6 text-left">
-                        <div className="flex items-start space-x-3">
-                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                            <span className="text-orange-600 font-bold">1</span>
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-orange-200/50 mb-6">
+                      <h3 className="text-base font-bold text-gray-900 mb-3">How to Contribute</h3>
+                      <div className="space-y-3 text-left">
+                        <div className="flex items-start space-x-2">
+                          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-orange-600 font-bold text-xs">1</span>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Export Your Data</h4>
-                            <p className="text-gray-600 text-sm">Download transaction history from your exchange (CSV format)</p>
+                            <h4 className="font-semibold text-gray-900 text-sm mb-1">Export Data</h4>
+                            <p className="text-gray-600 text-xs">Download CSV from exchange</p>
                           </div>
                         </div>
-                        <div className="flex items-start space-x-3">
-                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                            <span className="text-orange-600 font-bold">2</span>
+                        <div className="flex items-start space-x-2">
+                          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-orange-600 font-bold text-xs">2</span>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Anonymize Safely</h4>
-                            <p className="text-gray-600 text-sm">Remove personal data (keep only structure and transaction types)</p>
+                            <h4 className="font-semibold text-gray-900 text-sm mb-1">Anonymize</h4>
+                            <p className="text-gray-600 text-xs">Remove personal data</p>
                           </div>
                         </div>
-                        <div className="flex items-start space-x-3">
-                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                            <span className="text-orange-600 font-bold">3</span>
+                        <div className="flex items-start space-x-2">
+                          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-orange-600 font-bold text-xs">3</span>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Share with Us</h4>
-                            <p className="text-gray-600 text-sm">Open a GitHub issue with your anonymized sample</p>
+                            <h4 className="font-semibold text-gray-900 text-sm mb-1">Share</h4>
+                            <p className="text-gray-600 text-xs">Open GitHub issue</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <div className="flex flex-col gap-3">
                       <a
                         href="https://github.com/BeingCiteable/HeroCryptoCsvParser/issues/new?assignees=&labels=exchange-request&template=exchange_support_request.md&title=Add+support+for+[Exchange+Name]"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                        className="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
                       >
-                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
-                        Submit Exchange Request
+                        Submit Request
                       </a>
                       <a
                         href="https://github.com/BeingCiteable/HeroCryptoCsvParser/discussions"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center px-8 py-4 bg-white text-orange-600 rounded-xl font-semibold hover:bg-orange-50 transition-all duration-200 border border-orange-200"
+                        className="inline-flex items-center justify-center px-5 py-2.5 bg-white text-orange-600 rounded-xl font-semibold hover:bg-orange-50 transition-all duration-200 border border-orange-200 text-sm"
                       >
-                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         Join Discussion
@@ -694,15 +1123,14 @@ function App() {
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
-
-            {/* Call-to-Action */}
             <div className="mt-16 px-6 relative overflow-hidden">
               <div className="inset-0 bg-gradient-to-r from-primary to-secondary rounded-3xl"></div>
               <div className="relative bg-gradient-to-r from-primary/95 to-secondary/95 rounded-3xl p-12 text-center">
-                <h2 className="text-4xl font-bold text-white mb-6">Ready for Production?</h2>
-                <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+                <h2 className="text-3xl font-bold text-white mb-6">Ready for Production?</h2>
+                <p className="text-lg text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
                   This demo showcases the Hero Crypto CSV Parser library. Integrate the npm package into your production applications for enterprise-grade transaction processing.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
