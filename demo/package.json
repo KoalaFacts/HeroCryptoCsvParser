@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@beingciteable/hero-csv-crypto-parser": "^0.2.0",
+    "@beingciteable/hero-csv-crypto-parser": "file:..",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.13",
     "@vercel/analytics": "^1.5.0",
