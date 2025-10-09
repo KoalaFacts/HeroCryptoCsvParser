@@ -31,6 +31,16 @@ interface MMKV {
 	clearAll(): void;
 }
 
+interface MMKVMetadata {
+	transactionCount: number;
+	reportCount: number;
+	totalSize: number;
+	lastUpdated: string;
+	version?: string;
+	createdAt?: string;
+	lastCleanup?: string;
+}
+
 // Mock MMKV interface for development/testing when not in React Native
 const createMockMMKV = (): MMKV => ({
 	getString: () => undefined,
@@ -42,19 +52,16 @@ const createMockMMKV = (): MMKV => ({
 
 export class MMKVAdapter implements StorageAdapter {
 	private mmkv: MMKV;
-	private readonly config: StorageConfig;
 	private readonly encryptionKey?: string;
 
 	// Key prefixes for different data types
 	private readonly TRANSACTION_PREFIX = "tx:";
 	private readonly REPORT_PREFIX = "report:";
 	private readonly CACHE_PREFIX = "cache:";
-	private readonly EVENT_PREFIX = "event:";
 	private readonly INDEX_PREFIX = "idx:";
 	private readonly METADATA_KEY = "metadata";
 
 	constructor(config: StorageConfig) {
-		this.config = config;
 		this.encryptionKey = config.encryptionKey;
 
 		// Try to initialize MMKV, fall back to mock for development
@@ -65,7 +72,7 @@ export class MMKVAdapter implements StorageAdapter {
 
 			// For now, use mock implementation since we're not in React Native
 			this.mmkv = createMockMMKV();
-		} catch (error) {
+		} catch (_error) {
 			// Fallback for non-React Native environments
 			this.mmkv = createMockMMKV();
 		}
@@ -80,6 +87,8 @@ export class MMKVAdapter implements StorageAdapter {
 				createdAt: new Date().toISOString(),
 				transactionCount: 0,
 				reportCount: 0,
+				totalSize: 0,
+				lastUpdated: new Date().toISOString(),
 				lastCleanup: new Date().toISOString(),
 			});
 		}
@@ -226,7 +235,7 @@ export class MMKVAdapter implements StorageAdapter {
 		}
 	}
 
-	async cacheTaxCalculation(key: string, result: any): Promise<void> {
+	async cacheTaxCalculation(key: string, result: unknown): Promise<void> {
 		try {
 			const cacheKey = this.getCacheKey(key);
 			const cacheEntry = {
@@ -325,7 +334,7 @@ export class MMKVAdapter implements StorageAdapter {
 
 			const data = this.deserialize<any>(serialized);
 			// Remove serialization metadata
-			const { serializedAt, ...report } = data;
+			const { serializedAt: _serializedAt, ...report } = data;
 			return report as TaxReport;
 		} catch (error) {
 			throw new StorageError(
@@ -381,7 +390,7 @@ export class MMKVAdapter implements StorageAdapter {
 		return this.query({ assets: [asset] });
 	}
 
-	async getTaxableEvents(year: number): Promise<TaxEvent[]> {
+	async getTaxableEvents(_year: number): Promise<TaxEvent[]> {
 		// Implementation would filter events by year
 		// For now, return empty array as TaxEvent model needs to be properly integrated
 		return [];
@@ -516,10 +525,6 @@ export class MMKVAdapter implements StorageAdapter {
 		return `${this.CACHE_PREFIX}${key}`;
 	}
 
-	private getEventKey(id: string): string {
-		return `${this.EVENT_PREFIX}${id}`;
-	}
-
 	private getIndexKey(type: string, value: string): string {
 		return `${this.INDEX_PREFIX}${type}:${value}`;
 	}
@@ -536,7 +541,7 @@ export class MMKVAdapter implements StorageAdapter {
 			.filter((key) => key.startsWith(this.REPORT_PREFIX));
 	}
 
-	private serialize(obj: any): string {
+	private serialize(obj: unknown): string {
 		return JSON.stringify(obj);
 	}
 
@@ -578,7 +583,7 @@ export class MMKVAdapter implements StorageAdapter {
 			const dateIds = this.getIndexSet(dateKey);
 			dateIds.add(transaction.originalTransaction.id);
 			this.setIndexSet(dateKey, dateIds);
-		} catch (error) {
+		} catch (_error) {
 			// Index updates are not critical, silently continue
 			// Storage will still work without indices
 		}
@@ -610,7 +615,7 @@ export class MMKVAdapter implements StorageAdapter {
 			const dateIds = this.getIndexSet(dateKey);
 			dateIds.delete(transaction.originalTransaction.id);
 			this.setIndexSet(dateKey, dateIds);
-		} catch (error) {
+		} catch (_error) {
 			// Index updates are not critical, silently continue
 			// Storage will still work without indices
 		}
@@ -685,12 +690,19 @@ export class MMKVAdapter implements StorageAdapter {
 		return true;
 	}
 
-	private getMetadata(): any {
+	private getMetadata(): MMKVMetadata {
 		const serialized = this.mmkv.getString(this.METADATA_KEY);
-		return serialized ? JSON.parse(serialized) : null;
+		return serialized
+			? JSON.parse(serialized)
+			: {
+					transactionCount: 0,
+					reportCount: 0,
+					totalSize: 0,
+					lastUpdated: new Date().toISOString(),
+				};
 	}
 
-	private setMetadata(metadata: any): void {
+	private setMetadata(metadata: MMKVMetadata): void {
 		this.mmkv.set(this.METADATA_KEY, JSON.stringify(metadata));
 	}
 
@@ -709,7 +721,7 @@ export class MMKVAdapter implements StorageAdapter {
 					if (entry.expiresAt && entry.expiresAt < now) {
 						this.mmkv.delete(key);
 					}
-				} catch (error) {
+				} catch (_error) {
 					// Invalid cache entry, remove it
 					this.mmkv.delete(key);
 				}
@@ -733,7 +745,7 @@ export class MMKVAdapter implements StorageAdapter {
 						metadata.reportCount = Math.max(0, metadata.reportCount - 1);
 						this.setMetadata(metadata);
 					}
-				} catch (error) {
+				} catch (_error) {
 					// Invalid report, remove it
 					this.mmkv.delete(key);
 				}

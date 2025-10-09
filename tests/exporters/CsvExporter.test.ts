@@ -8,7 +8,6 @@ import {
 	type Fee,
 	type Interest,
 	type SpotTrade,
-	StakingDeposit,
 	type Swap,
 	type Transfer,
 } from "@/types/transactions";

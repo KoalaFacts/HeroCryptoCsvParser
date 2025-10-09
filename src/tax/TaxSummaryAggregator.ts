@@ -5,7 +5,6 @@
  * Calculates totals, breakdowns by asset/exchange/month, and summary statistics.
  */
 
-import type { Transaction } from "../types/transactions";
 import type { TaxableTransaction } from "./models/TaxableTransaction";
 import type { AssetSummary, TaxSummary } from "./models/TaxSummary";
 import {

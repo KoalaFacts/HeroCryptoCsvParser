@@ -19,13 +19,13 @@ const USER_ID = "123456789";
 const now = new Date();
 const currentYear = now.getUTCFullYear();
 const START_DATE = new Date(Date.UTC(currentYear - 2, 0, 1)); // 3 years ago
-const END_DATE = new Date(Date.UTC(currentYear, 11, 31, 23, 59, 59)); // End of current year
+const _END_DATE = new Date(Date.UTC(currentYear, 11, 31, 23, 59, 59)); // End of current year
 
 // Asset pools
 const MAJOR_ASSETS = ["BTC", "ETH", "BNB", "SOL", "AVAX"];
 const MID_ASSETS = ["ADA", "MATIC", "LINK", "DOT", "OP", "ARB"];
 const SMALL_ASSETS = ["CAKE", "SUI", "ZETA"];
-const STABLECOINS = ["USDT", "USDC", "BUSD"];
+const _STABLECOINS = ["USDT", "USDC", "BUSD"];
 const ALL_ASSETS = [...MAJOR_ASSETS, ...MID_ASSETS, ...SMALL_ASSETS];
 
 // Price ranges for realistic amounts
@@ -176,7 +176,7 @@ class TransactionGenerator {
 		if (!this.purchaseDates.has(asset)) {
 			this.purchaseDates.set(asset, []);
 		}
-		this.purchaseDates.get(asset)!.push(date);
+		this.purchaseDates.get(asset)?.push(date);
 
 		// Add trading fee
 		const feeDate = new Date(date.getTime());

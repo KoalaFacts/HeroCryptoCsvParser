@@ -219,7 +219,7 @@ export class TaxRuleModel implements TaxRule {
 		if (
 			!data.effectiveFrom ||
 			!(data.effectiveFrom instanceof Date) ||
-			isNaN(data.effectiveFrom.getTime())
+			Number.isNaN(data.effectiveFrom.getTime())
 		) {
 			throw new Error("Effective from date must be a valid Date object");
 		}
@@ -227,7 +227,7 @@ export class TaxRuleModel implements TaxRule {
 		if (data.effectiveTo) {
 			if (
 				!(data.effectiveTo instanceof Date) ||
-				isNaN(data.effectiveTo.getTime())
+				Number.isNaN(data.effectiveTo.getTime())
 			) {
 				throw new Error(
 					"Effective to date must be a valid Date object if provided",

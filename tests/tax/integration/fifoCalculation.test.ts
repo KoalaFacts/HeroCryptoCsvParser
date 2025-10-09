@@ -20,10 +20,7 @@ import {
 	createMockSpotTrade,
 } from "@tests/tax/helpers/mockFactories";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { Airdrop } from "@/types/transactions/Airdrop";
-import type { SpotTrade } from "@/types/transactions/SpotTrade";
 import type { Transaction } from "@/types/transactions/Transaction";
-import type { Transfer } from "@/types/transactions/Transfer";
 
 // These interfaces will be implemented in the tax module
 interface FIFOLot {
@@ -58,15 +55,15 @@ interface FIFOCalculator {
 }
 
 describe("T015: FIFO Cost Basis Calculation Integration", () => {
-	let fifoCalculator: FIFOCalculator;
-	let testTransactions: Transaction[];
+	let _fifoCalculator: FIFOCalculator;
+	let _testTransactions: Transaction[];
 
 	beforeEach(() => {
 		// Initialize FIFO calculator (will fail until implemented)
 		// fifoCalculator = new FIFOCalculator();
 
 		// Complex transaction dataset for FIFO testing
-		testTransactions = [
+		_testTransactions = [
 			// First BTC purchase - $30,000 AUD
 			createMockSpotTrade({
 				id: "btc-buy-001",

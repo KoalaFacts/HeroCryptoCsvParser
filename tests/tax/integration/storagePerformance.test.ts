@@ -19,7 +19,6 @@
 
 import { createMockSpotTrade } from "@tests/tax/helpers/mockFactories";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { SpotTrade } from "@/types/transactions/SpotTrade";
 import type { Transaction } from "@/types/transactions/Transaction";
 
 // These interfaces will be implemented in the storage module
@@ -83,9 +82,9 @@ interface OfflineStorage {
 }
 
 describe("T018: Offline Storage Performance Integration", () => {
-	let offlineStorage: OfflineStorage;
-	let largeTaxDataset: Transaction[];
-	let performanceThresholds: {
+	let _offlineStorage: OfflineStorage;
+	let _largeTaxDataset: Transaction[];
+	let _performanceThresholds: {
 		maxQueryTime: number; // ms
 		maxInsertTime: number; // ms per transaction
 		maxMemoryUsage: number; // bytes
@@ -97,7 +96,7 @@ describe("T018: Offline Storage Performance Integration", () => {
 		// offlineStorage = new OfflineStorage();
 
 		// Performance requirements
-		performanceThresholds = {
+		_performanceThresholds = {
 			maxQueryTime: 1000, // 1 second for complex queries
 			maxInsertTime: 0.1, // 0.1ms per transaction insert
 			maxMemoryUsage: 500 * 1024 * 1024, // 500MB max memory
@@ -105,7 +104,7 @@ describe("T018: Offline Storage Performance Integration", () => {
 		};
 
 		// Generate large realistic dataset (100k transactions)
-		largeTaxDataset = generateLargeDataset(100000);
+		_largeTaxDataset = generateLargeDataset(100000);
 	});
 
 	afterEach(async () => {
@@ -141,12 +140,12 @@ describe("T018: Offline Storage Performance Integration", () => {
 			);
 
 			// Random asset and source
-			const baseAsset = assets[Math.floor(Math.random() * assets.length)];
-			const source = sources[Math.floor(Math.random() * sources.length)];
+			const _baseAsset = assets[Math.floor(Math.random() * assets.length)];
+			const _source = sources[Math.floor(Math.random() * sources.length)];
 
 			// Generate realistic price and amount
 			const price = Math.random() * 100000 + 10;
-			const amount = Math.random() * 10 + 0.001;
+			const _amount = Math.random() * 10 + 0.001;
 
 			transactions.push(
 				createMockSpotTrade({

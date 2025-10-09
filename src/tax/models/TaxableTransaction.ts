@@ -110,7 +110,10 @@ export class TaxableTransactionModel implements TaxableTransaction {
 	 * Validates that a monetary amount is a valid number if provided
 	 */
 	private validateMonetaryAmount(fieldName: string, amount?: number): void {
-		if (amount !== undefined && (typeof amount !== "number" || isNaN(amount))) {
+		if (
+			amount !== undefined &&
+			(typeof amount !== "number" || Number.isNaN(amount))
+		) {
 			throw new Error(`${fieldName} must be a valid number if provided`);
 		}
 	}

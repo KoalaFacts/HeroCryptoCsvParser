@@ -47,22 +47,33 @@ export { PipelineContext } from "./plugins/PipelineContext";
 export { Plugin } from "./plugins/Plugin";
 export { PluginPipeline } from "./plugins/PluginPipeline";
 export { PluginRegistry, pluginRegistry } from "./plugins/PluginRegistry";
-export {
-	BinanceAdapter,
-	BinanceSource,
-	BinanceTransactionRecord,
-} from "./sources/binance";
 // Tax Module Exports
 export * from "./tax";
 export * from "./types/transactions/index";
 
 import { Source, type SourceProcessResult } from "./core/Source";
 import type { OperationMapping } from "./core/TransactionCategorizer";
-import { BinanceSource as BinanceSourceInstance } from "./sources/binance";
 
-const sourceRegistry = new Map<string, Source<any>>([
-	["binance", BinanceSourceInstance],
-]);
+// Lazy-load sources to avoid mixing static and dynamic imports
+const sourceRegistry = new Map<string, Source<any>>();
+
+async function getSource(sourceName: string): Promise<Source<any> | undefined> {
+	const key = sourceName.toLowerCase();
+
+	// Check if already loaded
+	if (sourceRegistry.has(key)) {
+		return sourceRegistry.get(key);
+	}
+
+	// Lazy load source
+	if (key === "binance") {
+		const { BinanceSource } = await import("./sources/binance");
+		sourceRegistry.set(key, BinanceSource);
+		return BinanceSource;
+	}
+
+	return undefined;
+}
 
 export interface ProcessOptions {
 	// Parsing options
@@ -85,11 +96,11 @@ export async function process(
 	content: string,
 	options?: ProcessOptions,
 ): Promise<SourceProcessResult> {
-	let sourceInstance = sourceRegistry.get(source.toLowerCase());
+	let sourceInstance = await getSource(source);
 
 	if (!sourceInstance) {
 		throw new Error(
-			`Unsupported source: ${source}. Supported sources: ${Array.from(sourceRegistry.keys()).join(", ")}`,
+			`Unsupported source: ${source}. Supported sources: binance`,
 		);
 	}
 
@@ -98,11 +109,8 @@ export async function process(
 		source.toLowerCase() === "binance" &&
 		(options?.customMappings || options?.operationOverrides)
 	) {
-		const { createBinanceCategorizer } = await import(
-			"./sources/binance/BinanceTransactionCategorizer"
-		);
-		const { BinanceAdapter } = await import("./sources/binance/BinanceAdapter");
-		const { BinanceParser } = await import("./sources/binance/BinanceParser");
+		const { createBinanceCategorizer, BinanceAdapter, BinanceParser } =
+			await import("./sources/binance");
 
 		// Create custom categorizer
 		const categorizer = createBinanceCategorizer(

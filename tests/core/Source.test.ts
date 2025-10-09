@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { BatchEntryRecord } from "@/core/BatchEntryRecord";
 import { Source } from "@/core/Source";
 import { SourceAdapter } from "@/core/SourceAdapter";
@@ -144,7 +144,7 @@ skip2,skip2
 			// From adapter
 			expect(result.metadata.startDate).toBeDefined();
 			expect(result.metadata.uniqueAssets).toContain("TEST");
-			expect(result.metadata.transactionTypes?.["SPOT_TRADE"]).toBe(2);
+			expect(result.metadata.transactionTypes?.SPOT_TRADE).toBe(2);
 		});
 	});
 

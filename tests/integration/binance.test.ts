@@ -1,19 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { type CsvExportOptions, exportToCSV, process } from "@/index";
-import {
-	type Airdrop,
-	type Fee,
-	type Interest,
-	type LiquidityAdd,
-	type Loan,
-	type MarginTrade,
-	type SpotTrade,
-	type StakingDeposit,
-	type StakingReward,
-	type Swap,
-	Transaction,
-	type Transfer,
-	type Unknown,
+import type {
+	Airdrop,
+	Fee,
+	Interest,
+	LiquidityAdd,
+	Loan,
+	MarginTrade,
+	SpotTrade,
+	StakingDeposit,
+	StakingReward,
+	Swap,
+	Transfer,
+	Unknown,
 } from "@/types/transactions";
 
 describe("Binance Integration", () => {
@@ -339,7 +338,7 @@ describe("Binance Integration", () => {
 
 			// Check transaction type breakdown
 			expect(result.metadata.transactionTypes).toBeDefined();
-			expect(result.metadata.transactionTypes?.["SPOT_TRADE"]).toBe(3);
+			expect(result.metadata.transactionTypes?.SPOT_TRADE).toBe(3);
 		});
 
 		it("should process mixed operations with various formats", async () => {

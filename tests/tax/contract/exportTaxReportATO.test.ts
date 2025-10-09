@@ -71,7 +71,7 @@ describe("T007: Contract Test - exportTaxReportATO Function", () => {
 		validateBeforeExport: true,
 	});
 
-	const createMockATOBusinessOptions = (): ATOExportOptions => ({
+	const _createMockATOBusinessOptions = (): ATOExportOptions => ({
 		abn: "12345678901",
 		includeSupplementarySchedules: false,
 		validateBeforeExport: true,

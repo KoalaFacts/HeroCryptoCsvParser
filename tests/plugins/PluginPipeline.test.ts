@@ -24,7 +24,7 @@ describe("PluginRegistry", () => {
 		it("should register a plugin", () => {
 			const plugin: Plugin = {
 				name: "test-plugin",
-				processLine: (ctx, next) => next(),
+				processLine: (_ctx, next) => next(),
 			};
 
 			registry.register(plugin);
@@ -35,7 +35,7 @@ describe("PluginRegistry", () => {
 		it("should throw error when registering plugin without name", () => {
 			const plugin: Plugin = {
 				name: "",
-				processLine: (ctx, next) => next(),
+				processLine: (_ctx, next) => next(),
 			};
 
 			expect(() => registry.register(plugin)).toThrow(
@@ -46,7 +46,7 @@ describe("PluginRegistry", () => {
 		it("should throw error when registering duplicate plugin", () => {
 			const plugin: Plugin = {
 				name: "test-plugin",
-				processLine: (ctx, next) => next(),
+				processLine: (_ctx, next) => next(),
 			};
 
 			registry.register(plugin);
@@ -59,7 +59,7 @@ describe("PluginRegistry", () => {
 		it("should unregister a plugin", () => {
 			const plugin: Plugin = {
 				name: "test-plugin",
-				processLine: (ctx, next) => next(),
+				processLine: (_ctx, next) => next(),
 			};
 
 			registry.register(plugin);
@@ -71,7 +71,7 @@ describe("PluginRegistry", () => {
 		it("should check if plugin is registered", () => {
 			const plugin: Plugin = {
 				name: "test-plugin",
-				processLine: (ctx, next) => next(),
+				processLine: (_ctx, next) => next(),
 			};
 
 			expect(registry.has("test-plugin")).toBe(false);
@@ -82,11 +82,11 @@ describe("PluginRegistry", () => {
 		it("should clear all plugins", () => {
 			const plugin1: Plugin = {
 				name: "plugin1",
-				processLine: (ctx, next) => next(),
+				processLine: (_ctx, next) => next(),
 			};
 			const plugin2: Plugin = {
 				name: "plugin2",
-				processLine: (ctx, next) => next(),
+				processLine: (_ctx, next) => next(),
 			};
 
 			registry.register(plugin1);
@@ -265,7 +265,7 @@ describe("PluginPipeline", () => {
 		it("should throw when plugin throws error", () => {
 			const plugin: Plugin = {
 				name: "error-plugin",
-				processLine: (ctx, next) => {
+				processLine: (_ctx, _next) => {
 					throw new Error("Plugin error");
 				},
 			};
@@ -283,7 +283,7 @@ describe("PluginPipeline", () => {
 
 			const plugin1: Plugin = {
 				name: "first",
-				processLine: (ctx, next) => {
+				processLine: (_ctx, next) => {
 					order.push("first-before");
 					const result = next();
 					order.push("first-after");
@@ -293,7 +293,7 @@ describe("PluginPipeline", () => {
 
 			const plugin2: Plugin = {
 				name: "second",
-				processLine: (ctx, next) => {
+				processLine: (_ctx, next) => {
 					order.push("second-before");
 					const result = next();
 					order.push("second-after");

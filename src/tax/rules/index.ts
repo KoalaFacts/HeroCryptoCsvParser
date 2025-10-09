@@ -12,10 +12,20 @@ export type {
 export type { RuleCategory, TaxRule } from "../models/TaxRule";
 export {
 	AUSTRALIAN_JURISDICTION,
-	CGTDiscountRules,
-	DeFiClassificationRules,
+	appliesCGTDiscount,
+	appliesPersonalUseExemption,
+	calculateCGTDiscount,
+	calculateDeFiIncomeAmount,
+	calculatePersonalUseTaxableAmount,
+	calculateTaxableGain,
+	classifyDeFiTransaction,
 	getAustralianJurisdiction,
 	getAustralianTaxRules,
 	getAustralianTaxYearBoundaries,
-	PersonalUseAssetRules,
+	getCGTDiscountRule,
+	getDeFiClassificationRule,
+	getPersonalUseAssetRule,
+	isDeFiTaxableEvent,
+	isPersonalUseAsset,
+	validatePersonalUseDocumentation,
 } from "./AustralianTaxRules";

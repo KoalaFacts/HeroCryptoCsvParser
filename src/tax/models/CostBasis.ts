@@ -47,7 +47,7 @@ export class AcquisitionLotModel implements AcquisitionLot {
 		if (
 			!data.date ||
 			!(data.date instanceof Date) ||
-			isNaN(data.date.getTime())
+			Number.isNaN(data.date.getTime())
 		) {
 			throw new Error("Date must be a valid Date object");
 		}
@@ -296,7 +296,7 @@ export class CostBasisModel implements CostBasis {
 		if (
 			!data.acquisitionDate ||
 			!(data.acquisitionDate instanceof Date) ||
-			isNaN(data.acquisitionDate.getTime())
+			Number.isNaN(data.acquisitionDate.getTime())
 		) {
 			throw new Error("Acquisition date must be a valid Date object");
 		}

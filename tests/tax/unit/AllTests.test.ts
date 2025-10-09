@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import { FIFOCalculator } from "@/tax/calculators/FIFOCalculator";
 import { TaxJurisdictionModel } from "@/tax/models/TaxJurisdiction";
 import {
-	CGTDiscountRules,
-	PersonalUseAssetRules,
+	appliesCGTDiscount,
+	calculateCGTDiscount,
+	calculatePersonalUseTaxableAmount,
+	isPersonalUseAsset,
 } from "@/tax/rules/AustralianTaxRules";
 import {
 	ATOFormatValidator,
@@ -36,41 +38,34 @@ describe("Tax Module - All Unit Tests", () => {
 
 	describe("CGT Discount Rules", () => {
 		it("should apply 50% discount for >365 days", () => {
-			const result = CGTDiscountRules.appliesCGTDiscount(366, true, false);
+			const result = appliesCGTDiscount(366, true, false);
 			expect(result).toBe(true);
 		});
 
 		it("should not apply discount for <365 days", () => {
-			const result = CGTDiscountRules.appliesCGTDiscount(364, true, false);
+			const result = appliesCGTDiscount(364, true, false);
 			expect(result).toBe(false);
 		});
 
 		it("should calculate correct discount amount", () => {
-			const discount = CGTDiscountRules.calculateDiscount(10000, 366, true);
+			const discount = calculateCGTDiscount(10000, 366, true);
 			expect(discount).toBe(5000);
 		});
 	});
 
 	describe("Personal Use Asset Rules", () => {
 		it("should classify as personal use when <$10k", () => {
-			const result = PersonalUseAssetRules.isPersonalUseAsset(9999, "PERSONAL");
+			const result = isPersonalUseAsset(9999, "PERSONAL");
 			expect(result).toBe(true);
 		});
 
 		it("should not classify as personal use when >=$10k", () => {
-			const result = PersonalUseAssetRules.isPersonalUseAsset(
-				10000,
-				"PERSONAL",
-			);
+			const result = isPersonalUseAsset(10000, "PERSONAL");
 			expect(result).toBe(false);
 		});
 
 		it("should return 0 taxable for exempt gains", () => {
-			const taxable = PersonalUseAssetRules.calculateTaxableAmount(
-				5000,
-				5000,
-				"PERSONAL",
-			);
+			const taxable = calculatePersonalUseTaxableAmount(5000, 5000, "PERSONAL");
 			expect(taxable).toBe(0);
 		});
 	});

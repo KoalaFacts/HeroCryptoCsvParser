@@ -86,7 +86,7 @@ export abstract class SourceAdapter<TRecord extends BatchEntryRecord<TRecord>> {
 	 */
 	protected postProcess(
 		transactions: Transaction[],
-		options?: ConversionOptions,
+		_options?: ConversionOptions,
 	): Transaction[] {
 		return transactions;
 	}
@@ -139,7 +139,7 @@ export abstract class SourceAdapter<TRecord extends BatchEntryRecord<TRecord>> {
 			}
 			if ("assets" in t && Array.isArray(t.assets)) {
 				t.assets.forEach((a) => {
-					if (a && a.asset) {
+					if (a?.asset) {
 						assets.add(a.asset.toString());
 					}
 				});

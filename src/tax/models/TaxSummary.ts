@@ -328,7 +328,7 @@ export class TaxSummaryModel implements TaxSummary {
 			throw new Error("Tax summary data is required");
 		}
 
-		const numericFields = [
+		const numericFields: (keyof TaxSummary)[] = [
 			"totalDisposals",
 			"totalAcquisitions",
 			"totalCapitalGains",
@@ -342,14 +342,14 @@ export class TaxSummaryModel implements TaxSummary {
 		];
 
 		for (const field of numericFields) {
-			const value = (data as any)[field];
+			const value = data[field];
 			if (typeof value !== "number") {
 				throw new Error(`${field} must be a number`);
 			}
 		}
 
 		// Validate non-negative fields
-		const nonNegativeFields = [
+		const nonNegativeFields: (keyof TaxSummary)[] = [
 			"totalDisposals",
 			"totalAcquisitions",
 			"totalCapitalGains",
@@ -361,8 +361,8 @@ export class TaxSummaryModel implements TaxSummary {
 		];
 
 		for (const field of nonNegativeFields) {
-			const value = (data as any)[field];
-			if (value < 0) {
+			const value = data[field];
+			if (typeof value === "number" && value < 0) {
 				throw new Error(`${field} must be non-negative`);
 			}
 		}

@@ -17,16 +17,12 @@
  * Tests must fail initially since implementation doesn't exist yet (TDD approach).
  */
 
+import { existsSync } from "node:fs";
 import {
 	createMockSpotTrade,
 	createMockStakingReward,
 } from "@tests/tax/helpers/mockFactories";
-import { existsSync } from "fs";
-import { readFile, unlink, writeFile } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { Interest } from "@/types/transactions/Interest";
-import type { SpotTrade } from "@/types/transactions/SpotTrade";
-import type { StakingReward } from "@/types/transactions/StakingReward";
 import type { Transaction } from "@/types/transactions/Transaction";
 
 // These interfaces will be implemented in the export module
@@ -146,8 +142,8 @@ interface ReportExporter {
 }
 
 describe("T019: Export Formats Integration", () => {
-	let reportExporter: ReportExporter;
-	let testData: ATOReportData;
+	let _reportExporter: ReportExporter;
+	let _testData: ATOReportData;
 	let outputDirectory: string;
 
 	beforeEach(() => {
@@ -157,7 +153,7 @@ describe("T019: Export Formats Integration", () => {
 		outputDirectory = "./test-exports";
 
 		// Comprehensive test data for export testing
-		testData = {
+		_testData = {
 			taxpayerDetails: {
 				tfn: "123-456-789",
 				name: "John Smith",

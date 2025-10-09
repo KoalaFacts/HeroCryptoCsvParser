@@ -3,7 +3,7 @@ import { BatchEntryRecord } from "@/core/BatchEntryRecord";
 import { Source } from "@/core/Source";
 import { SourceAdapter } from "@/core/SourceAdapter";
 import { SourceBuilder } from "@/core/SourceBuilder";
-import { ParseResult, SourceParser } from "@/core/SourceParser";
+import { SourceParser } from "@/core/SourceParser";
 import {
 	Amount,
 	Asset,

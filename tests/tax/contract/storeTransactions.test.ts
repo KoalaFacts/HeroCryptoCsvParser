@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type {
 	InitializeStorageFunction,
-	StorageAdapter,
 	StorageConfig,
 } from "@/tax/contracts/function-interfaces";
 

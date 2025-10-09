@@ -11,7 +11,6 @@ import {
 	getAssetKey,
 	getBaseAmount,
 	getQuoteAmount,
-	getTransactionAsset,
 	getTransactionFee,
 	getTransactionTimestamp,
 } from "../utils/transactionHelpers";
@@ -249,13 +248,15 @@ export class FIFOCalculator {
 			this.lotsByAsset.clear();
 
 			for (const { asset, lots } of state.lots) {
-				const fifoLots: FIFOLot[] = lots.map((lot: any) => ({
-					date: new Date(lot.date),
-					amount: lot.amount,
-					unitPrice: lot.unitPrice,
-					remainingAmount: lot.remainingAmount,
-					transactionId: lot.transactionId,
-				}));
+				const fifoLots: FIFOLot[] = lots.map(
+					(lot: Omit<FIFOLot, "date"> & { date: string }) => ({
+						date: new Date(lot.date),
+						amount: lot.amount,
+						unitPrice: lot.unitPrice,
+						remainingAmount: lot.remainingAmount,
+						transactionId: lot.transactionId,
+					}),
+				);
 
 				this.lotsByAsset.set(asset, fifoLots);
 			}

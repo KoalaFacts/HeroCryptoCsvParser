@@ -11,12 +11,11 @@ import type { TaxReport } from "../models/TaxReport";
 import type {
 	StorageAdapter,
 	StorageConfig,
-	StorageError,
 	StorageStats,
 	TaxReportSummary,
 	TransactionFilter,
 } from "./StorageAdapter";
-import { DEFAULT_BATCH_CONFIG } from "./StorageAdapter";
+import { DEFAULT_BATCH_CONFIG, StorageError } from "./StorageAdapter";
 
 /**
  * RxDB-based storage adapter for unified cross-platform storage
@@ -28,7 +27,7 @@ import { DEFAULT_BATCH_CONFIG } from "./StorageAdapter";
  * - Automatic indexing for performance
  */
 export class RxDBAdapter implements StorageAdapter {
-	private db: any = null;
+	private db: unknown = null;
 	private config: StorageConfig;
 	private initialized = false;
 
@@ -86,8 +85,14 @@ export class RxDBAdapter implements StorageAdapter {
 
 		try {
 			// Cleanup RxDB instance
-			if (this.db && typeof this.db.destroy === "function") {
-				await this.db.destroy();
+			if (
+				this.db &&
+				typeof this.db === "object" &&
+				"destroy" in this.db &&
+				typeof (this.db as { destroy: () => Promise<void> }).destroy ===
+					"function"
+			) {
+				await (this.db as { destroy: () => Promise<void> }).destroy();
 			}
 			this.db = null;
 			this.initialized = false;
@@ -151,7 +156,7 @@ export class RxDBAdapter implements StorageAdapter {
 	 */
 	async update(
 		id: string,
-		updates: Partial<TaxableTransaction>,
+		_updates: Partial<TaxableTransaction>,
 	): Promise<void> {
 		this.ensureInitialized();
 
@@ -188,11 +193,11 @@ export class RxDBAdapter implements StorageAdapter {
 	/**
 	 * Cache tax calculation results
 	 */
-	async cacheTaxCalculation(key: string, result: any): Promise<void> {
+	async cacheTaxCalculation(key: string, result: unknown): Promise<void> {
 		this.ensureInitialized();
 
 		try {
-			const cacheEntry = {
+			const _cacheEntry = {
 				key,
 				result: this.config.compressionEnabled ? this.compress(result) : result,
 				timestamp: Date.now(),
@@ -212,7 +217,7 @@ export class RxDBAdapter implements StorageAdapter {
 	/**
 	 * Retrieve cached calculation result
 	 */
-	async getCachedCalculation(key: string): Promise<any> {
+	async getCachedCalculation(key: string): Promise<unknown> {
 		this.ensureInitialized();
 
 		try {
@@ -334,8 +339,8 @@ export class RxDBAdapter implements StorageAdapter {
 
 		try {
 			// Calculate tax year boundaries based on jurisdiction
-			const startDate = new Date(year - 1, 6, 1); // July 1
-			const endDate = new Date(year, 5, 30); // June 30
+			const _startDate = new Date(year - 1, 6, 1); // July 1
+			const _endDate = new Date(year, 5, 30); // June 30
 
 			// In production: Query transactions and extract taxable events
 			return [];
@@ -380,7 +385,7 @@ export class RxDBAdapter implements StorageAdapter {
 		this.ensureInitialized();
 
 		try {
-			const cutoffDate =
+			const _cutoffDate =
 				olderThan || new Date(Date.now() - 365 * 24 * 60 * 60 * 1000); // 1 year ago
 
 			// In production:
@@ -430,7 +435,7 @@ export class RxDBAdapter implements StorageAdapter {
 		this.ensureInitialized();
 
 		try {
-			const importData = JSON.parse(data);
+			const _importData = JSON.parse(data);
 
 			// In production: Import all collections with validation
 			// await this.batchInsert(importData.transactions);
@@ -460,23 +465,13 @@ export class RxDBAdapter implements StorageAdapter {
 		code: string,
 		details?: Record<string, unknown>,
 	): StorageError {
-		const error: any = new Error(message);
-		error.code = code;
-		error.platform = this.config.platform;
-		error.details = details;
-		error.name = "StorageError";
-		return error;
+		return new StorageError(message, code, this.config.platform, details);
 	}
 
-	private compress(data: any): string {
+	private compress(data: unknown): string {
 		// Placeholder for compression logic
 		// In production: Use pako or similar compression library
 		return JSON.stringify(data);
-	}
-
-	private decompress(data: string): any {
-		// Placeholder for decompression logic
-		return JSON.parse(data);
 	}
 
 	private async simulateOperation(): Promise<void> {
@@ -484,19 +479,8 @@ export class RxDBAdapter implements StorageAdapter {
 		return Promise.resolve();
 	}
 
-	private async simulateBatchOperation(count: number): Promise<void> {
+	private async simulateBatchOperation(_count: number): Promise<void> {
 		// Placeholder for batch operations during development
 		return Promise.resolve();
-	}
-
-	private toReportSummary(report: TaxReport): TaxReportSummary {
-		return {
-			id: report.id,
-			jurisdiction: report.jurisdiction.code,
-			taxYear: report.taxPeriod.year,
-			generatedAt: report.generatedAt,
-			transactionCount: report.metadata.totalTransactions,
-			netTaxableAmount: report.summary.netTaxableAmount,
-		};
 	}
 }

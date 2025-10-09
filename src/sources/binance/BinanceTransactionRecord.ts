@@ -1,11 +1,4 @@
 import { BatchEntryRecord } from "../../core/BatchEntryRecord";
-import { FieldValidationBuilder } from "../../core/FieldValidationBuilder";
-import {
-	Amount,
-	Asset,
-	AssetAmount,
-	TransactionType,
-} from "../../types/transactions/index";
 
 export class BinanceTransactionRecord extends BatchEntryRecord<BinanceTransactionRecord> {
 	userId: string = "";

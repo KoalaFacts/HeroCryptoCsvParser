@@ -32,10 +32,10 @@ export class PDFReportFormatter {
 		options: PDFExportOptions = {},
 	): Promise<Buffer> {
 		const {
-			includeTransactionDetails = true,
-			includeOptimizationStrategies = true,
-			includeAuditTrail = false,
-			template = "STANDARD",
+			includeTransactionDetails: _includeTransactionDetails = true,
+			includeOptimizationStrategies: _includeOptimizationStrategies = true,
+			includeAuditTrail: _includeAuditTrail = false,
+			template: _template = "STANDARD",
 		} = options;
 
 		// Note: Full PDFKit implementation would be added here
@@ -60,7 +60,7 @@ export class PDFReportFormatter {
 	 */
 	private buildPDFContent(
 		report: TaxReport,
-		options: PDFExportOptions,
+		_options: PDFExportOptions,
 	): string {
 		return `
       Australian Cryptocurrency Tax Report

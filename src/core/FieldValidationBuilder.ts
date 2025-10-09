@@ -286,7 +286,7 @@ export class FieldValidationBuilder<TRecord, TProperty = any> {
 	min(minValue: number, errorMessage?: string): this {
 		this.validationRules.push((context) => {
 			const value = Number(context.currentValue);
-			if (isNaN(value) || value < minValue) {
+			if (Number.isNaN(value) || value < minValue) {
 				return ValidationResult.failure({
 					code: this.errorCode || "MIN",
 					message:
@@ -304,7 +304,7 @@ export class FieldValidationBuilder<TRecord, TProperty = any> {
 	max(maxValue: number, errorMessage?: string): this {
 		this.validationRules.push((context) => {
 			const value = Number(context.currentValue);
-			if (isNaN(value) || value > maxValue) {
+			if (Number.isNaN(value) || value > maxValue) {
 				return ValidationResult.failure({
 					code: this.errorCode || "MAX",
 					message:
@@ -322,7 +322,7 @@ export class FieldValidationBuilder<TRecord, TProperty = any> {
 	range(min: number, max: number, errorMessage?: string): this {
 		this.validationRules.push((context) => {
 			const value = Number(context.currentValue);
-			if (isNaN(value) || value < min || value > max) {
+			if (Number.isNaN(value) || value < min || value > max) {
 				return ValidationResult.failure({
 					code: this.errorCode || "RANGE",
 					message:

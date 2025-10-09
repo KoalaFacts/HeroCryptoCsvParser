@@ -4,7 +4,6 @@
  * Validates complete tax reports for accuracy and completeness.
  */
 
-import type { TaxJurisdiction } from "../models/TaxJurisdiction";
 import type { TaxReport } from "../models/TaxReport";
 import type { ValidationIssue, ValidationResult } from "./TransactionValidator";
 

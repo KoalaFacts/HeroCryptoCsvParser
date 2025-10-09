@@ -73,12 +73,22 @@ export type {
 // Rules
 export {
 	AUSTRALIAN_JURISDICTION,
-	CGTDiscountRules,
-	DeFiClassificationRules,
+	appliesCGTDiscount,
+	appliesPersonalUseExemption,
+	calculateCGTDiscount,
+	calculateDeFiIncomeAmount,
+	calculatePersonalUseTaxableAmount,
+	calculateTaxableGain,
+	classifyDeFiTransaction,
 	getAustralianJurisdiction,
 	getAustralianTaxRules,
 	getAustralianTaxYearBoundaries,
-	PersonalUseAssetRules,
+	getCGTDiscountRule,
+	getDeFiClassificationRule,
+	getPersonalUseAssetRule,
+	isDeFiTaxableEvent,
+	isPersonalUseAsset,
+	validatePersonalUseDocumentation,
 } from "./rules/AustralianTaxRules";
 export { IndexedDBAdapter } from "./storage/IndexedDBAdapter";
 export { MMKVAdapter } from "./storage/MMKVAdapter";

@@ -22,12 +22,7 @@ import {
 	createMockSwap,
 } from "@tests/tax/helpers/mockFactories";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { Interest } from "@/types/transactions/Interest";
-import type { SpotTrade } from "@/types/transactions/SpotTrade";
-import type { StakingReward } from "@/types/transactions/StakingReward";
-import type { Swap } from "@/types/transactions/Swap";
 import type { Transaction } from "@/types/transactions/Transaction";
-import type { Transfer } from "@/types/transactions/Transfer";
 
 // These interfaces will be implemented in the tax module
 interface AustralianTaxReport {
@@ -70,15 +65,15 @@ interface AustralianTaxCalculator {
 }
 
 describe("T014: Australian Tax Report Generation Integration", () => {
-	let taxCalculator: AustralianTaxCalculator;
-	let testTransactions: Transaction[];
+	let _taxCalculator: AustralianTaxCalculator;
+	let _testTransactions: Transaction[];
 
 	beforeEach(() => {
 		// Initialize tax calculator (will fail until implemented)
 		// taxCalculator = new AustralianTaxCalculator();
 
 		// Realistic transaction dataset based on quickstart guide
-		testTransactions = [
+		_testTransactions = [
 			// Initial BTC purchase - acquisition for CGT
 			createMockSpotTrade({
 				id: "binance-001",

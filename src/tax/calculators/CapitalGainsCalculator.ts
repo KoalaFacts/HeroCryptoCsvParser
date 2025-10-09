@@ -183,7 +183,15 @@ export class CapitalGainsCalculator {
 			taxableAmount: number;
 		}
 	> {
-		const byAsset = new Map<string, any>();
+		const byAsset = new Map<
+			string,
+			{
+				totalGains: number;
+				totalLosses: number;
+				netGainLoss: number;
+				taxableAmount: number;
+			}
+		>();
 
 		for (const context of contexts) {
 			const asset = (

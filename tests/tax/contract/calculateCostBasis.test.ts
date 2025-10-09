@@ -1,9 +1,7 @@
 import { createMockSpotTrade } from "@tests/tax/helpers/mockFactories";
 import { describe, expect, it } from "vitest";
 import type {
-	AcquisitionLot,
 	CalculateCostBasisFunction,
-	CostBasis,
 	CostBasisMethod,
 } from "@/tax/contracts/function-interfaces";
 import type { Transaction } from "@/types/transactions/Transaction";
@@ -18,7 +16,7 @@ describe("T009: Contract Test - calculateCostBasis Function", () => {
 	// Mock data for testing
 	const createMockAcquisition = (
 		date: string,
-		amount: number,
+		_amount: number,
 		unitPrice: number,
 	): Transaction =>
 		createMockSpotTrade({
@@ -28,7 +26,7 @@ describe("T009: Contract Test - calculateCostBasis Function", () => {
 			price: unitPrice.toString(),
 		});
 
-	const createMockDisposal = (date: string, amount: number): Transaction =>
+	const createMockDisposal = (date: string, _amount: number): Transaction =>
 		createMockSpotTrade({
 			id: `disposal-${Date.now()}-${Math.random()}`,
 			timestamp: new Date(date),

@@ -1,16 +1,10 @@
-import {
-	createMockAsset,
-	createMockDataSource,
-	createMockSpotTrade,
-} from "@tests/tax/helpers/mockFactories";
+import { createMockDataSource } from "@tests/tax/helpers/mockFactories";
 import { describe, expect, it } from "vitest";
 import type {
 	ClassifyTransactionFunction,
 	InvestorProfile,
 	PortfolioSnapshot,
-	TaxRule,
 	TransactionContext,
-	TransactionTaxTreatment,
 } from "@/tax/contracts/function-interfaces";
 import type { Transaction } from "@/types/transactions/Transaction";
 

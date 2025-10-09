@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type {
 	GenerateTaxReportFunction,
-	TaxReport,
 	TaxReportConfig,
 } from "@/tax/contracts/function-interfaces";
-import type { Transaction } from "@/types/transactions/Transaction";
 import { createMockTransaction } from "./mock-data";
 
 /**

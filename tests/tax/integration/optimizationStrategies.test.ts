@@ -22,10 +22,7 @@ import {
 	createMockStakingReward,
 } from "@tests/tax/helpers/mockFactories";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { SpotTrade } from "@/types/transactions/SpotTrade";
-import type { StakingReward } from "@/types/transactions/StakingReward";
 import type { Transaction } from "@/types/transactions/Transaction";
-import type { Transfer } from "@/types/transactions/Transfer";
 
 // These interfaces will be implemented in the tax optimization module
 interface TaxOptimizationSuggestion {
@@ -105,16 +102,16 @@ interface TaxOptimizer {
 }
 
 describe("T017: Tax Optimization Strategies Integration", () => {
-	let taxOptimizer: TaxOptimizer;
-	let testTransactions: Transaction[];
-	let currentMarketPrices: Map<string, number>;
+	let _taxOptimizer: TaxOptimizer;
+	let _testTransactions: Transaction[];
+	let _currentMarketPrices: Map<string, number>;
 
 	beforeEach(() => {
 		// Initialize tax optimizer (will fail until implemented)
 		// taxOptimizer = new TaxOptimizer();
 
 		// Current market prices for optimization calculations
-		currentMarketPrices = new Map([
+		_currentMarketPrices = new Map([
 			["BTC", 45000], // Down from some purchases
 			["ETH", 2500], // Down from some purchases
 			["ADA", 0.8], // Up from purchases
@@ -123,7 +120,7 @@ describe("T017: Tax Optimization Strategies Integration", () => {
 		]);
 
 		// Comprehensive transaction dataset for optimization testing
-		testTransactions = [
+		_testTransactions = [
 			// BTC purchases at different prices (some now underwater)
 			createMockSpotTrade({
 				id: "btc-buy-high-001",

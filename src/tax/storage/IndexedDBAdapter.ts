@@ -13,10 +13,8 @@ import {
 	getTransactionSource,
 } from "../utils/transactionHelpers";
 import type {
-	BatchConfig,
 	StorageAdapter,
 	StorageConfig,
-	StorageResult,
 	StorageStats,
 	TaxReportSummary,
 	TransactionFilter,
@@ -27,7 +25,6 @@ export class IndexedDBAdapter implements StorageAdapter {
 	private db: IDBDatabase | null = null;
 	private readonly dbName: string;
 	private readonly version: number = 1;
-	private readonly config: StorageConfig;
 
 	// Store names
 	private readonly TRANSACTIONS_STORE = "transactions";
@@ -36,7 +33,6 @@ export class IndexedDBAdapter implements StorageAdapter {
 	private readonly EVENTS_STORE = "events";
 
 	constructor(config: StorageConfig) {
-		this.config = config;
 		this.dbName = config.databaseName || "crypto-tax-db";
 	}
 
@@ -382,7 +378,8 @@ export class IndexedDBAdapter implements StorageAdapter {
 				// Check expiration
 				if (entry.expiresAt < Date.now()) {
 					// Clean up expired entry
-					this.db!.transaction([this.CACHE_STORE], "readwrite")
+					this.db
+						?.transaction([this.CACHE_STORE], "readwrite")
 						.objectStore(this.CACHE_STORE)
 						.delete(key);
 					resolve(null);
@@ -566,7 +563,7 @@ export class IndexedDBAdapter implements StorageAdapter {
 		return this.query({ assets: [asset] });
 	}
 
-	async getTaxableEvents(year: number): Promise<TaxEvent[]> {
+	async getTaxableEvents(_year: number): Promise<TaxEvent[]> {
 		// Implementation would query events store by year
 		// For now, return empty array as TaxEvent model needs to be properly integrated
 		return [];
@@ -589,7 +586,7 @@ export class IndexedDBAdapter implements StorageAdapter {
 				const estimate = await navigator.storage.estimate();
 				storageUsed = estimate.usage || 0;
 				storageAvailable = estimate.quota || 0;
-			} catch (error) {
+			} catch (_error) {
 				// Fallback if storage API not available
 			}
 		}
@@ -684,7 +681,7 @@ export class IndexedDBAdapter implements StorageAdapter {
 
 	private deserializeTransaction(data: any): TaxableTransaction {
 		// Remove serialization metadata
-		const { serializedAt, ...transaction } = data;
+		const { serializedAt: _serializedAt, ...transaction } = data;
 		return transaction as TaxableTransaction;
 	}
 

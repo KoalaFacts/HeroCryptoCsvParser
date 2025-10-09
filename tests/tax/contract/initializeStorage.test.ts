@@ -1,19 +1,12 @@
-import {
-	createMockDataSource,
-	createMockSpotTrade,
-} from "@tests/tax/helpers/mockFactories";
+import { createMockSpotTrade } from "@tests/tax/helpers/mockFactories";
 import { describe, expect, it } from "vitest";
 import type {
 	StorageAdapter,
-	StorageStats,
 	TaxableTransaction,
 	TaxReport,
-	TaxReportSummary,
 	TransactionFilter,
 	TransactionTaxTreatment,
 } from "@/tax/contracts/function-interfaces";
-import type { TaxEvent } from "@/types/common/TaxEvent";
-import type { Transaction } from "@/types/transactions/Transaction";
 
 /**
  * Contract Test T011: Storage Adapter Interfaces

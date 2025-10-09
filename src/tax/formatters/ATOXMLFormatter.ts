@@ -31,12 +31,7 @@ export class ATOXMLFormatter {
 		report: TaxReport,
 		options: ATOExportOptions,
 	): Promise<string> {
-		const {
-			tfn,
-			abn,
-			includeSupplementarySchedules = true,
-			validateBeforeExport = true,
-		} = options;
+		const { tfn, abn, validateBeforeExport = true } = options;
 
 		// Validate required fields
 		if (!tfn && !abn) {
@@ -79,7 +74,15 @@ export class ATOXMLFormatter {
 	 * Build ATO XML (placeholder)
 	 */
 	private buildATOXML(report: TaxReport, options: ATOExportOptions): string {
-		const { tfn, abn } = options;
+		const { tfn, abn, includeSupplementarySchedules = true } = options;
+
+		const supplementarySchedules = includeSupplementarySchedules
+			? `
+  <SupplementarySchedules>
+    <OrdinaryIncome>${report.summary.ordinaryIncome}</OrdinaryIncome>
+    <Deductions>${report.summary.totalDeductions}</Deductions>
+  </SupplementarySchedules>`
+			: "";
 
 		return `<?xml version="1.0" encoding="UTF-8"?>
 <TaxReturn xmlns="http://www.ato.gov.au/sbr">
@@ -94,7 +97,7 @@ export class ATOXMLFormatter {
     <NetCapitalGain>${report.summary.netCapitalGain}</NetCapitalGain>
     <CGTDiscount>${report.summary.cgtDiscount}</CGTDiscount>
     <TaxableCapitalGain>${report.summary.taxableCapitalGain}</TaxableCapitalGain>
-  </CapitalGainsSchedule>
+  </CapitalGainsSchedule>${supplementarySchedules}
 </TaxReturn>`;
 	}
 }

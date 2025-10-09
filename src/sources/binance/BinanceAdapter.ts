@@ -52,7 +52,7 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
 
 	protected convertRecord(
 		record: BinanceTransactionRecord,
-		options?: ConversionOptions,
+		_options?: ConversionOptions,
 	): Transaction {
 		const changeAmount = new Amount(record.change);
 		const timestamp = new Date(record.utcTime);
@@ -191,8 +191,6 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
 
 			case "LOAN":
 				return this.createLoan(id, timestamp, record, changeAmount);
-
-			case "UNKNOWN":
 			default:
 				return this.createUnknown(id, timestamp, record, changeAmount);
 		}
@@ -307,7 +305,7 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
 			},
 			staking: {
 				protocol: "Binance Earn",
-				lockupPeriod: lockPeriod ? parseInt(lockPeriod) : undefined,
+				lockupPeriod: lockPeriod ? parseInt(lockPeriod, 10) : undefined,
 				apr: this.extractAPR(record.remark),
 			},
 		};
@@ -512,7 +510,7 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
 		changeAmount: Amount,
 	): Interest {
 		// Get the categorization result to check for subType
-		const categorization = this.categorizer.categorize(
+		const _categorization = this.categorizer.categorize(
 			record.operation,
 			record.remark,
 		);
@@ -545,7 +543,7 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
 		id: string,
 		timestamp: Date,
 		record: BinanceTransactionRecord,
-		changeAmount: Amount,
+		_changeAmount: Amount,
 	): Unknown {
 		return {
 			type: "UNKNOWN",
@@ -604,16 +602,6 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
 		)
 			return "network";
 		if (op.includes("platform") || rmk.includes("platform")) return "platform";
-		return "other";
-	}
-
-	private determineInterestSubType(operation: string): string {
-		const op = operation.toLowerCase();
-		if (op.includes("liquid") || op.includes("swap")) return "liquidity";
-		if (op.includes("staking") || op.includes("launchpool")) return "staking";
-		if (op.includes("lending") || op.includes("flexible")) return "lending";
-		if (op.includes("mining")) return "mining";
-		if (op.includes("referral")) return "referral";
 		return "other";
 	}
 

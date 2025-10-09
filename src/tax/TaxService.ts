@@ -303,7 +303,7 @@ export class TaxService {
 	 */
 	validateTransactions(
 		transactions: Transaction[],
-		jurisdictionCode: "AU",
+		_jurisdictionCode: "AU",
 	): {
 		isValid: boolean;
 		errors: Array<{ code: string; message: string; transaction?: Transaction }>;

@@ -75,7 +75,7 @@ export class CSVExporter {
 		report: TaxReport,
 		options: CSVExportOptions = {},
 	): string {
-		const { delimiter = "," } = options;
+		const { delimiter: _delimiter = "," } = options;
 
 		const lines: string[] = [];
 

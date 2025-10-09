@@ -96,7 +96,7 @@ export class TaxPeriodModel implements TaxPeriod {
 		if (
 			!data.startDate ||
 			!(data.startDate instanceof Date) ||
-			isNaN(data.startDate.getTime())
+			Number.isNaN(data.startDate.getTime())
 		) {
 			throw new Error("Start date must be a valid Date object");
 		}
@@ -104,7 +104,7 @@ export class TaxPeriodModel implements TaxPeriod {
 		if (
 			!data.endDate ||
 			!(data.endDate instanceof Date) ||
-			isNaN(data.endDate.getTime())
+			Number.isNaN(data.endDate.getTime())
 		) {
 			throw new Error("End date must be a valid Date object");
 		}

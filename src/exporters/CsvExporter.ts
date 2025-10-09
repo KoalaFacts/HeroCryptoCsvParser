@@ -296,7 +296,6 @@ export class CsvExporter {
 				return Math.floor(date.getTime() / 1000).toString();
 			case "utc":
 				return date.toUTCString();
-			case "iso":
 			default:
 				return date.toISOString();
 		}

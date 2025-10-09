@@ -28,7 +28,7 @@ export class Amount {
 		// Handle scientific notation
 		if (normalized.includes("E") || normalized.includes("e")) {
 			const parsed = parseFloat(normalized);
-			if (isNaN(parsed)) {
+			if (Number.isNaN(parsed)) {
 				throw new Error(`Invalid scientific notation: ${value}`);
 			}
 			// Convert to fixed notation with sufficient precision
@@ -40,7 +40,7 @@ export class Amount {
 
 		// Ensure we have at least "0" for values less than 1
 		if (normalized.startsWith(".")) {
-			normalized = "0" + normalized;
+			normalized = `0${normalized}`;
 		}
 
 		return normalized || "0";
@@ -93,7 +93,7 @@ export class Amount {
 		if (this.isNegative()) {
 			return new Amount(this.value.substring(1));
 		}
-		return new Amount("-" + this.value);
+		return new Amount(`-${this.value}`);
 	}
 
 	equals(other: Amount | string | number): boolean {

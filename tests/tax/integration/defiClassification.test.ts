@@ -26,13 +26,9 @@ import {
 	createMockTransfer,
 } from "@tests/tax/helpers/mockFactories";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { Interest } from "@/types/transactions/Interest";
 import type { LiquidityAdd } from "@/types/transactions/LiquidityAdd";
 import type { LiquidityRemove } from "@/types/transactions/LiquidityRemove";
-import type { StakingReward } from "@/types/transactions/StakingReward";
-import type { Swap } from "@/types/transactions/Swap";
 import type { Transaction } from "@/types/transactions/Transaction";
-import type { Transfer } from "@/types/transactions/Transfer";
 
 // These interfaces will be implemented in the DeFi classification module
 interface DeFiClassificationResult {
@@ -83,15 +79,15 @@ interface DeFiClassifier {
 }
 
 describe("T016: DeFi Transaction Classification Integration", () => {
-	let defiClassifier: DeFiClassifier;
-	let testTransactions: Transaction[];
+	let _defiClassifier: DeFiClassifier;
+	let _testTransactions: Transaction[];
 
 	beforeEach(() => {
 		// Initialize DeFi classifier (will fail until implemented)
 		// defiClassifier = new DeFiClassifier();
 
 		// Comprehensive DeFi transaction dataset
-		testTransactions = [
+		_testTransactions = [
 			// Uniswap V3 liquidity provision
 			createMockLiquidityAdd({
 				id: "uniswap-lp-add-001",

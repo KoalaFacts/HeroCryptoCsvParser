@@ -1,16 +1,9 @@
 import {
-	createMockAsset,
 	createMockAssetAmount,
-	createMockDataSource,
 	createMockSpotTrade,
 } from "@tests/tax/helpers/mockFactories";
 import { describe, expect, it } from "vitest";
-import type {
-	ValidateTransactionsFunction,
-	ValidationError,
-	ValidationResult,
-	ValidationWarning,
-} from "@/tax/contracts/function-interfaces";
+import type { ValidateTransactionsFunction } from "@/tax/contracts/function-interfaces";
 import type { Transaction } from "@/types/transactions/Transaction";
 
 /**

@@ -5,7 +5,6 @@
  * Recommends legal strategies to minimize tax liability within Australian tax law.
  */
 
-import type { Transaction } from "../../types/transactions";
 import type { TaxableTransaction } from "../models/TaxableTransaction";
 import type { TaxJurisdiction } from "../models/TaxJurisdiction";
 import type {
@@ -293,7 +292,7 @@ export class TaxOptimizationEngine {
 	// Helper methods for finding opportunities
 
 	private findUnrealizedLosses(
-		transactions: TaxableTransaction[],
+		_transactions: TaxableTransaction[],
 	): OptimizationOpportunity[] {
 		// Identify assets with current unrealized losses
 		return [];

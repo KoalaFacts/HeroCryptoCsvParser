@@ -22,11 +22,19 @@ export { CapitalGainsCalculator } from "./CapitalGainsCalculator";
 
 // Cost Basis Calculator Factory
 export {
-	CostBasisCalculatorFactory,
+	type CostBasisOptions,
 	calculateCostBasis,
+	calculateCostBasisWithMethod,
+	createCalculator,
 	createCostBasisCalculator,
+	getDefaultMethod,
+	getMethodDescription,
+	getRecommendedMethod,
 	getSupportedCostBasisMethods,
+	getSupportedMethods,
 	type ICostBasisCalculator,
+	isMethodSupported,
+	validateOptions,
 } from "./CostBasisCalculatorFactory";
 // FIFO Calculator
 export {

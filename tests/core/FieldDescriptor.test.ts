@@ -301,7 +301,7 @@ describe("FieldDescriptor", () => {
 
 			field.mapWith((value) => {
 				const num = parseInt(value, 10);
-				if (isNaN(num)) {
+				if (Number.isNaN(num)) {
 					throw new Error("Invalid number");
 				}
 				return num;

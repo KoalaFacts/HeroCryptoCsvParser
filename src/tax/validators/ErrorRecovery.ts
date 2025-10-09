@@ -340,7 +340,7 @@ export class ErrorRecovery {
 	/**
 	 * Estimate market price (placeholder)
 	 */
-	private estimateMarketPrice(transaction: Transaction): number | null {
+	private estimateMarketPrice(_transaction: Transaction): number | null {
 		// In a real implementation, this would call a price API
 		// For now, return null
 		return null;
@@ -378,7 +378,7 @@ export class ErrorRecovery {
 	/**
 	 * Merge transactions from different sources
 	 */
-	private mergeTransactions(tx1: Transaction, tx2: Transaction): Transaction {
+	private mergeTransactions(tx1: Transaction, _tx2: Transaction): Transaction {
 		// Prefer more complete data
 		// This is simplified - real implementation would be more sophisticated
 		return {
@@ -390,7 +390,7 @@ export class ErrorRecovery {
 	/**
 	 * Infer asset symbol from transaction
 	 */
-	private inferAssetSymbol(transaction: Transaction): string | null {
+	private inferAssetSymbol(_transaction: Transaction): string | null {
 		// Try to extract from various transaction fields
 		// This is highly dependent on transaction structure
 		return null;

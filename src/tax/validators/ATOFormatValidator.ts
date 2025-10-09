@@ -174,7 +174,7 @@ export class ATOFormatValidator {
 		}
 
 		// Check date is valid
-		if (isNaN(dateObj.getTime())) {
+		if (Number.isNaN(dateObj.getTime())) {
 			issues.push({
 				field: "date",
 				message: "Invalid date value",
@@ -256,7 +256,7 @@ export class ATOFormatValidator {
 		let sum = 0;
 
 		for (let i = 0; i < Math.min(tfn.length, 9); i++) {
-			sum += parseInt(tfn[i]) * weights[i];
+			sum += parseInt(tfn[i], 10) * weights[i];
 		}
 
 		return sum % 11 === 0;
@@ -271,12 +271,12 @@ export class ATOFormatValidator {
 		let sum = 0;
 
 		// Subtract 1 from first digit
-		const firstDigit = parseInt(abn[0]) - 1;
+		const firstDigit = parseInt(abn[0], 10) - 1;
 		sum += firstDigit * weights[0];
 
 		// Add remaining digits with weights
 		for (let i = 1; i < 11; i++) {
-			sum += parseInt(abn[i]) * weights[i];
+			sum += parseInt(abn[i], 10) * weights[i];
 		}
 
 		return sum % 89 === 0;

@@ -18,7 +18,6 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { SpotTrade } from "@/types/transactions/SpotTrade";
 import type { Transaction } from "@/types/transactions/Transaction";
 
 // These interfaces will be implemented in the streaming module
@@ -90,20 +89,20 @@ interface LiveTaxCalculator {
 }
 
 describe("T020: Streaming Transaction Processing Integration", () => {
-	let streamingProcessor: StreamingProcessor;
-	let liveTaxCalculator: LiveTaxCalculator;
-	let mockExchanges: string[];
-	let receivedTransactions: Transaction[];
-	let connectionEvents: StreamingConnection[];
+	let _streamingProcessor: StreamingProcessor;
+	let _liveTaxCalculator: LiveTaxCalculator;
+	let _mockExchanges: string[];
+	let _receivedTransactions: Transaction[];
+	let _connectionEvents: StreamingConnection[];
 
 	beforeEach(async () => {
 		// Initialize streaming processor (will fail until implemented)
 		// streamingProcessor = new StreamingProcessor();
 		// liveTaxCalculator = new LiveTaxCalculator();
 
-		mockExchanges = ["binance", "coinbase", "kraken", "gemini"];
-		receivedTransactions = [];
-		connectionEvents = [];
+		_mockExchanges = ["binance", "coinbase", "kraken", "gemini"];
+		_receivedTransactions = [];
+		_connectionEvents = [];
 
 		// Set up event handlers
 		// streamingProcessor.onTransaction(async (tx, source) => {

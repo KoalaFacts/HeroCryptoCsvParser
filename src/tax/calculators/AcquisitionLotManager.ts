@@ -10,7 +10,6 @@ import type { AcquisitionLot } from "../models/CostBasis";
 import {
 	getAssetKey,
 	getBaseAmount,
-	getTransactionAsset,
 	getTransactionTimestamp,
 } from "../utils/transactionHelpers";
 
@@ -288,18 +287,22 @@ export class AcquisitionLotManager {
 			this.disposalHistory = [];
 
 			for (const { asset, lots } of state.lots) {
-				const managedLots: ManagedLot[] = lots.map((lot: any) => ({
-					...lot,
-					date: new Date(lot.date),
-				}));
+				const managedLots: ManagedLot[] = lots.map(
+					(lot: Omit<ManagedLot, "date"> & { date: string }) => ({
+						...lot,
+						date: new Date(lot.date),
+					}),
+				);
 
 				this.lotsByAsset.set(asset, managedLots);
 			}
 
-			this.disposalHistory = state.disposalHistory.map((d: any) => ({
-				...d,
-				timestamp: new Date(d.timestamp),
-			}));
+			this.disposalHistory = state.disposalHistory.map(
+				(d: Omit<LotDisposal, "timestamp"> & { timestamp: string }) => ({
+					...d,
+					timestamp: new Date(d.timestamp),
+				}),
+			);
 		} catch (error) {
 			throw new Error(`Failed to import lot manager state: ${error}`);
 		}

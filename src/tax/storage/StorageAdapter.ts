@@ -48,8 +48,8 @@ export interface StorageAdapter {
 	delete(id: string): Promise<void>;
 
 	// Tax calculation caching
-	cacheTaxCalculation(key: string, result: any): Promise<void>;
-	getCachedCalculation(key: string): Promise<any>;
+	cacheTaxCalculation(key: string, result: unknown): Promise<void>;
+	getCachedCalculation(key: string): Promise<unknown>;
 	clearCache(): Promise<void>;
 
 	// Report storage

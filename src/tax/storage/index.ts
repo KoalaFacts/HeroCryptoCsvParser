@@ -18,9 +18,13 @@ export type {
 
 // Storage factory
 export {
+	createAdapter,
 	createStorageAdapter,
+	detectPlatform,
 	detectStoragePlatform,
-	StorageFactory,
+	getPlatformCapabilities,
+	getRecommendedPlatform,
+	isPlatformSupported,
 	type StorageFactoryConfig,
 	type StoragePlatform,
 } from "./StorageFactory";

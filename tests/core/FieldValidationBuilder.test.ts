@@ -6,6 +6,7 @@ import { FieldValidationBuilder } from "@/core/FieldValidationBuilder";
 // Test record
 class TestRecord extends BatchEntryRecord<TestRecord> {
 	value: any = "";
+
 	constructor() {
 		super();
 	}
@@ -448,7 +449,7 @@ describe("FieldValidationBuilder", () => {
 			);
 			const validator = builder
 				.when(
-					(record, value) => value === "special",
+					(_record, value) => value === "special",
 					(b) => b.minLength(10, "Special values must be long"),
 				)
 				.build();
@@ -481,7 +482,7 @@ describe("FieldValidationBuilder", () => {
 			);
 			const validator = builder
 				.unless(
-					(record, value) => value === "exempt",
+					(_record, value) => value === "exempt",
 					(b) => b.minLength(5, "Must be at least 5 chars unless exempt"),
 				)
 				.build();

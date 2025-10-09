@@ -1,15 +1,7 @@
 import type { Transaction } from "../types/transactions";
 import type { BatchEntryRecord } from "./BatchEntryRecord";
-import {
-	type ConversionOptions,
-	ConversionResult,
-	type SourceAdapter,
-} from "./SourceAdapter";
-import {
-	type ParseOptions,
-	ParseResult,
-	type SourceParser,
-} from "./SourceParser";
+import type { ConversionOptions, SourceAdapter } from "./SourceAdapter";
+import type { ParseOptions, SourceParser } from "./SourceParser";
 
 export interface SourceInfo {
 	name: string;

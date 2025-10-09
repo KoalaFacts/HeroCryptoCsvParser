@@ -269,9 +269,9 @@ export class TransactionClassifier {
 	 * Check if transaction is eligible for CGT treatment
 	 */
 	private isCGTEligible(
-		transaction: Transaction,
+		_transaction: Transaction,
 		eventType: TaxEventType,
-		isPersonalUse: boolean,
+		_isPersonalUse: boolean,
 	): boolean {
 		// Only disposal and some acquisition events are CGT eligible
 		if (eventType !== "DISPOSAL" && eventType !== "ACQUISITION") {

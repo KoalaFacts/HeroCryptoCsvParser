@@ -186,7 +186,7 @@ export class TaxReportGenerator {
 	 */
 	private calculateTaxPeriod(
 		year: number,
-		jurisdiction: TaxJurisdiction,
+		_jurisdiction: TaxJurisdiction,
 	): TaxPeriod {
 		const boundaries = getAustralianTaxYearBoundaries(year);
 
@@ -217,7 +217,7 @@ export class TaxReportGenerator {
 	private async classifyTransactions(
 		transactions: Transaction[],
 		jurisdiction: TaxJurisdiction,
-		options: TaxReportConfig["options"],
+		_options: TaxReportConfig["options"],
 		onProgress?: (progress: ProgressUpdate) => void,
 	): Promise<TaxableTransaction[]> {
 		const taxableTransactions: TaxableTransaction[] = [];
@@ -274,7 +274,7 @@ export class TaxReportGenerator {
 	private async calculateCostBasisAndGains(
 		transactions: TaxableTransaction[],
 		jurisdiction: TaxJurisdiction,
-		method: "FIFO" | "SPECIFIC_IDENTIFICATION",
+		_method: "FIFO" | "SPECIFIC_IDENTIFICATION",
 		onProgress?: (progress: ProgressUpdate) => void,
 	): Promise<void> {
 		const CHUNK_SIZE = 1000; // Process 1000 transactions per batch
@@ -323,7 +323,7 @@ export class TaxReportGenerator {
 					disposal.taxableAmount = capitalGainsResult.taxableGain;
 					disposal.taxTreatment.cgtDiscountApplied =
 						capitalGainsResult.cgtDiscountApplied;
-				} catch (error) {
+				} catch (_error) {
 					// Handle insufficient cost basis or other errors
 					// Skip this disposal and continue processing
 					// Error details will be visible in the report metadata

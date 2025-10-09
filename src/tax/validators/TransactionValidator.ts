@@ -223,7 +223,7 @@ export class TransactionValidator {
 		// Timestamp should be a valid date
 		if (transaction.timestamp) {
 			const timestamp = getTransactionTimestamp(transaction);
-			if (isNaN(timestamp.getTime())) {
+			if (Number.isNaN(timestamp.getTime())) {
 				issues.push({
 					field: "timestamp",
 					message: "Invalid timestamp format",
@@ -236,7 +236,7 @@ export class TransactionValidator {
 		// Amount should be a number
 		try {
 			const amount = getBaseAmount(transaction);
-			if (isNaN(amount)) {
+			if (Number.isNaN(amount)) {
 				issues.push({
 					field: "amount",
 					message: "Invalid amount value",
@@ -244,7 +244,7 @@ export class TransactionValidator {
 					code: "INVALID_AMOUNT",
 				});
 			}
-		} catch (error) {
+		} catch (_error) {
 			issues.push({
 				field: "amount",
 				message: "Cannot extract amount from transaction",
@@ -260,7 +260,7 @@ export class TransactionValidator {
 	private validateBusinessRules(
 		transaction: Transaction,
 		issues: ValidationIssue[],
-		options: ValidationOptions,
+		_options: ValidationOptions,
 	): void {
 		// Amount should not be zero (usually)
 		try {
@@ -373,8 +373,12 @@ export class TransactionValidator {
 		taxableTransaction: TaxableTransaction,
 		issues: ValidationIssue[],
 	): void {
-		const { capitalGain, capitalLoss, incomeAmount, deductibleAmount } =
-			taxableTransaction;
+		const {
+			capitalGain,
+			capitalLoss,
+			incomeAmount,
+			deductibleAmount: _deductibleAmount,
+		} = taxableTransaction;
 
 		// Cannot have both capital gain and loss
 		if (capitalGain && capitalGain > 0 && capitalLoss && capitalLoss > 0) {

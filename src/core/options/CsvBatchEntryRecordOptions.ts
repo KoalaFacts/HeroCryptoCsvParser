@@ -38,7 +38,7 @@ export class CsvBatchEntryRecordOptions implements BatchEntryRecordOptions {
 					a.definition.fieldLocator.fieldIndex -
 					b.definition.fieldLocator.fieldIndex,
 			)
-			.map((d, i) => fields[i] || "");
+			.map((_d, i) => fields[i] || "");
 
 		return orderedFields.map((f) => this.escapeField(f)).join(this.delimiter);
 	}

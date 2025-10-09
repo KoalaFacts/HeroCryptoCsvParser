@@ -4,7 +4,6 @@ import type {
 	GetTaxOptimizationFunction,
 	OptimizationConfig,
 	TaxableTransaction,
-	TaxStrategy,
 	TransactionTaxTreatment,
 } from "@/tax/contracts/function-interfaces";
 
@@ -239,7 +238,8 @@ describe("T008: Contract Test - getTaxOptimizationStrategies Function", () => {
 				expect(Array.isArray(result)).toBe(true);
 
 				// Should work without target savings
-				const { targetSavings, ...configWithoutTarget } = mockConfig;
+				const { targetSavings: _targetSavings, ...configWithoutTarget } =
+					mockConfig;
 				const resultWithoutTarget =
 					await getTaxOptimizationStrategies(configWithoutTarget);
 				expect(Array.isArray(resultWithoutTarget)).toBe(true);

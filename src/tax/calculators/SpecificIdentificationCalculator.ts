@@ -10,7 +10,6 @@ import type { AcquisitionLot, CostBasis } from "../models/CostBasis";
 import {
 	getAssetKey,
 	getBaseAmount,
-	getTransactionAsset,
 	getTransactionFee,
 	getTransactionTimestamp,
 } from "../utils/transactionHelpers";

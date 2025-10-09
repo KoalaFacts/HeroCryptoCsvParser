@@ -1,4 +1,4 @@
-import { Transaction, type TransactionType } from "../types/transactions";
+import type { TransactionType } from "../types/transactions";
 
 /**
  * Operation mapping configuration

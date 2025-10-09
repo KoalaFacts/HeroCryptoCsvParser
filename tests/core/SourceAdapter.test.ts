@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { BatchEntryRecord } from "@/core/BatchEntryRecord";
 import { type ConversionOptions, SourceAdapter } from "@/core/SourceAdapter";
 import {
@@ -33,7 +33,7 @@ class TestAdapter extends SourceAdapter<TestRecord> {
 
 	protected convertRecord(
 		record: TestRecord,
-		options?: ConversionOptions,
+		_options?: ConversionOptions,
 	): Transaction {
 		const trade: SpotTrade = {
 			type: "SPOT_TRADE",
