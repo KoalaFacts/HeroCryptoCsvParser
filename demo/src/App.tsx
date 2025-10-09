@@ -6,37 +6,53 @@ import { useState, useEffect, useCallback } from 'react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
 import jsPDF from 'jspdf';
+import { generateSampleCSV } from './utils/generateSampleData';
 
 // Helper functions to safely extract properties from different transaction types
 const getTransactionAsset = (tx: Transaction): string => {
-  // Try to get primary asset from various transaction types
-  if ('baseAsset' in tx && tx.baseAsset) {
-    // AssetAmount type
-    if (typeof tx.baseAsset === 'object' && tx.baseAsset !== null && 'asset' in tx.baseAsset) {
-      const asset = (tx.baseAsset as any).asset;
-      if (!asset) return 'N/A';
-      return typeof asset === 'string' ? asset : (asset.symbol || String(asset));
+  // Helper to extract asset symbol from AssetAmount or Asset
+  const extractAsset = (field: any): string | null => {
+    if (!field) return null;
+
+    // If it's an AssetAmount object, extract the asset
+    if (typeof field === 'object' && field !== null && 'asset' in field) {
+      const asset = field.asset;
+      if (typeof asset === 'string') return asset;
+      if (asset && typeof asset === 'object' && 'symbol' in asset) {
+        return asset.symbol || null;
+      }
     }
-    return typeof tx.baseAsset === 'string' ? tx.baseAsset : String(tx.baseAsset);
-  }
-  if ('asset' in tx && tx.asset) {
-    if (typeof tx.asset === 'object' && tx.asset !== null && 'symbol' in tx.asset) {
-      return (tx.asset as any).symbol || String(tx.asset);
+
+    // If it's an Asset object with symbol
+    if (typeof field === 'object' && field !== null && 'symbol' in field) {
+      return field.symbol || null;
     }
-    return typeof tx.asset === 'string' ? tx.asset : String(tx.asset);
-  }
-  if ('fromAsset' in tx && tx.fromAsset) {
-    if (typeof tx.fromAsset === 'object' && tx.fromAsset !== null && 'symbol' in tx.fromAsset) {
-      return (tx.fromAsset as any).symbol || String(tx.fromAsset);
+
+    // If it's a string
+    if (typeof field === 'string') return field;
+
+    return null;
+  };
+
+  // Try different field names based on transaction type
+  const fields = [
+    'fee',        // Fee
+    'reward',     // StakingReward
+    'interest',   // Interest
+    'received',   // Airdrop
+    'asset',      // Transfer, StakingDeposit, StakingWithdrawal
+    'baseAsset',  // SpotTrade
+    'fromAsset',  // Swap
+    'toAsset'     // Swap
+  ];
+
+  for (const fieldName of fields) {
+    if (fieldName in tx) {
+      const result = extractAsset((tx as any)[fieldName]);
+      if (result) return result;
     }
-    return typeof tx.fromAsset === 'string' ? tx.fromAsset : String(tx.fromAsset);
   }
-  if ('toAsset' in tx && tx.toAsset) {
-    if (typeof tx.toAsset === 'object' && tx.toAsset !== null && 'symbol' in tx.toAsset) {
-      return (tx.toAsset as any).symbol || String(tx.toAsset);
-    }
-    return typeof tx.toAsset === 'string' ? tx.toAsset : String(tx.toAsset);
-  }
+
   return 'N/A';
 };
 
@@ -54,35 +70,49 @@ const getTransactionQuoteAsset = (tx: Transaction): string | undefined => {
 };
 
 const getTransactionAmount = (tx: Transaction): string => {
-  // For SpotTrade, use baseAsset's amount (AssetAmount type)
-  if ('baseAsset' in tx && tx.baseAsset) {
-    if (typeof tx.baseAsset === 'object' && tx.baseAsset !== null && 'amount' in tx.baseAsset) {
-      const amt = (tx.baseAsset as any).amount;
-      return amt?.toString() || 'N/A';
+  // Helper to extract amount from AssetAmount
+  const extractAmount = (field: any): string | null => {
+    if (!field) return null;
+    if (typeof field === 'object' && field !== null && 'amount' in field) {
+      return field.amount?.toString() || null;
+    }
+    if (typeof field === 'object' && field !== null && 'toString' in field) {
+      return field.toString();
+    }
+    return String(field);
+  };
+
+  // Try different field names based on transaction type
+  const fields = [
+    'fee',        // Fee
+    'reward',     // StakingReward
+    'interest',   // Interest
+    'received',   // Airdrop
+    'asset',      // Transfer, StakingDeposit, StakingWithdrawal
+    'baseAsset',  // SpotTrade
+    'amount',     // Generic
+    'baseAmount',
+    'fromAmount',
+    'toAmount'
+  ];
+
+  for (const fieldName of fields) {
+    if (fieldName in tx) {
+      const result = extractAmount((tx as any)[fieldName]);
+      if (result) return result;
     }
   }
-  if ('amount' in tx && tx.amount) {
-    if (typeof tx.amount === 'object' && tx.amount !== null && 'amount' in tx.amount) {
-      // AssetAmount type
-      return (tx.amount as any).amount?.toString() || 'N/A';
-    }
-    return tx.amount.toString();
-  }
-  if ('baseAmount' in tx && tx.baseAmount) {
-    return tx.baseAmount.toString();
-  }
-  if ('fromAmount' in tx && tx.fromAmount) {
-    return tx.fromAmount.toString();
-  }
-  if ('toAmount' in tx && tx.toAmount) {
-    return tx.toAmount.toString();
-  }
+
   return 'N/A';
 };
 
 const getTransactionPrice = (tx: Transaction): string | undefined => {
   if ('price' in tx && tx.price) {
-    return tx.price.toString();
+    const priceStr = tx.price.toString();
+    // Only return if price is not zero
+    if (priceStr !== '0' && priceStr !== '0.0' && priceStr !== '0.00') {
+      return priceStr;
+    }
   }
   return undefined;
 };
@@ -104,8 +134,12 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [taxReport, setTaxReport] = useState<TaxReport | null>(null);
-  const [taxYear, setTaxYear] = useState(new Date().getFullYear());
+  const currentYear = new Date().getFullYear();
+  const [taxYear, setTaxYear] = useState(currentYear);
   const [generatingTaxReport, setGeneratingTaxReport] = useState(false);
+
+  // Generate last 10 financial years dynamically
+  const financialYears = Array.from({ length: 10 }, (_, i) => currentYear - i);
 
   const handleProcess = useCallback(async (source: string, input: string) => {
     if (!input.trim()) {
@@ -272,13 +306,29 @@ function App() {
   };
 
   const handleLoadSample = async () => {
+    setLoading(true);
+    setError('');
+
     try {
-      const response = await fetch('/samples/binance-sample.csv');
-      if (!response.ok) throw new Error('Failed to load sample data');
-      const sampleData = await response.text();
+      // Simulate loading effect for better UX
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Generate sample data dynamically based on selected source
+      let sampleData: string;
+
+      if (selectedSource === 'binance') {
+        sampleData = generateSampleCSV();
+      } else {
+        // For other exchanges (not yet implemented), show a message
+        setError(`Sample data for ${selectedSource} is not yet available. Showing Binance sample instead.`);
+        sampleData = generateSampleCSV();
+      }
+
       setCsvInput(sampleData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load sample data');
+      setError(err instanceof Error ? err.message : 'Failed to generate sample data');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -355,18 +405,16 @@ function App() {
                   </div>
 
                   <div className="form-control">
-                    <div className="relative">
-                      <select
-                        className="select select-bordered bg-base-100/50 border-base-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-base font-medium"
-                        value={selectedSource}
-                        onChange={(e) => setSelectedSource(e.target.value)}
-                      >
-                        <option value="binance">Binance Exchange</option>
-                        <option value="coinbase" disabled>Coinbase (Coming Soon)</option>
-                        <option value="kraken" disabled>Kraken (Coming Soon)</option>
-                        <option value="kucoin" disabled>KuCoin (Coming Soon)</option>
-                      </select>
-                    </div>
+                    <select
+                      className="select select-lg bg-white border-2 border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-lg font-semibold min-w-[240px] shadow-lg hover:shadow-xl"
+                      value={selectedSource}
+                      onChange={(e) => setSelectedSource(e.target.value)}
+                    >
+                      <option value="binance">Binance Exchange</option>
+                      <option value="coinbase" disabled>Coinbase (Coming Soon)</option>
+                      <option value="kraken" disabled>Kraken (Coming Soon)</option>
+                      <option value="kucoin" disabled>KuCoin (Coming Soon)</option>
+                    </select>
                   </div>
                 </div>
 
@@ -421,13 +469,23 @@ function App() {
                     {!csvInput && (
                       <button
                         type="button"
-                        className="inline-flex items-center px-4 py-2 bg-secondary/10 text-secondary rounded-xl font-medium hover:bg-secondary/20 transition-all duration-200"
+                        className="inline-flex items-center px-4 py-2 bg-secondary/10 text-secondary rounded-xl font-medium hover:bg-secondary/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={handleLoadSample}
+                        disabled={loading}
                       >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                        </svg>
-                        Load Sample Data
+                        {loading ? (
+                          <>
+                            <span className="loading loading-spinner loading-sm mr-2"></span>
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                            </svg>
+                            Load Sample Data
+                          </>
+                        )}
                       </button>
                     )}
                     {csvInput && (
@@ -468,7 +526,15 @@ function App() {
             </div>
 
             {/* Right Panel - Parsed Transactions */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-base-300/50 shadow-xl hover:shadow-2xl transition-all duration-300 h-full">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-base-300/50 shadow-xl hover:shadow-2xl transition-all duration-300 h-full relative">
+              {loading && (
+                <>
+                  <div className="absolute inset-0 bg-gray-400/20 rounded-2xl z-10 transition-opacity duration-200"></div>
+                  <div className="absolute top-4 right-4 z-20">
+                    <span className="loading loading-spinner loading-md text-primary"></span>
+                  </div>
+                </>
+              )}
               <div className="p-8 flex flex-col h-full">
                 <div className="flex justify-between items-center mb-6">
                   <div className="flex items-center space-x-3">
@@ -600,22 +666,22 @@ function App() {
                               <th className="px-6 py-4 text-left text-sm font-semibold text-base-content/80">Type</th>
                               <th className="px-6 py-4 text-left text-sm font-semibold text-base-content/80">Asset</th>
                               <th className="px-6 py-4 text-right text-sm font-semibold text-base-content/80">Amount</th>
-                              <th className="px-6 py-4 text-right text-sm font-semibold text-base-content/80">Fee</th>
                             </tr>
                           </thead>
                           <tbody>
                             {transactions.map((tx, index) => (
                               <tr
                                 key={index}
-                                className="border-b border-base-300/30 hover:bg-base-200/30 transition-all duration-200"
+                                className="border-b border-base-300/30 hover:bg-base-200/30 transition-all duration-200 animate-fadeIn"
+                                style={{ animationDelay: `${Math.min(index * 20, 500)}ms` }}
                               >
                                 <td className="px-6 py-4">
                                   <div className="flex flex-col">
                                     <span className="font-mono text-sm font-medium text-base-content">
-                                      {new Date(tx.timestamp).toLocaleDateString()}
+                                      {new Date(tx.timestamp).toISOString().split('T')[0]}
                                     </span>
                                     <span className="font-mono text-xs text-base-content/60">
-                                      {new Date(tx.timestamp).toLocaleTimeString()}
+                                      {new Date(tx.timestamp).toISOString().split('T')[1].split('.')[0]} UTC
                                     </span>
                                   </div>
                                 </td>
@@ -623,34 +689,27 @@ function App() {
                                   <span
                                     className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                                       tx.type.includes('BUY') || tx.type.includes('DEPOSIT')
-                                        ? 'bg-success/10 text-success border border-success/20'
+                                        ? 'bg-green-50 text-green-700 border border-green-200'
                                         : tx.type.includes('SELL') || tx.type.includes('WITHDRAWAL')
-                                        ? 'bg-error/10 text-error border border-error/20'
+                                        ? 'bg-red-50 text-red-700 border border-red-200'
                                         : tx.type.includes('FEE')
-                                        ? 'bg-warning/10 text-warning border border-warning/20'
-                                        : 'bg-info/10 text-info border border-info/20'
+                                        ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                        : 'bg-blue-50 text-blue-700 border border-blue-200'
                                     }`}
                                   >
                                     {tx.type}
                                   </span>
                                 </td>
                                 <td className="px-6 py-4">
-                                  <div className="flex items-center space-x-2">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full flex items-center justify-center">
-                                      <span className="text-xs font-bold text-primary">
-                                        {getTransactionAsset(tx).slice(0, 2)}
+                                  <div>
+                                    <span className="font-mono font-semibold text-base-content">
+                                      {getTransactionAsset(tx)}
+                                    </span>
+                                    {getTransactionQuoteAsset(tx) && (
+                                      <span className="text-xs text-base-content/50 ml-1">
+                                        /{getTransactionQuoteAsset(tx)}
                                       </span>
-                                    </div>
-                                    <div>
-                                      <span className="font-mono font-semibold text-base-content">
-                                        {getTransactionAsset(tx)}
-                                      </span>
-                                      {getTransactionQuoteAsset(tx) && (
-                                        <span className="text-xs text-base-content/50 ml-1">
-                                          /{getTransactionQuoteAsset(tx)}
-                                        </span>
-                                      )}
-                                    </div>
+                                    )}
                                   </div>
                                 </td>
                                 <td className="px-6 py-4 text-right">
@@ -665,18 +724,6 @@ function App() {
                                     )}
                                   </div>
                                 </td>
-                                <td className="px-6 py-4 text-right">
-                                  {(() => {
-                                    const fee = getTransactionFee(tx);
-                                    return fee.amount ? (
-                                      <div className="inline-flex items-center px-2 py-1 bg-neutral/10 text-neutral rounded-md text-xs font-medium">
-                                        {fee.amount} {fee.asset}
-                                      </div>
-                                    ) : (
-                                      <span className="text-base-content/40 text-sm">—</span>
-                                    );
-                                  })()}
-                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -684,44 +731,54 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Tax Report Section */}
-                    <div className="mt-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200/50">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                            🇦🇺 Australian Tax Report
-                            <span className="text-xs font-semibold px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">
-                              NEW
-                            </span>
-                          </h3>
-                          <p className="text-sm text-gray-600 mt-1">Generate ATO-compliant tax reports (FY runs Jul-Jun)</p>
+                    {/* Tax Report Section - Enhanced */}
+                    <div className="mt-8 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 rounded-2xl p-8 border-2 border-emerald-300/50 shadow-xl">
+                      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                              🇦🇺 Australian Tax Report
+                              <span className="text-xs font-semibold px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-md">
+                                NEW FEATURE
+                              </span>
+                            </h3>
+                            <p className="text-base text-gray-700 mt-1 font-medium">Generate ATO-compliant tax reports with CGT discount calculations</p>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <select
-                            className="select select-sm select-bordered bg-white border-emerald-200 focus:border-emerald-500 focus:outline-none"
-                            value={taxYear}
-                            onChange={(e) => setTaxYear(Number(e.target.value))}
-                          >
-                            <option value={2024}>FY 2024-25</option>
-                            <option value={2023}>FY 2023-24</option>
-                            <option value={2022}>FY 2022-23</option>
-                            <option value={2021}>FY 2021-22</option>
-                            <option value={2020}>FY 2020-21</option>
-                          </select>
+                        <div className="flex items-center gap-4">
+                          <div className="flex flex-col">
+                            <label className="text-xs font-semibold text-gray-600 mb-1">Financial Year</label>
+                            <select
+                              className="select select-lg select-bordered bg-white border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none text-base font-semibold shadow-md hover:shadow-lg transition-all"
+                              value={taxYear}
+                              onChange={(e) => setTaxYear(Number(e.target.value))}
+                            >
+                              {financialYears.map((year) => (
+                                <option key={year} value={year}>
+                                  FY {year}-{(year + 1).toString().slice(-2)}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                           <button
                             type="button"
-                            className="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-none"
+                            className="btn btn-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white border-none shadow-xl hover:shadow-2xl transition-all duration-200 mt-5"
                             onClick={handleGenerateTaxReport}
                             disabled={generatingTaxReport || transactions.length === 0}
                           >
                             {generatingTaxReport ? (
                               <>
-                                <span className="loading loading-spinner loading-xs"></span>
+                                <span className="loading loading-spinner loading-md"></span>
                                 Generating...
                               </>
                             ) : (
                               <>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
                                 Generate Report
@@ -760,26 +817,26 @@ function App() {
                             </div>
                           </div>
 
-                          <div className="flex gap-2">
+                          <div className="flex gap-3 flex-wrap">
                             <button
                               type="button"
-                              className="btn btn-sm bg-red-600 hover:bg-red-700 text-white border-none"
+                              className="btn btn-md bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200"
                               onClick={handleExportTaxReportPDF}
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                               </svg>
-                              Export PDF
+                              <span className="font-semibold">Export as PDF</span>
                             </button>
                             <button
                               type="button"
-                              className="btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none"
+                              className="btn btn-md bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200"
                               onClick={handleExportTaxReportCSV}
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                               </svg>
-                              Export CSV
+                              <span className="font-semibold">Export as CSV</span>
                             </button>
                           </div>
                         </div>
