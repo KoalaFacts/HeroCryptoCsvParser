@@ -1,6 +1,6 @@
 {
   "name": "@beingciteable/hero-csv-crypto-parser",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Universal cryptocurrency transaction parser for exchange exports, tax reporting, and portfolio tracking. Supports multiple formats beyond CSV.",
   "type": "module",
   "exports": {
@@ -48,5 +48,13 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "compression": "^1.8.1",
+    "mmkv": "^1.0.4",
+    "pako": "^2.1.0",
+    "pdfkit": "^0.17.2",
+    "rxdb": "^16.19.1",
+    "uuid": "^13.0.0"
+  }
 }

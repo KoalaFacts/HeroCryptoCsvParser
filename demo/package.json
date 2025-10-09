@@ -12,22 +12,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@beingciteable/hero-csv-crypto-parser": "^0.1.1",
-    "@tailwindcss/typography": "^0.5.16",
+    "@beingciteable/hero-csv-crypto-parser": "^0.1.2",
+    "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.13",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
-    "daisyui": "^5.1.13",
+    "daisyui": "^5.1.25",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
-    "@types/react": "^19.1.13",
+    "@types/react": "^19.1.15",
     "@types/react-dom": "^19.1.9",
-    "@vitejs/plugin-react": "^5.0.3",
+    "@vitejs/plugin-react": "^5.0.4",
     "typescript": "^5.9.2",
-    "vite": "^7.1.6"
+    "vite": "^7.1.7"
   }
 }
