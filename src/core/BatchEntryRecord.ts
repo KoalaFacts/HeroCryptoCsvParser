@@ -21,10 +21,6 @@ export abstract class BatchEntryRecord<
 	private _recordHeaders?: string[];
 	private _options?: BatchEntryRecordOptions;
 
-	protected constructor() {
-		// Initialize will be called by derived classes
-	}
-
 	private getOptions(): BatchEntryRecordOptions {
 		return this._options || CsvBatchEntryRecordOptions.Default;
 	}
