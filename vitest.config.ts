@@ -27,7 +27,7 @@ export default defineConfig({
         '**/index.ts',
         '**/*.test.ts',
         '**/*.spec.ts',
-        'src/types/transactions/**',
+        'src/types/**',
         'tests/**'
       ],
       thresholds: {
