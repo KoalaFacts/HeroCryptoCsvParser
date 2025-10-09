@@ -1,0 +1,36 @@
+User_ID,UTC_Time,Account,Operation,Coin,Change,Remark
+123456789,2024-01-15 10:30:00,Spot,Buy,BTC,0.05,
+123456789,2024-01-15 10:30:00,Spot,Fee,USDT,-2.50,Trading Fee
+123456789,2024-02-20 14:15:00,Spot,Sell,BTC,-0.02,
+123456789,2024-02-20 14:15:00,Spot,Fee,USDT,-1.20,Trading Fee
+123456789,2024-03-10 09:45:00,Spot,Staking Rewards,DOT,15.5,Staking Rewards
+123456789,2024-03-25 16:20:00,Spot,Deposit,USDT,5000,
+123456789,2024-04-12 11:00:00,Spot,Buy,ETH,2.5,
+123456789,2024-04-12 11:00:00,Spot,Fee,USDT,-5.80,Trading Fee
+123456789,2024-05-05 13:30:00,Spot,Sell,ETH,-1.0,
+123456789,2024-05-05 13:30:00,Spot,Fee,USDT,-2.30,Trading Fee
+123456789,2024-06-01 08:15:00,Spot,Savings Interest,USDC,12.35,Savings Interest
+123456789,2024-06-15 10:00:00,Spot,Small assets exchange BNB,BNB,0.0045,Small assets exchange BNB
+123456789,2024-06-15 10:00:00,Spot,Small assets exchange BNB,USDT,-0.25,Small assets exchange BNB
+123456789,2024-07-01 14:45:00,Spot,Launchpool Interest,CAKE,8.75,Launchpool Interest
+123456789,2024-07-20 09:30:00,Spot,Buy,ADA,1000,
+123456789,2024-07-20 09:30:00,Spot,Fee,USDT,-3.15,Trading Fee
+123456789,2024-08-10 16:00:00,Spot,Distribution,BNB,0.15,Referral Kickback
+123456789,2024-08-25 11:20:00,Spot,Withdraw,USDT,-1000,
+123456789,2024-08-25 11:20:00,Spot,Fee,USDT,-1.00,Withdraw Fee
+123456789,2024-09-05 12:00:00,Spot,Super BNB Mining,BNB,0.025,Super BNB Mining
+123456789,2024-09-15 10:15:00,Spot,Convert,SOL,-50,
+123456789,2024-09-15 10:15:00,Spot,Convert,USDT,2450.80,
+123456789,2024-10-01 09:00:00,Spot,Liquid Swap add,BUSD,-500,
+123456789,2024-10-01 09:00:00,Spot,Liquid Swap add,USDT,-500,
+123456789,2024-10-05 15:30:00,Spot,Liquid Swap rewards,BUSD,2.15,Liquid Swap rewards
+123456789,2024-10-20 14:00:00,Spot,ETH 2.0 Staking Rewards,ETH,0.015,ETH 2.0 Staking Rewards
+123456789,2024-11-01 08:30:00,Spot,Cash Voucher distribution,BNB,0.008,Cash Voucher distribution
+123456789,2024-11-10 11:45:00,Spot,Sell,ADA,-500,
+123456789,2024-11-10 11:45:00,Spot,Fee,USDT,-1.85,Trading Fee
+123456789,2024-12-01 10:00:00,Spot,Buy,MATIC,2500,
+123456789,2024-12-01 10:00:00,Spot,Fee,USDT,-4.25,Trading Fee
+123456789,2024-12-15 13:15:00,Spot,Airdrop Assets,ARB,125.50,Airdrop Assets
+123456789,2024-12-20 16:30:00,Spot,Simple Earn Flexible Interest,USDT,8.95,Simple Earn Flexible Interest
+123456789,2024-12-25 09:45:00,Spot,POS savings interest,DOT,3.25,POS savings interest
+123456789,2024-12-31 23:59:00,Spot,Transaction Related,BNB,0.012,Cashback Voucher
