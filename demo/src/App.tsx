@@ -1,6 +1,6 @@
 import { process } from '@beingciteable/hero-csv-crypto-parser';
 import type { Transaction, SourceProcessResult } from '@beingciteable/hero-csv-crypto-parser';
-import { generateTaxReport, exportTaxReportPDF, exportSummaryToCSV } from '@beingciteable/hero-csv-crypto-parser/tax';
+import { generateTaxReport, exportSummaryToCSV } from '@beingciteable/hero-csv-crypto-parser/tax';
 import type { TaxReport } from '@beingciteable/hero-csv-crypto-parser/tax';
 import { useState, useEffect, useCallback } from 'react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
@@ -177,28 +177,6 @@ function App() {
     }
   };
 
-  const handleExportTaxReportPDF = async () => {
-    if (!taxReport) return;
-
-    try {
-      const pdfBuffer = await exportTaxReportPDF(taxReport, {
-        includeTransactionDetails: true,
-        includeOptimizationStrategies: true,
-      });
-
-      // Convert Buffer to Uint8Array for browser compatibility
-      const uint8Array = new Uint8Array(pdfBuffer);
-      const blob = new Blob([uint8Array], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `tax-report-AU-${taxYear}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'PDF export failed');
-    }
-  };
 
   const handleExportTaxReportCSV = async () => {
     if (!taxReport) return;
@@ -707,27 +685,22 @@ function App() {
                             </div>
                           </div>
 
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              className="btn btn-sm bg-red-600 hover:bg-red-700 text-white border-none"
-                              onClick={handleExportTaxReportPDF}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                              </svg>
-                              Export PDF
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none"
-                              onClick={handleExportTaxReportCSV}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                              Export CSV
-                            </button>
+                          <div className="flex flex-col gap-3">
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                className="btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none"
+                                onClick={handleExportTaxReportCSV}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Export CSV
+                              </button>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                              💡 PDF export available when using the npm package in Node.js
+                            </p>
                           </div>
                         </div>
                       )}
