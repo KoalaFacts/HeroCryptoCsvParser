@@ -52,6 +52,9 @@ jobs:
             npm install
           fi
 
+      - name: Build core package first
+        run: npm run build --workspace=packages/core
+
       - name: TypeScript type checking
         run: npm run typecheck
 
@@ -60,7 +63,7 @@ jobs:
         env:
           CI: true
 
-      - name: Build package
+      - name: Build all packages
         run: npm run build
 
       - name: Upload test coverage (Ubuntu Node 22 only)
