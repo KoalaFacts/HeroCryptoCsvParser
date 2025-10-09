@@ -5,49 +5,53 @@
  * These models implement the interface contracts defined in the function-interfaces.ts file.
  */
 
-// Core Models
-export { TaxJurisdictionModel, type TaxJurisdiction, type CostBasisMethod } from './TaxJurisdiction';
-export { TaxReportModel, type TaxReport } from './TaxReport';
-export { TaxableTransactionModel, type TaxableTransaction } from './TaxableTransaction';
-export { TaxPeriodModel, type TaxPeriod } from './TaxPeriod';
-
 // Cost Basis Models
 export {
-  CostBasisModel,
-  AcquisitionLotModel,
-  type CostBasis,
-  type AcquisitionLot
-} from './CostBasis';
-
+	type AcquisitionLot,
+	AcquisitionLotModel,
+	type CostBasis,
+	CostBasisModel,
+} from "./CostBasis";
+export {
+	type TaxableTransaction,
+	TaxableTransactionModel,
+} from "./TaxableTransaction";
+// Core Models
+export {
+	type CostBasisMethod,
+	type TaxJurisdiction,
+	TaxJurisdictionModel,
+} from "./TaxJurisdiction";
+export { type TaxPeriod, TaxPeriodModel } from "./TaxPeriod";
+export { type TaxReport, TaxReportModel } from "./TaxReport";
+export {
+	type RuleCategory,
+	type TaxRule,
+	TaxRuleModel,
+} from "./TaxRule";
 // Strategy and Rules Models
 export {
-  TaxStrategyModel,
-  type TaxStrategy,
-  type StrategyType,
-  type ComplianceLevel
-} from './TaxStrategy';
-
-export {
-  TaxRuleModel,
-  type TaxRule,
-  type RuleCategory
-} from './TaxRule';
+	type ComplianceLevel,
+	type StrategyType,
+	type TaxStrategy,
+	TaxStrategyModel,
+} from "./TaxStrategy";
 
 // Summary Models
 export {
-  TaxSummaryModel,
-  AssetSummaryModel,
-  ExchangeSummaryModel,
-  MonthlySummaryModel,
-  type TaxSummary,
-  type AssetSummary,
-  type ExchangeSummary,
-  type MonthlySummary
-} from './TaxSummary';
+	type AssetSummary,
+	AssetSummaryModel,
+	type ExchangeSummary,
+	ExchangeSummaryModel,
+	type MonthlySummary,
+	MonthlySummaryModel,
+	type TaxSummary,
+	TaxSummaryModel,
+} from "./TaxSummary";
 
 // Treatment Models
 export {
-  TransactionTaxTreatmentModel,
-  type TransactionTaxTreatment,
-  type TaxEventType
-} from './TransactionTaxTreatment';
+	type TaxEventType,
+	type TransactionTaxTreatment,
+	TransactionTaxTreatmentModel,
+} from "./TransactionTaxTreatment";

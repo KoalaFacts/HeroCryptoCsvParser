@@ -4,27 +4,26 @@
  * Exports all storage adapter implementations and utilities.
  */
 
+// Platform-specific adapters
+export { IndexedDBAdapter } from "./IndexedDBAdapter";
+export { MMKVAdapter } from "./MMKVAdapter";
+export { RxDBAdapter } from "./RxDBAdapter";
 // Core adapter interface
 export type {
-  StorageAdapter,
-  TransactionFilter,
-  TaxReportSummary,
-  StorageStats
-} from './StorageAdapter';
-
-// Platform-specific adapters
-export { IndexedDBAdapter } from './IndexedDBAdapter';
-export { MMKVAdapter } from './MMKVAdapter';
-export { RxDBAdapter } from './RxDBAdapter';
+	StorageAdapter,
+	StorageStats,
+	TaxReportSummary,
+	TransactionFilter,
+} from "./StorageAdapter";
 
 // Storage factory
 export {
-  StorageFactory,
-  createStorageAdapter,
-  detectStoragePlatform,
-  type StoragePlatform,
-  type StorageFactoryConfig
-} from './StorageFactory';
+	createStorageAdapter,
+	detectStoragePlatform,
+	StorageFactory,
+	type StorageFactoryConfig,
+	type StoragePlatform,
+} from "./StorageFactory";
 
 // Storage manager
-export { StorageManager } from './StorageManager';
+export { StorageManager } from "./StorageManager";

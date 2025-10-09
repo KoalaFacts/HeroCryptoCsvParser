@@ -1,67 +1,61 @@
 {
-  "name": "@beingciteable/hero-csv-crypto-parser",
-  "version": "0.2.0",
-  "description": "Universal cryptocurrency transaction parser for exchange exports, tax reporting, and portfolio tracking. Supports multiple formats beyond CSV.",
-  "type": "module",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./tax": {
-      "import": "./dist/tax/index.js",
-      "types": "./dist/tax/index.d.ts"
-    }
-  },
-  "scripts": {
-    "build": "npm run clean && tsc -p tsconfig.build.json",
-    "dev": "tsc --watch -p tsconfig.build.json",
-    "clean": "rimraf dist",
-    "test": "npm run typecheck && vitest",
-    "test:ui": "npm run typecheck && vitest --ui",
-    "test:coverage": "npm run typecheck && vitest --coverage",
-    "typecheck": "tsc --noEmit",
-    "demo": "cd demo && npm run dev",
-    "demo:build": "cd demo && npm run build",
-    "demo:preview": "cd demo && npm run preview",
-    "demo:install": "cd demo && npm install",
-    "generate:samples": "tsx demo/scripts/generateSampleData.ts > demo/public/samples/binance-sample.csv"
-  },
-  "keywords": [
-    "cryptocurrency",
-    "cryptocurrency transaction parser"
-  ],
-  "author": "BeingCiteable",
-  "license": "MIT",
-  "homepage": "https://github.com/BeingCiteable/hero-crypto-csv-parser#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/BeingCiteable/hero-crypto-csv-parser.git"
-  },
-  "bugs": {
-    "url": "https://github.com/BeingCiteable/hero-crypto-csv-parser/issues"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.2.5",
-    "@types/node": "^24.7.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "rimraf": "^6.0.1",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
-  },
-  "files": [
-    "dist"
-  ],
-  "dependencies": {
-    "compression": "^1.8.1",
-    "mmkv": "^1.0.4",
-    "pako": "^2.1.0",
-    "pdfkit": "^0.17.2",
-    "rxdb": "^16.19.1",
-    "uuid": "^13.0.0"
-  }
+	"name": "@beingciteable/hero-csv-crypto-parser",
+	"version": "0.2.0",
+	"description": "Universal cryptocurrency transaction parser for exchange exports, tax reporting, and portfolio tracking. Supports multiple formats beyond CSV.",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./tax": {
+			"import": "./dist/tax/index.js",
+			"types": "./dist/tax/index.d.ts"
+		}
+	},
+	"scripts": {
+		"build": "npm run lint && npm run clean && tsc -p tsconfig.build.json",
+		"dev": "tsc --watch -p tsconfig.build.json",
+		"clean": "rimraf dist",
+		"lint": "biome check . --diagnostic-level=error",
+		"lint:fix": "biome check . --write",
+		"format": "biome format . --write",
+		"test": "npm run lint && npm run typecheck && vitest",
+		"test:ui": "npm run typecheck && vitest --ui",
+		"test:coverage": "npm run typecheck && vitest --coverage",
+		"typecheck": "tsc --noEmit",
+		"demo": "cd demo && npm run dev",
+		"demo:build": "cd demo && npm run build",
+		"demo:preview": "cd demo && npm run preview",
+		"demo:install": "cd demo && npm install"
+	},
+	"keywords": [
+		"cryptocurrency",
+		"cryptocurrency transaction parser"
+	],
+	"author": "BeingCiteable",
+	"license": "MIT",
+	"homepage": "https://github.com/BeingCiteable/hero-crypto-csv-parser#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/BeingCiteable/hero-crypto-csv-parser.git"
+	},
+	"bugs": {
+		"url": "https://github.com/BeingCiteable/hero-crypto-csv-parser/issues"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.2.5",
+		"@types/node": "^24.7.0",
+		"@vitest/coverage-v8": "^3.2.4",
+		"rimraf": "^6.0.1",
+		"tsx": "^4.20.6",
+		"typescript": "^5.9.3",
+		"vitest": "^3.2.4"
+	},
+	"files": [
+		"dist"
+	]
 }

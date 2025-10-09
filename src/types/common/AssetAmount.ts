@@ -1,9 +1,9 @@
-import { Asset } from './Asset';
-import { Amount } from './Amount';
-import { FiatValue } from './FiatValue';
+import type { Amount } from "./Amount";
+import type { Asset } from "./Asset";
+import type { FiatValue } from "./FiatValue";
 
 export interface AssetAmount {
-  asset: Asset;
-  amount: Amount;
-  fiatValue?: FiatValue;
+	asset: Asset;
+	amount: Amount;
+	fiatValue?: FiatValue;
 }

@@ -1,35 +1,36 @@
 // Union type of all transaction types
-import { SpotTrade } from './SpotTrade';
-import { Transfer } from './Transfer';
-import { StakingDeposit } from './StakingDeposit';
-import { StakingWithdrawal } from './StakingWithdrawal';
-import { StakingReward } from './StakingReward';
-import { Swap } from './Swap';
-import { LiquidityAdd } from './LiquidityAdd';
-import { LiquidityRemove } from './LiquidityRemove';
-import { Airdrop } from './Airdrop';
-import { Fee } from './Fee';
-import { Loan } from './Loan';
-import { Interest } from './Interest';
-import { MarginTrade } from './MarginTrade';
-import { FuturesTrade } from './FuturesTrade';
-import { Unknown } from './Unknown';
+
+import type { Airdrop } from "./Airdrop";
+import type { Fee } from "./Fee";
+import type { FuturesTrade } from "./FuturesTrade";
+import type { Interest } from "./Interest";
+import type { LiquidityAdd } from "./LiquidityAdd";
+import type { LiquidityRemove } from "./LiquidityRemove";
+import type { Loan } from "./Loan";
+import type { MarginTrade } from "./MarginTrade";
+import type { SpotTrade } from "./SpotTrade";
+import type { StakingDeposit } from "./StakingDeposit";
+import type { StakingReward } from "./StakingReward";
+import type { StakingWithdrawal } from "./StakingWithdrawal";
+import type { Swap } from "./Swap";
+import type { Transfer } from "./Transfer";
+import type { Unknown } from "./Unknown";
 
 export type Transaction =
-  | SpotTrade
-  | Transfer
-  | StakingDeposit
-  | StakingWithdrawal
-  | StakingReward
-  | Swap
-  | LiquidityAdd
-  | LiquidityRemove
-  | Airdrop
-  | Fee
-  | Loan
-  | Interest
-  | MarginTrade
-  | FuturesTrade
-  | Unknown;
+	| SpotTrade
+	| Transfer
+	| StakingDeposit
+	| StakingWithdrawal
+	| StakingReward
+	| Swap
+	| LiquidityAdd
+	| LiquidityRemove
+	| Airdrop
+	| Fee
+	| Loan
+	| Interest
+	| MarginTrade
+	| FuturesTrade
+	| Unknown;
 
-export type TransactionType = Transaction['type'];
+export type TransactionType = Transaction["type"];
