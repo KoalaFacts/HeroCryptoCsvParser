@@ -1,5 +1,5 @@
 {
-  "name": "demo",
+  "name": "@beingciteable/hero-csv-crypto-parser-demo",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -9,10 +9,11 @@
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "format": "biome format . --write",
+    "typecheck": "tsc -b",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@beingciteable/hero-csv-crypto-parser": "file:..",
+    "@beingciteable/hero-csv-crypto-parser": "file:../core",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.14",
     "@vercel/analytics": "^1.5.0",

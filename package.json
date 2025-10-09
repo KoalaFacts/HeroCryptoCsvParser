@@ -1,38 +1,32 @@
 {
-  "name": "@beingciteable/hero-csv-crypto-parser",
+  "name": "@beingciteable/hero-csv-crypto-parser-workspace",
   "version": "0.2.0",
-  "description": "Universal cryptocurrency transaction parser for exchange exports, tax reporting, and portfolio tracking. Supports multiple formats beyond CSV.",
+  "private": true,
+  "description": "Universal cryptocurrency transaction parser monorepo with core library and demo",
   "type": "module",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./tax": {
-      "import": "./dist/tax/index.js",
-      "types": "./dist/tax/index.d.ts"
-    }
-  },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "npm run lint && npm run clean && tsc -p tsconfig.build.json",
-    "dev": "tsc --watch -p tsconfig.build.json",
-    "clean": "rimraf dist",
-    "lint": "biome check . --diagnostic-level=error",
+    "build": "npm run build --workspace=packages/core && npm run build --workspace=packages/demo",
+    "dev": "npm run dev --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "biome check . --write",
     "format": "biome format . --write",
     "format:check": "biome format .",
-    "test": "npm run lint && npm run typecheck && vitest",
-    "test:ui": "npm run typecheck && vitest --ui",
-    "test:coverage": "npm run typecheck && vitest --coverage",
-    "typecheck": "tsc --noEmit",
-    "demo": "cd demo && npm run dev",
-    "demo:build": "cd demo && npm run build",
-    "demo:preview": "cd demo && npm run preview",
-    "demo:install": "cd demo && npm install"
+    "test": "npm run test --workspace=packages/core",
+    "test:ui": "npm run test:ui --workspace=packages/core",
+    "test:coverage": "npm run test:coverage --workspace=packages/core",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "demo": "npm run dev --workspace=packages/demo",
+    "demo:build": "npm run build --workspace=packages/demo",
+    "demo:preview": "npm run preview --workspace=packages/demo"
   },
   "keywords": [
     "cryptocurrency",
-    "cryptocurrency transaction parser"
+    "cryptocurrency transaction parser",
+    "cryptocurrency tax reporting"
   ],
   "author": "BeingCiteable",
   "license": "MIT",
@@ -55,8 +49,5 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

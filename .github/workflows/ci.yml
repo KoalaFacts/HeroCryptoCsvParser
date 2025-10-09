@@ -68,7 +68,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage/
+          path: packages/core/coverage/
           retention-days: 7
 
       - name: Upload build artifacts (Ubuntu Node 22 only)
@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist-artifacts
-          path: dist/
+          path: packages/core/dist/
           retention-days: 7
 
       - name: Verify package integrity
@@ -161,13 +161,13 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: dist-artifacts
-          path: dist/
+          path: packages/core/dist/
 
       - name: Check if version changed
         id: version-check
         shell: bash
         run: |
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          CURRENT_VERSION=$(node -p "require('./packages/core/package.json').version")
 
           # Check if this version exists on npm
           if npm view @beingciteable/hero-csv-crypto-parser@$CURRENT_VERSION version 2>/dev/null; then
@@ -185,16 +185,16 @@ jobs:
         shell: bash
         run: |
           echo "Verifying package structure..."
-          ls -la dist/
+          ls -la packages/core/dist/
 
           # Verify essential files exist
-          if [ ! -f "dist/index.js" ]; then
-            echo "Error: dist/index.js not found"
+          if [ ! -f "packages/core/dist/index.js" ]; then
+            echo "Error: packages/core/dist/index.js not found"
             exit 1
           fi
 
-          if [ ! -f "dist/index.d.ts" ]; then
-            echo "Error: dist/index.d.ts not found"
+          if [ ! -f "packages/core/dist/index.d.ts" ]; then
+            echo "Error: packages/core/dist/index.d.ts not found"
             exit 1
           fi
 
@@ -202,6 +202,7 @@ jobs:
 
       - name: Publish to NPM
         if: steps.version-check.outputs.should_publish == 'true'
+        working-directory: packages/core
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -323,11 +324,11 @@ jobs:
       - name: Verify package.json integrity
         shell: bash
         run: |
-          echo "Verifying package.json configuration..."
+          echo "Verifying core package.json configuration..."
 
           # Check for required fields
           node -e "
-            const pkg = require('./package.json');
+            const pkg = require('./packages/core/package.json');
             const required = ['name', 'version', 'description', 'license', 'exports'];
             const missing = required.filter(field => !pkg[field]);
 
@@ -380,7 +381,7 @@ jobs:
           echo "Analyzing bundle size..."
 
           # Get the size of the main export
-          MAIN_SIZE=$(stat -c%s "dist/index.js" 2>/dev/null || stat -f%z "dist/index.js" 2>/dev/null || echo "0")
+          MAIN_SIZE=$(stat -c%s "packages/core/dist/index.js" 2>/dev/null || stat -f%z "packages/core/dist/index.js" 2>/dev/null || echo "0")
           MAIN_SIZE_KB=$((MAIN_SIZE / 1024))
 
           echo "📦 Bundle Analysis:"
@@ -388,8 +389,8 @@ jobs:
 
           # List all files in dist with sizes
           echo ""
-          echo "📁 Dist contents:"
-          ls -lah dist/ || true
+          echo "📁 Core package dist contents:"
+          ls -lah packages/core/dist/ || true
 
           # Check if bundle size is reasonable (warn if > 1MB)
           if [ $MAIN_SIZE -gt 1048576 ]; then
