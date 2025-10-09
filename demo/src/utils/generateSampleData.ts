@@ -265,7 +265,7 @@ class SampleDataGenerator {
 
     // Only generate deposits that are not in the future
     deposits.forEach(date => {
-      if (date <= now) {
+      if (date <= endDate) {
         this.generateDeposit(date);
       }
     });
@@ -278,18 +278,18 @@ class SampleDataGenerator {
       monthDate.setMonth(startDate.getMonth() + month);
 
       // Skip future months
-      if (monthDate > now) break;
+      if (monthDate > endDate) break;
 
       // Calculate end of month, but not exceeding today
       const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
       const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
-      const effectiveEnd = monthEnd > now ? now : monthEnd;
+      const effectiveEnd = monthEnd > endDate ? endDate : monthEnd;
 
       // 2-4 buys per month
       const buyCount = randomInt(2, 4);
       for (let i = 0; i < buyCount; i++) {
         const date = randomDate(monthStart, effectiveEnd);
-        if (date <= now) {
+        if (date <= endDate) {
           this.generateBuy(date);
         }
       }
@@ -299,7 +299,7 @@ class SampleDataGenerator {
         const sellCount = randomInt(1, 2);
         for (let i = 0; i < sellCount; i++) {
           const date = randomDate(monthStart, effectiveEnd);
-          if (date <= now) {
+          if (date <= endDate) {
             this.generateSell(date);
           }
         }
@@ -308,14 +308,14 @@ class SampleDataGenerator {
       // Monthly rewards
       if (month % 1 === 0) {
         const date = randomDate(monthStart, effectiveEnd);
-        if (date <= now) {
+        if (date <= endDate) {
           this.generateStakingReward(date);
         }
       }
 
       if (month % 1 === 0) {
         const date = randomDate(monthStart, effectiveEnd);
-        if (date <= now) {
+        if (date <= endDate) {
           this.generateInterest(date);
         }
       }
@@ -323,14 +323,14 @@ class SampleDataGenerator {
       // Less frequent events
       if (month % 3 === 0) {
         const date = randomDate(monthStart, effectiveEnd);
-        if (date <= now) {
+        if (date <= endDate) {
           this.generateDistribution(date);
         }
       }
 
       if (month % 5 === 0 && month > 5) {
         const date = randomDate(monthStart, effectiveEnd);
-        if (date <= now) {
+        if (date <= endDate) {
           this.generateAirdrop(date);
         }
       }

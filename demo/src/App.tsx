@@ -660,12 +660,12 @@ function App() {
                     <div className="flex-1 bg-base-100/50 rounded-xl border border-base-300/50 overflow-hidden">
                       <div className="overflow-x-auto max-h-96">
                         <table className="w-full">
-                          <thead className="sticky top-0 bg-base-200/80 backdrop-blur-sm border-b border-base-300/50">
+                          <thead className="sticky top-0 bg-white/85 backdrop-blur-lg border-b-2 border-gray-300 shadow-sm z-10">
                             <tr>
-                              <th className="px-6 py-4 text-left text-sm font-semibold text-base-content/80">Time</th>
-                              <th className="px-6 py-4 text-left text-sm font-semibold text-base-content/80">Type</th>
-                              <th className="px-6 py-4 text-left text-sm font-semibold text-base-content/80">Asset</th>
-                              <th className="px-6 py-4 text-right text-sm font-semibold text-base-content/80">Amount</th>
+                              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Time</th>
+                              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
+                              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Asset</th>
+                              <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Amount</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -797,9 +797,9 @@ function App() {
                                 ${taxReport.summary.totalCapitalGains.toLocaleString()}
                               </p>
                             </div>
-                            <div className="bg-teal-50 rounded-lg p-3">
-                              <p className="text-xs text-teal-700 font-medium mb-1">CGT Discount</p>
-                              <p className="text-lg font-bold text-teal-900">
+                            <div className="bg-amber-50 rounded-lg p-3">
+                              <p className="text-xs text-amber-700 font-medium mb-1">CGT Discount</p>
+                              <p className="text-lg font-bold text-amber-900">
                                 ${taxReport.summary.cgtDiscount.toLocaleString()}
                               </p>
                             </div>
