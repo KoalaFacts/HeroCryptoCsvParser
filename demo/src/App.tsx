@@ -593,10 +593,132 @@ function App() {
               </div>
             </div>
 
-            {/* Community Contribution Section */}
+            {/* Two Column Layout for Large Screens */}
             <div className="mt-16 px-6">
-              <div className="max-w-6xl mx-auto">
-                <div className="relative bg-gradient-to-br from-orange-50 to-amber-50 rounded-3xl p-12 border border-orange-200/50">
+              <div className="grid lg:grid-cols-3 gap-8">
+
+                {/* NEW: Tax Reporting Feature - Takes 2/3 width */}
+                <div className="lg:col-span-2 bg-gradient-to-br from-emerald-50 to-teal-50 p-8 lg:p-12 rounded-2xl overflow-hidden relative">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl"></div>
+
+                  <div className="relative">
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                      <h2 className="text-3xl font-bold text-gray-900 mb-3 flex items-center justify-center gap-3">
+                        🇦🇺 Australian Tax Reports
+                        <span className="inline-flex items-center px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold">
+                          🆕 NEW
+                        </span>
+                      </h2>
+                      <p className="text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                        Privacy-first cryptocurrency tax reporting. Generate ATO-compliant reports entirely on your device - no data ever leaves your browser.
+                      </p>
+                    </div>
+
+                    {/* Two-column: Code Example + CTA/Features */}
+                    <div className="grid lg:grid-cols-2 gap-6">
+                      {/* Left: Code Example */}
+                      <div>
+                        <div className="bg-gray-900 rounded-2xl p-5 overflow-hidden h-full">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-emerald-400 font-mono text-xs">tax-report.ts</span>
+                            <span className="text-gray-500 text-xs">TypeScript</span>
+                          </div>
+                          <pre className="text-xs text-gray-300 overflow-x-auto leading-relaxed">
+{`import { generateTaxReport } from
+ 'hero-crypto-csv-parser/tax';
+
+const report = await generateTaxReport({
+  jurisdictionCode: 'AU',
+  taxYear: 2024,
+  transactions: myTransactions
+});
+
+// Capital gains, CGT discounts,
+// net taxable amount - all calculated
+console.log(report.summary);`}
+                          </pre>
+                        </div>
+                      </div>
+
+                      {/* Right: Features & CTA */}
+                      <div className="space-y-6">
+                        {/* Key Features */}
+                        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/30">
+                          <h3 className="text-lg font-bold text-gray-900 mb-4">Key Features</h3>
+                          <div className="space-y-3">
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>100% Privacy</strong> - Zero external API calls</span>
+                            </div>
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>ATO Compliant</strong> - CGT discount & FIFO</span>
+                            </div>
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>Lightning Fast</strong> - 100k+ tx in &lt;30s</span>
+                            </div>
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>DeFi Support</strong> - Staking, yield, LP tokens</span>
+                            </div>
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>PDF & ATO XML</strong> - Professional reports</span>
+                            </div>
+                            <div className="flex items-start space-x-2">
+                              <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-sm text-gray-900"><strong>Tax Optimization</strong> - 5 strategy types</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* CTA Buttons */}
+                        <div className="flex flex-col gap-3">
+                          <a
+                            href="https://github.com/BeingCiteable/HeroCryptoCsvParser#-tax-reporting-new"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
+                          >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Read Documentation
+                          </a>
+                          <a
+                            href="https://github.com/BeingCiteable/HeroCryptoCsvParser/tree/main/docs"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-6 py-3 bg-white text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50 transition-all duration-200 border border-emerald-200 text-sm"
+                          >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            View Examples
+                          </a>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+                {/* Community Contribution Section - Takes 1/3 width */}
+                <div className="relative bg-gradient-to-br from-orange-50 to-amber-50 p-8 lg:p-12 rounded-2xl border border-orange-200/50">
                   <div className="absolute top-6 right-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -606,87 +728,86 @@ function App() {
                   </div>
 
                   <div className="text-center">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-3">
                       Help Us Support Your Exchange
                     </h2>
-                    <p className="text-xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
+                    <p className="text-lg text-gray-700 mb-6 leading-relaxed">
                       We're building universal cryptocurrency parser support! Currently supporting <strong>Binance</strong> with 150+ transaction patterns.
-                      Help us add your favorite exchange by sharing anonymized CSV samples.
                     </p>
 
                     {/* Exchange Status Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-green-200">
-                        <div className="text-green-600 font-semibold mb-1">✅ Binance</div>
-                        <div className="text-sm text-gray-600">Full Support</div>
+                    <div className="grid grid-cols-2 gap-3 mb-6">
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-green-200">
+                        <div className="text-green-600 font-semibold text-sm mb-1">✅ Binance</div>
+                        <div className="text-xs text-gray-600">Full Support</div>
                       </div>
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-yellow-200">
-                        <div className="text-yellow-600 font-semibold mb-1">🔄 Coinbase</div>
-                        <div className="text-sm text-gray-600">In Progress</div>
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-yellow-200">
+                        <div className="text-yellow-600 font-semibold text-sm mb-1">🔄 Coinbase</div>
+                        <div className="text-xs text-gray-600">In Progress</div>
                       </div>
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-blue-200">
-                        <div className="text-blue-600 font-semibold mb-1">📝 Kraken</div>
-                        <div className="text-sm text-gray-600">Samples Needed</div>
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-blue-200">
+                        <div className="text-blue-600 font-semibold text-sm mb-1">📝 Kraken</div>
+                        <div className="text-xs text-gray-600">Samples Needed</div>
                       </div>
-                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-purple-200">
-                        <div className="text-purple-600 font-semibold mb-1">🚀 KuCoin</div>
-                        <div className="text-sm text-gray-600">Samples Needed</div>
+                      <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-purple-200">
+                        <div className="text-purple-600 font-semibold text-sm mb-1">🚀 KuCoin</div>
+                        <div className="text-xs text-gray-600">Samples Needed</div>
                       </div>
                     </div>
 
                     {/* How to Contribute */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-orange-200/50 mb-8">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-6">How to Contribute</h3>
-                      <div className="grid md:grid-cols-3 gap-6 text-left">
-                        <div className="flex items-start space-x-3">
-                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                            <span className="text-orange-600 font-bold">1</span>
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-orange-200/50 mb-6">
+                      <h3 className="text-base font-bold text-gray-900 mb-3">How to Contribute</h3>
+                      <div className="space-y-3 text-left">
+                        <div className="flex items-start space-x-2">
+                          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-orange-600 font-bold text-xs">1</span>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Export Your Data</h4>
-                            <p className="text-gray-600 text-sm">Download transaction history from your exchange (CSV format)</p>
+                            <h4 className="font-semibold text-gray-900 text-sm mb-1">Export Data</h4>
+                            <p className="text-gray-600 text-xs">Download CSV from exchange</p>
                           </div>
                         </div>
-                        <div className="flex items-start space-x-3">
-                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                            <span className="text-orange-600 font-bold">2</span>
+                        <div className="flex items-start space-x-2">
+                          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-orange-600 font-bold text-xs">2</span>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Anonymize Safely</h4>
-                            <p className="text-gray-600 text-sm">Remove personal data (keep only structure and transaction types)</p>
+                            <h4 className="font-semibold text-gray-900 text-sm mb-1">Anonymize</h4>
+                            <p className="text-gray-600 text-xs">Remove personal data</p>
                           </div>
                         </div>
-                        <div className="flex items-start space-x-3">
-                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                            <span className="text-orange-600 font-bold">3</span>
+                        <div className="flex items-start space-x-2">
+                          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-orange-600 font-bold text-xs">3</span>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900 mb-2">Share with Us</h4>
-                            <p className="text-gray-600 text-sm">Open a GitHub issue with your anonymized sample</p>
+                            <h4 className="font-semibold text-gray-900 text-sm mb-1">Share</h4>
+                            <p className="text-gray-600 text-xs">Open GitHub issue</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <div className="flex flex-col gap-3">
                       <a
                         href="https://github.com/BeingCiteable/HeroCryptoCsvParser/issues/new?assignees=&labels=exchange-request&template=exchange_support_request.md&title=Add+support+for+[Exchange+Name]"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                        className="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
                       >
-                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
-                        Submit Exchange Request
+                        Submit Request
                       </a>
                       <a
                         href="https://github.com/BeingCiteable/HeroCryptoCsvParser/discussions"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center px-8 py-4 bg-white text-orange-600 rounded-xl font-semibold hover:bg-orange-50 transition-all duration-200 border border-orange-200"
+                        className="inline-flex items-center justify-center px-5 py-2.5 bg-white text-orange-600 rounded-xl font-semibold hover:bg-orange-50 transition-all duration-200 border border-orange-200 text-sm"
                       >
-                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         Join Discussion
@@ -694,15 +815,14 @@ function App() {
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
-
-            {/* Call-to-Action */}
             <div className="mt-16 px-6 relative overflow-hidden">
               <div className="inset-0 bg-gradient-to-r from-primary to-secondary rounded-3xl"></div>
               <div className="relative bg-gradient-to-r from-primary/95 to-secondary/95 rounded-3xl p-12 text-center">
-                <h2 className="text-4xl font-bold text-white mb-6">Ready for Production?</h2>
-                <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+                <h2 className="text-3xl font-bold text-white mb-6">Ready for Production?</h2>
+                <p className="text-lg text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
                   This demo showcases the Hero Crypto CSV Parser library. Integrate the npm package into your production applications for enterprise-grade transaction processing.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
