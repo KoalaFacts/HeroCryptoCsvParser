@@ -2,21 +2,21 @@ import type { AssetAmount } from "../common/AssetAmount";
 import type { BaseTransaction } from "./BaseTransaction";
 
 export interface Swap extends BaseTransaction {
-	type: "SWAP";
+  type: "SWAP";
 
-	// Swap details
-	from: AssetAmount;
-	to: AssetAmount;
+  // Swap details
+  from: AssetAmount;
+  to: AssetAmount;
 
-	// Route information
-	route?: {
-		protocol?: string; // Uniswap, SushiSwap, etc.
-		pools?: string[];
-		slippage?: string;
-	};
+  // Route information
+  route?: {
+    protocol?: string; // Uniswap, SushiSwap, etc.
+    pools?: string[];
+    slippage?: string;
+  };
 
-	// Price and fees
-	price?: string;
-	fee?: AssetAmount;
-	gasUsed?: AssetAmount;
+  // Price and fees
+  price?: string;
+  fee?: AssetAmount;
+  gasUsed?: AssetAmount;
 }

@@ -16,57 +16,57 @@ import type { Transfer } from "./Transfer";
 
 // Type guards for each transaction type
 export function isSpotTrade(tx: Transaction): tx is SpotTrade {
-	return tx.type === "SPOT_TRADE";
+  return tx.type === "SPOT_TRADE";
 }
 
 export function isTransfer(tx: Transaction): tx is Transfer {
-	return tx.type === "TRANSFER";
+  return tx.type === "TRANSFER";
 }
 
 export function isStakingDeposit(tx: Transaction): tx is StakingDeposit {
-	return tx.type === "STAKING_DEPOSIT";
+  return tx.type === "STAKING_DEPOSIT";
 }
 
 export function isStakingWithdrawal(tx: Transaction): tx is StakingWithdrawal {
-	return tx.type === "STAKING_WITHDRAWAL";
+  return tx.type === "STAKING_WITHDRAWAL";
 }
 
 export function isStakingReward(tx: Transaction): tx is StakingReward {
-	return tx.type === "STAKING_REWARD";
+  return tx.type === "STAKING_REWARD";
 }
 
 export function isSwap(tx: Transaction): tx is Swap {
-	return tx.type === "SWAP";
+  return tx.type === "SWAP";
 }
 
 export function isLiquidityAdd(tx: Transaction): tx is LiquidityAdd {
-	return tx.type === "LIQUIDITY_ADD";
+  return tx.type === "LIQUIDITY_ADD";
 }
 
 export function isLiquidityRemove(tx: Transaction): tx is LiquidityRemove {
-	return tx.type === "LIQUIDITY_REMOVE";
+  return tx.type === "LIQUIDITY_REMOVE";
 }
 
 export function isAirdrop(tx: Transaction): tx is Airdrop {
-	return tx.type === "AIRDROP";
+  return tx.type === "AIRDROP";
 }
 
 export function isFee(tx: Transaction): tx is Fee {
-	return tx.type === "FEE";
+  return tx.type === "FEE";
 }
 
 export function isLoan(tx: Transaction): tx is Loan {
-	return tx.type === "LOAN";
+  return tx.type === "LOAN";
 }
 
 export function isInterest(tx: Transaction): tx is Interest {
-	return tx.type === "INTEREST";
+  return tx.type === "INTEREST";
 }
 
 export function isMarginTrade(tx: Transaction): tx is MarginTrade {
-	return tx.type === "MARGIN_TRADE";
+  return tx.type === "MARGIN_TRADE";
 }
 
 export function isFuturesTrade(tx: Transaction): tx is FuturesTrade {
-	return tx.type === "FUTURES_TRADE";
+  return tx.type === "FUTURES_TRADE";
 }

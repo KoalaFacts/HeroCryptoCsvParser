@@ -18,201 +18,201 @@
  */
 
 import {
-	createMockSpotTrade,
-	createMockStakingReward,
+  createMockSpotTrade,
+  createMockStakingReward,
 } from "@tests/tax/helpers/mockFactories";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Transaction } from "@/types/transactions/Transaction";
 
 // These interfaces will be implemented in the tax optimization module
 interface TaxOptimizationSuggestion {
-	strategy: string;
-	description: string;
-	potentialSavings: number;
-	implementation: string;
-	deadline?: Date;
-	riskLevel: "low" | "medium" | "high";
-	prerequisites: string[];
-	legalConsiderations: string[];
+  strategy: string;
+  description: string;
+  potentialSavings: number;
+  implementation: string;
+  deadline?: Date;
+  riskLevel: "low" | "medium" | "high";
+  prerequisites: string[];
+  legalConsiderations: string[];
 }
 
 interface HarvestingOpportunity {
-	assetSymbol: string;
-	currentUnrealizedLoss: number;
-	suggestedSaleAmount: number;
-	repurchaseDate: Date; // After wash sale period
-	estimatedTaxBenefit: number;
-	riskFactors: string[];
+  assetSymbol: string;
+  currentUnrealizedLoss: number;
+  suggestedSaleAmount: number;
+  repurchaseDate: Date; // After wash sale period
+  estimatedTaxBenefit: number;
+  riskFactors: string[];
 }
 
 interface CGTOptimization {
-	holdUntilDate: Date;
-	currentHoldingPeriod: number;
-	daysUntilDiscount: number;
-	potentialDiscountBenefit: number;
-	riskOfHolding: "low" | "medium" | "high";
+  holdUntilDate: Date;
+  currentHoldingPeriod: number;
+  daysUntilDiscount: number;
+  potentialDiscountBenefit: number;
+  riskOfHolding: "low" | "medium" | "high";
 }
 
 interface TaxOptimizer {
-	analyzeTaxPosition(
-		transactions: Transaction[],
-		taxYear: string,
-	): Promise<{
-		currentLiability: number;
-		optimizedLiability: number;
-		savings: number;
-		suggestions: TaxOptimizationSuggestion[];
-	}>;
-	identifyHarvestingOpportunities(
-		transactions: Transaction[],
-		marketPrices: Map<string, number>,
-	): Promise<HarvestingOpportunity[]>;
-	optimizeDisposalTiming(
-		holdings: Map<string, any>,
-		plannedDisposals: {
-			asset: string;
-			amount: number;
-			urgency: "low" | "medium" | "high";
-		}[],
-	): Promise<CGTOptimization[]>;
-	calculateWashSaleImpact(
-		saleTransaction: Transaction,
-		repurchaseTransaction: Transaction,
-	): Promise<{
-		isWashSale: boolean;
-		disallowedLoss: number;
-		adjustedCostBasis: number;
-	}>;
-	suggestPersonalUseOptimization(
-		transactions: Transaction[],
-		threshold: number,
-	): Promise<TaxOptimizationSuggestion[]>;
-	optimizeIncomeClassification(
-		transactions: Transaction[],
-	): Promise<TaxOptimizationSuggestion[]>;
-	planMultiYearStrategy(
-		transactions: Transaction[],
-		projectedTransactions: Transaction[],
-		yearsAhead: number,
-	): Promise<{
-		yearByYear: Map<string, TaxOptimizationSuggestion[]>;
-		overallStrategy: string;
-		projectedSavings: number;
-	}>;
+  analyzeTaxPosition(
+    transactions: Transaction[],
+    taxYear: string,
+  ): Promise<{
+    currentLiability: number;
+    optimizedLiability: number;
+    savings: number;
+    suggestions: TaxOptimizationSuggestion[];
+  }>;
+  identifyHarvestingOpportunities(
+    transactions: Transaction[],
+    marketPrices: Map<string, number>,
+  ): Promise<HarvestingOpportunity[]>;
+  optimizeDisposalTiming(
+    holdings: Map<string, any>,
+    plannedDisposals: {
+      asset: string;
+      amount: number;
+      urgency: "low" | "medium" | "high";
+    }[],
+  ): Promise<CGTOptimization[]>;
+  calculateWashSaleImpact(
+    saleTransaction: Transaction,
+    repurchaseTransaction: Transaction,
+  ): Promise<{
+    isWashSale: boolean;
+    disallowedLoss: number;
+    adjustedCostBasis: number;
+  }>;
+  suggestPersonalUseOptimization(
+    transactions: Transaction[],
+    threshold: number,
+  ): Promise<TaxOptimizationSuggestion[]>;
+  optimizeIncomeClassification(
+    transactions: Transaction[],
+  ): Promise<TaxOptimizationSuggestion[]>;
+  planMultiYearStrategy(
+    transactions: Transaction[],
+    projectedTransactions: Transaction[],
+    yearsAhead: number,
+  ): Promise<{
+    yearByYear: Map<string, TaxOptimizationSuggestion[]>;
+    overallStrategy: string;
+    projectedSavings: number;
+  }>;
 }
 
 describe("T017: Tax Optimization Strategies Integration", () => {
-	let _taxOptimizer: TaxOptimizer;
-	let _testTransactions: Transaction[];
-	let _currentMarketPrices: Map<string, number>;
+  let _taxOptimizer: TaxOptimizer;
+  let _testTransactions: Transaction[];
+  let _currentMarketPrices: Map<string, number>;
 
-	beforeEach(() => {
-		// Initialize tax optimizer (will fail until implemented)
-		// taxOptimizer = new TaxOptimizer();
+  beforeEach(() => {
+    // Initialize tax optimizer (will fail until implemented)
+    // taxOptimizer = new TaxOptimizer();
 
-		// Current market prices for optimization calculations
-		_currentMarketPrices = new Map([
-			["BTC", 45000], // Down from some purchases
-			["ETH", 2500], // Down from some purchases
-			["ADA", 0.8], // Up from purchases
-			["DOT", 15], // Mixed performance
-			["USDC", 1], // Stable
-		]);
+    // Current market prices for optimization calculations
+    _currentMarketPrices = new Map([
+      ["BTC", 45000], // Down from some purchases
+      ["ETH", 2500], // Down from some purchases
+      ["ADA", 0.8], // Up from purchases
+      ["DOT", 15], // Mixed performance
+      ["USDC", 1], // Stable
+    ]);
 
-		// Comprehensive transaction dataset for optimization testing
-		_testTransactions = [
-			// BTC purchases at different prices (some now underwater)
-			createMockSpotTrade({
-				id: "btc-buy-high-001",
-				timestamp: new Date("2023-01-01T10:00:00Z"),
-				side: "BUY",
-				price: "60000.00",
-			}),
+    // Comprehensive transaction dataset for optimization testing
+    _testTransactions = [
+      // BTC purchases at different prices (some now underwater)
+      createMockSpotTrade({
+        id: "btc-buy-high-001",
+        timestamp: new Date("2023-01-01T10:00:00Z"),
+        side: "BUY",
+        price: "60000.00",
+      }),
 
-			createMockSpotTrade({
-				id: "btc-buy-low-001",
-				timestamp: new Date("2023-06-01T10:00:00Z"),
-				side: "BUY",
-				price: "35000.00",
-			}),
+      createMockSpotTrade({
+        id: "btc-buy-low-001",
+        timestamp: new Date("2023-06-01T10:00:00Z"),
+        side: "BUY",
+        price: "35000.00",
+      }),
 
-			// ETH purchase (11 months ago - close to CGT discount)
-			createMockSpotTrade({
-				id: "eth-buy-001",
-				timestamp: new Date("2023-01-15T14:30:00Z"),
-				side: "BUY",
-				price: "2500.00",
-			}),
+      // ETH purchase (11 months ago - close to CGT discount)
+      createMockSpotTrade({
+        id: "eth-buy-001",
+        timestamp: new Date("2023-01-15T14:30:00Z"),
+        side: "BUY",
+        price: "2500.00",
+      }),
 
-			// ADA purchases with significant gains
-			createMockSpotTrade({
-				id: "ada-buy-001",
-				timestamp: new Date("2022-12-01T10:00:00Z"),
-				side: "BUY",
-				price: "0.50",
-			}),
+      // ADA purchases with significant gains
+      createMockSpotTrade({
+        id: "ada-buy-001",
+        timestamp: new Date("2022-12-01T10:00:00Z"),
+        side: "BUY",
+        price: "0.50",
+      }),
 
-			// DOT purchases (mixed timeframes and performance)
-			createMockSpotTrade({
-				id: "dot-buy-recent-001",
-				timestamp: new Date("2023-11-01T10:00:00Z"),
-				side: "BUY",
-				price: "20.00",
-			}),
+      // DOT purchases (mixed timeframes and performance)
+      createMockSpotTrade({
+        id: "dot-buy-recent-001",
+        timestamp: new Date("2023-11-01T10:00:00Z"),
+        side: "BUY",
+        price: "20.00",
+      }),
 
-			createMockSpotTrade({
-				id: "dot-buy-old-001",
-				timestamp: new Date("2022-10-01T10:00:00Z"),
-				side: "BUY",
-				price: "10.00",
-			}),
+      createMockSpotTrade({
+        id: "dot-buy-old-001",
+        timestamp: new Date("2022-10-01T10:00:00Z"),
+        side: "BUY",
+        price: "10.00",
+      }),
 
-			// Staking rewards (ordinary income)
-			createMockStakingReward({
-				id: "ada-staking-001",
-				timestamp: new Date("2023-09-01T00:00:00Z"),
-			}),
+      // Staking rewards (ordinary income)
+      createMockStakingReward({
+        id: "ada-staking-001",
+        timestamp: new Date("2023-09-01T00:00:00Z"),
+      }),
 
-			// Recent sale that might trigger wash sale if repurchased
-			createMockSpotTrade({
-				id: "btc-sell-wash-001",
-				timestamp: new Date("2023-11-20T15:30:00Z"),
-				side: "SELL",
-				price: "45000.00",
-			}),
+      // Recent sale that might trigger wash sale if repurchased
+      createMockSpotTrade({
+        id: "btc-sell-wash-001",
+        timestamp: new Date("2023-11-20T15:30:00Z"),
+        side: "SELL",
+        price: "45000.00",
+      }),
 
-			// Small crypto purchases (potential personal use)
-			createMockSpotTrade({
-				id: "small-crypto-001",
-				timestamp: new Date("2023-10-01T10:00:00Z"),
-				side: "BUY",
-				price: "1.00",
-			}),
-		];
-	});
+      // Small crypto purchases (potential personal use)
+      createMockSpotTrade({
+        id: "small-crypto-001",
+        timestamp: new Date("2023-10-01T10:00:00Z"),
+        side: "BUY",
+        price: "1.00",
+      }),
+    ];
+  });
 
-	describe("Tax Position Analysis", () => {
-		it("should initialize tax optimizer", async () => {
-			// This test will fail until TaxOptimizer is implemented
-			expect(() => {
-				// const optimizer = new TaxOptimizer();
-				throw new Error("TaxOptimizer not implemented yet");
-			}).toThrow("TaxOptimizer not implemented yet");
+  describe("Tax Position Analysis", () => {
+    it("should initialize tax optimizer", async () => {
+      // This test will fail until TaxOptimizer is implemented
+      expect(() => {
+        // const optimizer = new TaxOptimizer();
+        throw new Error("TaxOptimizer not implemented yet");
+      }).toThrow("TaxOptimizer not implemented yet");
 
-			// TODO: Uncomment when implementation exists
-			/*
+      // TODO: Uncomment when implementation exists
+      /*
       expect(taxOptimizer).toBeDefined();
       */
-		});
+    });
 
-		it("should analyze current tax position and identify savings", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Tax position analysis not implemented");
-			}).toThrow("Tax position analysis not implemented");
+    it("should analyze current tax position and identify savings", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Tax position analysis not implemented");
+      }).toThrow("Tax position analysis not implemented");
 
-			// TODO: Uncomment when implementation exists
-			/*
+      // TODO: Uncomment when implementation exists
+      /*
       const analysis = await taxOptimizer.analyzeTaxPosition(testTransactions, '2023-2024');
 
       expect(analysis.currentLiability).toBeGreaterThanOrEqual(0);
@@ -225,16 +225,16 @@ describe("T017: Tax Optimization Strategies Integration", () => {
       expect(suggestionTypes).toContain('tax_loss_harvesting');
       expect(suggestionTypes).toContain('disposal_timing_optimization');
       */
-		});
+    });
 
-		it("should identify tax loss harvesting opportunities", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Tax loss harvesting not implemented");
-			}).toThrow("Tax loss harvesting not implemented");
+    it("should identify tax loss harvesting opportunities", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Tax loss harvesting not implemented");
+      }).toThrow("Tax loss harvesting not implemented");
 
-			// TODO: Uncomment when implementation exists
-			/*
+      // TODO: Uncomment when implementation exists
+      /*
       const opportunities = await taxOptimizer.identifyHarvestingOpportunities(
         testTransactions,
         currentMarketPrices
@@ -254,16 +254,16 @@ describe("T017: Tax Optimization Strategies Integration", () => {
       expect(dotOpportunity).toBeDefined();
       expect(dotOpportunity!.currentUnrealizedLoss).toBeGreaterThan(0); // $20 - $15 = $5 per DOT
       */
-		});
+    });
 
-		it("should optimize disposal timing for CGT discount", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Disposal timing optimization not implemented");
-			}).toThrow("Disposal timing optimization not implemented");
+    it("should optimize disposal timing for CGT discount", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Disposal timing optimization not implemented");
+      }).toThrow("Disposal timing optimization not implemented");
 
-			// TODO: Uncomment when implementation exists
-			/*
+      // TODO: Uncomment when implementation exists
+      /*
       const plannedDisposals = [
         { asset: 'ETH', amount: 2.5, urgency: 'medium' as const },
         { asset: 'ADA', amount: 5000, urgency: 'low' as const },
@@ -286,16 +286,16 @@ describe("T017: Tax Optimization Strategies Integration", () => {
       expect(adaOpt).toBeDefined();
       expect(adaOpt!.daysUntilDiscount).toBe(0);
       */
-		});
+    });
 
-		it("should detect and calculate wash sale impact", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Wash sale calculation not implemented");
-			}).toThrow("Wash sale calculation not implemented");
+    it("should detect and calculate wash sale impact", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Wash sale calculation not implemented");
+      }).toThrow("Wash sale calculation not implemented");
 
-			// TODO: Uncomment when implementation exists
-			/*
+      // TODO: Uncomment when implementation exists
+      /*
       const saleTransaction = testTransactions.find(t => t.id === 'btc-sell-wash-001')!;
 
       // Simulate repurchase within 30 days
@@ -314,18 +314,18 @@ describe("T017: Tax Optimization Strategies Integration", () => {
       expect(washSaleResult.disallowedLoss).toBeGreaterThan(0); // $3,750 loss disallowed
       expect(washSaleResult.adjustedCostBasis).toBeGreaterThan(35000); // Original cost + disallowed loss
       */
-		});
-	});
+    });
+  });
 
-	describe("Strategic Tax Planning", () => {
-		it("should suggest personal use asset optimization", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Personal use optimization not implemented");
-			}).toThrow("Personal use optimization not implemented");
+  describe("Strategic Tax Planning", () => {
+    it("should suggest personal use asset optimization", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Personal use optimization not implemented");
+      }).toThrow("Personal use optimization not implemented");
 
-			// TODO: Uncomment when implementation exists
-			/*
+      // TODO: Uncomment when implementation exists
+      /*
       const suggestions = await taxOptimizer.suggestPersonalUseOptimization(
         testTransactions,
         10000 // ATO personal use threshold
@@ -340,16 +340,16 @@ describe("T017: Tax Optimization Strategies Integration", () => {
       expect(personalUseSuggestion).toBeDefined();
       expect(personalUseSuggestion!.implementation).toContain('separate purchases');
       */
-		});
+    });
 
-		it("should optimize income vs capital gains classification", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Income classification optimization not implemented");
-			}).toThrow("Income classification optimization not implemented");
+    it("should optimize income vs capital gains classification", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Income classification optimization not implemented");
+      }).toThrow("Income classification optimization not implemented");
 
-			// TODO: Uncomment when implementation exists
-			/*
+      // TODO: Uncomment when implementation exists
+      /*
       const suggestions = await taxOptimizer.optimizeIncomeClassification(testTransactions);
 
       expect(suggestions.length).toBeGreaterThan(0);
@@ -361,16 +361,16 @@ describe("T017: Tax Optimization Strategies Integration", () => {
       expect(classificationSuggestion).toBeDefined();
       expect(classificationSuggestion!.legalConsiderations.length).toBeGreaterThan(0);
       */
-		});
+    });
 
-		it("should plan multi-year tax strategy", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Multi-year planning not implemented");
-			}).toThrow("Multi-year planning not implemented");
+    it("should plan multi-year tax strategy", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Multi-year planning not implemented");
+      }).toThrow("Multi-year planning not implemented");
 
-			// TODO: Uncomment when implementation exists
-			/*
+      // TODO: Uncomment when implementation exists
+      /*
       // Project some future transactions
       const projectedTransactions = [
         // Projected salary sacrifice into crypto SMSF
@@ -397,92 +397,92 @@ describe("T017: Tax Optimization Strategies Integration", () => {
         });
       });
       */
-		});
-	});
+    });
+  });
 
-	describe("Advanced Optimization Strategies", () => {
-		it("should suggest charitable donation strategies with crypto", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Charitable donation strategies not implemented");
-			}).toThrow("Charitable donation strategies not implemented");
+  describe("Advanced Optimization Strategies", () => {
+    it("should suggest charitable donation strategies with crypto", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Charitable donation strategies not implemented");
+      }).toThrow("Charitable donation strategies not implemented");
 
-			// TODO: Test donating appreciated crypto to avoid CGT while claiming deduction
-		});
+      // TODO: Test donating appreciated crypto to avoid CGT while claiming deduction
+    });
 
-		it("should optimize SMSF crypto strategies", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("SMSF optimization not implemented");
-			}).toThrow("SMSF optimization not implemented");
+    it("should optimize SMSF crypto strategies", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("SMSF optimization not implemented");
+      }).toThrow("SMSF optimization not implemented");
 
-			// TODO: Test Self-Managed Super Fund crypto strategies
-		});
+      // TODO: Test Self-Managed Super Fund crypto strategies
+    });
 
-		it("should suggest business structure optimization", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Business structure optimization not implemented");
-			}).toThrow("Business structure optimization not implemented");
+    it("should suggest business structure optimization", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Business structure optimization not implemented");
+      }).toThrow("Business structure optimization not implemented");
 
-			// TODO: Test company vs individual vs trust structure recommendations
-		});
+      // TODO: Test company vs individual vs trust structure recommendations
+    });
 
-		it("should optimize international tax treaty benefits", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("International tax optimization not implemented");
-			}).toThrow("International tax optimization not implemented");
+    it("should optimize international tax treaty benefits", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("International tax optimization not implemented");
+      }).toThrow("International tax optimization not implemented");
 
-			// TODO: Test utilizing tax treaties to minimize withholding tax
-		});
+      // TODO: Test utilizing tax treaties to minimize withholding tax
+    });
 
-		it("should suggest timing strategies around tax law changes", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Tax law change strategies not implemented");
-			}).toThrow("Tax law change strategies not implemented");
+    it("should suggest timing strategies around tax law changes", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Tax law change strategies not implemented");
+      }).toThrow("Tax law change strategies not implemented");
 
-			// TODO: Test adapting to announced but not yet effective tax law changes
-		});
+      // TODO: Test adapting to announced but not yet effective tax law changes
+    });
 
-		it("should optimize family trust distributions", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Family trust optimization not implemented");
-			}).toThrow("Family trust optimization not implemented");
+    it("should optimize family trust distributions", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Family trust optimization not implemented");
+      }).toThrow("Family trust optimization not implemented");
 
-			// TODO: Test distributing capital gains to lower-income family members
-		});
+      // TODO: Test distributing capital gains to lower-income family members
+    });
 
-		it("should suggest offset strategies for crypto losses", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Loss offset strategies not implemented");
-			}).toThrow("Loss offset strategies not implemented");
+    it("should suggest offset strategies for crypto losses", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Loss offset strategies not implemented");
+      }).toThrow("Loss offset strategies not implemented");
 
-			// TODO: Test using crypto losses to offset other capital gains
-		});
+      // TODO: Test using crypto losses to offset other capital gains
+    });
 
-		it("should optimize timing of staking rewards", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Staking timing optimization not implemented");
-			}).toThrow("Staking timing optimization not implemented");
+    it("should optimize timing of staking rewards", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Staking timing optimization not implemented");
+      }).toThrow("Staking timing optimization not implemented");
 
-			// TODO: Test timing staking entries/exits to manage income across tax years
-		});
-	});
+      // TODO: Test timing staking entries/exits to manage income across tax years
+    });
+  });
 
-	describe("Risk Assessment and Compliance", () => {
-		it("should assess risk of optimization strategies", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Risk assessment not implemented");
-			}).toThrow("Risk assessment not implemented");
+  describe("Risk Assessment and Compliance", () => {
+    it("should assess risk of optimization strategies", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Risk assessment not implemented");
+      }).toThrow("Risk assessment not implemented");
 
-			// TODO: Uncomment when implementation exists
-			/*
+      // TODO: Uncomment when implementation exists
+      /*
       const analysis = await taxOptimizer.analyzeTaxPosition(testTransactions, '2023-2024');
 
       analysis.suggestions.forEach(suggestion => {
@@ -494,42 +494,42 @@ describe("T017: Tax Optimization Strategies Integration", () => {
         }
       });
       */
-		});
+    });
 
-		it("should flag strategies requiring professional advice", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Professional advice flagging not implemented");
-			}).toThrow("Professional advice flagging not implemented");
+    it("should flag strategies requiring professional advice", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Professional advice flagging not implemented");
+      }).toThrow("Professional advice flagging not implemented");
 
-			// TODO: Test flagging complex strategies that require tax professional review
-		});
+      // TODO: Test flagging complex strategies that require tax professional review
+    });
 
-		it("should ensure ATO compliance in all suggestions", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("ATO compliance checking not implemented");
-			}).toThrow("ATO compliance checking not implemented");
+    it("should ensure ATO compliance in all suggestions", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("ATO compliance checking not implemented");
+      }).toThrow("ATO compliance checking not implemented");
 
-			// TODO: Test that all suggestions comply with current ATO guidance
-		});
+      // TODO: Test that all suggestions comply with current ATO guidance
+    });
 
-		it("should handle edge cases in optimization", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Edge case handling not implemented");
-			}).toThrow("Edge case handling not implemented");
+    it("should handle edge cases in optimization", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Edge case handling not implemented");
+      }).toThrow("Edge case handling not implemented");
 
-			// TODO: Test complex scenarios like trust distributions, partnership interests, etc.
-		});
+      // TODO: Test complex scenarios like trust distributions, partnership interests, etc.
+    });
 
-		it("should provide documentation for optimization decisions", async () => {
-			// This test will fail until implementation exists
-			expect(() => {
-				throw new Error("Documentation generation not implemented");
-			}).toThrow("Documentation generation not implemented");
+    it("should provide documentation for optimization decisions", async () => {
+      // This test will fail until implementation exists
+      expect(() => {
+        throw new Error("Documentation generation not implemented");
+      }).toThrow("Documentation generation not implemented");
 
-			// TODO: Test generating documentation to support tax position
-		});
-	});
+      // TODO: Test generating documentation to support tax position
+    });
+  });
 });

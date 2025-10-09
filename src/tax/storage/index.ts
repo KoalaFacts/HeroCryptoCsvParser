@@ -10,23 +10,23 @@ export { MMKVAdapter } from "./MMKVAdapter";
 export { RxDBAdapter } from "./RxDBAdapter";
 // Core adapter interface
 export type {
-	StorageAdapter,
-	StorageStats,
-	TaxReportSummary,
-	TransactionFilter,
+  StorageAdapter,
+  StorageStats,
+  TaxReportSummary,
+  TransactionFilter,
 } from "./StorageAdapter";
 
 // Storage factory
 export {
-	createAdapter,
-	createStorageAdapter,
-	detectPlatform,
-	detectStoragePlatform,
-	getPlatformCapabilities,
-	getRecommendedPlatform,
-	isPlatformSupported,
-	type StorageFactoryConfig,
-	type StoragePlatform,
+  createAdapter,
+  createStorageAdapter,
+  detectPlatform,
+  detectStoragePlatform,
+  getPlatformCapabilities,
+  getRecommendedPlatform,
+  isPlatformSupported,
+  type StorageFactoryConfig,
+  type StoragePlatform,
 } from "./StorageFactory";
 
 // Storage manager

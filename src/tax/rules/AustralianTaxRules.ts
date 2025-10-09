@@ -14,20 +14,20 @@ import { getBaseAmount, getQuoteAmount } from "../utils/transactionHelpers";
  * Australian tax jurisdiction configuration
  */
 export const AUSTRALIAN_JURISDICTION: TaxJurisdiction = {
-	code: "AU",
-	name: "Australia",
-	taxYear: {
-		startMonth: 7, // July
-		startDay: 1,
-		endMonth: 6, // June
-		endDay: 30,
-	},
-	currency: "AUD",
-	cgtDiscountRate: 0.5, // 50% discount for assets held > 12 months
-	cgtHoldingPeriod: 365, // days
-	personalUseThreshold: 10000, // AUD
-	supportedMethods: ["FIFO", "SPECIFIC_IDENTIFICATION"],
-	rules: [], // Will be populated with rule instances
+  code: "AU",
+  name: "Australia",
+  taxYear: {
+    startMonth: 7, // July
+    startDay: 1,
+    endMonth: 6, // June
+    endDay: 30,
+  },
+  currency: "AUD",
+  cgtDiscountRate: 0.5, // 50% discount for assets held > 12 months
+  cgtHoldingPeriod: 365, // days
+  personalUseThreshold: 10000, // AUD
+  supportedMethods: ["FIFO", "SPECIFIC_IDENTIFICATION"],
+  rules: [], // Will be populated with rule instances
 };
 
 /**
@@ -46,22 +46,22 @@ export const AUSTRALIAN_JURISDICTION: TaxJurisdiction = {
  * @returns True if CGT discount applies
  */
 export function appliesCGTDiscount(
-	holdingPeriod: number,
-	isIndividual = true,
-	isPersonalUse = false,
+  holdingPeriod: number,
+  isIndividual = true,
+  isPersonalUse = false,
 ): boolean {
-	// CGT discount only applies to individuals (not companies)
-	if (!isIndividual) {
-		return false;
-	}
+  // CGT discount only applies to individuals (not companies)
+  if (!isIndividual) {
+    return false;
+  }
 
-	// Personal use assets are exempt, not discounted
-	if (isPersonalUse) {
-		return false;
-	}
+  // Personal use assets are exempt, not discounted
+  if (isPersonalUse) {
+    return false;
+  }
 
-	// Must hold for more than 12 months
-	return holdingPeriod >= AUSTRALIAN_JURISDICTION.cgtHoldingPeriod;
+  // Must hold for more than 12 months
+  return holdingPeriod >= AUSTRALIAN_JURISDICTION.cgtHoldingPeriod;
 }
 
 /**
@@ -73,15 +73,15 @@ export function appliesCGTDiscount(
  * @returns Discount amount
  */
 export function calculateCGTDiscount(
-	capitalGain: number,
-	holdingPeriod: number,
-	isIndividual = true,
+  capitalGain: number,
+  holdingPeriod: number,
+  isIndividual = true,
 ): number {
-	if (!appliesCGTDiscount(holdingPeriod, isIndividual, false)) {
-		return 0;
-	}
+  if (!appliesCGTDiscount(holdingPeriod, isIndividual, false)) {
+    return 0;
+  }
 
-	return capitalGain * AUSTRALIAN_JURISDICTION.cgtDiscountRate;
+  return capitalGain * AUSTRALIAN_JURISDICTION.cgtDiscountRate;
 }
 
 /**
@@ -93,33 +93,33 @@ export function calculateCGTDiscount(
  * @returns Taxable capital gain
  */
 export function calculateTaxableGain(
-	capitalGain: number,
-	holdingPeriod: number,
-	isIndividual = true,
+  capitalGain: number,
+  holdingPeriod: number,
+  isIndividual = true,
 ): number {
-	const discount = calculateCGTDiscount(
-		capitalGain,
-		holdingPeriod,
-		isIndividual,
-	);
-	return capitalGain - discount;
+  const discount = calculateCGTDiscount(
+    capitalGain,
+    holdingPeriod,
+    isIndividual,
+  );
+  return capitalGain - discount;
 }
 
 /**
  * Get CGT discount tax rule
  */
 export function getCGTDiscountRule(): TaxRule {
-	return {
-		id: "AU_CGT_DISCOUNT",
-		jurisdiction: "AU",
-		name: "CGT 50% Discount for Individuals",
-		description:
-			"Individuals who hold CGT assets for at least 12 months receive a 50% discount on capital gains",
-		effectiveFrom: new Date("1999-09-21"), // Introduction date
-		category: "CAPITAL_GAINS",
-		applicableTransactionTypes: ["DISPOSAL"],
-		calculationLogic: "calculateTaxableGain",
-	};
+  return {
+    id: "AU_CGT_DISCOUNT",
+    jurisdiction: "AU",
+    name: "CGT 50% Discount for Individuals",
+    description:
+      "Individuals who hold CGT assets for at least 12 months receive a 50% discount on capital gains",
+    effectiveFrom: new Date("1999-09-21"), // Introduction date
+    category: "CAPITAL_GAINS",
+    applicableTransactionTypes: ["DISPOSAL"],
+    calculationLogic: "calculateTaxableGain",
+  };
 }
 
 /**
@@ -136,16 +136,16 @@ export function getCGTDiscountRule(): TaxRule {
  * @returns True if qualifies as personal use
  */
 export function isPersonalUseAsset(
-	acquisitionCost: number,
-	intendedUse: "PERSONAL" | "INVESTMENT" = "INVESTMENT",
+  acquisitionCost: number,
+  intendedUse: "PERSONAL" | "INVESTMENT" = "INVESTMENT",
 ): boolean {
-	// Must be acquired for personal use
-	if (intendedUse !== "PERSONAL") {
-		return false;
-	}
+  // Must be acquired for personal use
+  if (intendedUse !== "PERSONAL") {
+    return false;
+  }
 
-	// Must cost less than $10,000
-	return acquisitionCost < AUSTRALIAN_JURISDICTION.personalUseThreshold;
+  // Must cost less than $10,000
+  return acquisitionCost < AUSTRALIAN_JURISDICTION.personalUseThreshold;
 }
 
 /**
@@ -157,16 +157,16 @@ export function isPersonalUseAsset(
  * @returns True if exemption applies
  */
 export function appliesPersonalUseExemption(
-	acquisitionCost: number,
-	intendedUse: "PERSONAL" | "INVESTMENT",
-	hasCapitalGain: boolean,
+  acquisitionCost: number,
+  intendedUse: "PERSONAL" | "INVESTMENT",
+  hasCapitalGain: boolean,
 ): boolean {
-	// Exemption only applies to capital gains, not losses
-	if (!hasCapitalGain) {
-		return false;
-	}
+  // Exemption only applies to capital gains, not losses
+  if (!hasCapitalGain) {
+    return false;
+  }
 
-	return isPersonalUseAsset(acquisitionCost, intendedUse);
+  return isPersonalUseAsset(acquisitionCost, intendedUse);
 }
 
 /**
@@ -178,17 +178,17 @@ export function appliesPersonalUseExemption(
  * @returns Taxable amount (0 if exempt)
  */
 export function calculatePersonalUseTaxableAmount(
-	capitalGain: number,
-	acquisitionCost: number,
-	intendedUse: "PERSONAL" | "INVESTMENT",
+  capitalGain: number,
+  acquisitionCost: number,
+  intendedUse: "PERSONAL" | "INVESTMENT",
 ): number {
-	if (
-		appliesPersonalUseExemption(acquisitionCost, intendedUse, capitalGain > 0)
-	) {
-		return 0;
-	}
+  if (
+    appliesPersonalUseExemption(acquisitionCost, intendedUse, capitalGain > 0)
+  ) {
+    return 0;
+  }
 
-	return capitalGain;
+  return capitalGain;
 }
 
 /**
@@ -198,41 +198,41 @@ export function calculatePersonalUseTaxableAmount(
  * @returns Validation result
  */
 export function validatePersonalUseDocumentation(transaction: Transaction): {
-	isValid: boolean;
-	missingItems: string[];
+  isValid: boolean;
+  missingItems: string[];
 } {
-	const missingItems: string[] = [];
+  const missingItems: string[] = [];
 
-	// Check for acquisition value
-	const quoteAmount = getQuoteAmount(transaction);
-	if (!quoteAmount || quoteAmount === 0) {
-		missingItems.push("Acquisition value documentation");
-	}
+  // Check for acquisition value
+  const quoteAmount = getQuoteAmount(transaction);
+  if (!quoteAmount || quoteAmount === 0) {
+    missingItems.push("Acquisition value documentation");
+  }
 
-	// Note: Personal use intent documentation should be tracked separately
-	// in the transaction metadata or tax events
+  // Note: Personal use intent documentation should be tracked separately
+  // in the transaction metadata or tax events
 
-	return {
-		isValid: missingItems.length === 0,
-		missingItems,
-	};
+  return {
+    isValid: missingItems.length === 0,
+    missingItems,
+  };
 }
 
 /**
  * Get personal use asset tax rule
  */
 export function getPersonalUseAssetRule(): TaxRule {
-	return {
-		id: "AU_PERSONAL_USE_EXEMPTION",
-		jurisdiction: "AU",
-		name: "Personal Use Asset Exemption",
-		description:
-			"CGT exemption for personal use assets acquired for less than $10,000 AUD",
-		effectiveFrom: new Date("1985-09-20"), // CGT introduction
-		category: "EXEMPTIONS",
-		applicableTransactionTypes: ["DISPOSAL"],
-		calculationLogic: "calculatePersonalUseTaxableAmount",
-	};
+  return {
+    id: "AU_PERSONAL_USE_EXEMPTION",
+    jurisdiction: "AU",
+    name: "Personal Use Asset Exemption",
+    description:
+      "CGT exemption for personal use assets acquired for less than $10,000 AUD",
+    effectiveFrom: new Date("1985-09-20"), // CGT introduction
+    category: "EXEMPTIONS",
+    applicableTransactionTypes: ["DISPOSAL"],
+    calculationLogic: "calculatePersonalUseTaxableAmount",
+  };
 }
 
 /**
@@ -248,65 +248,65 @@ export function getPersonalUseAssetRule(): TaxRule {
  * @returns Classification
  */
 export function classifyDeFiTransaction(transaction: Transaction): {
-	type: string;
-	taxTreatment: "INCOME" | "CAPITAL" | "MIXED";
-	reasoning: string;
+  type: string;
+  taxTreatment: "INCOME" | "CAPITAL" | "MIXED";
+  reasoning: string;
 } {
-	const type = transaction.type?.toLowerCase() || "";
+  const type = transaction.type?.toLowerCase() || "";
 
-	// Staking rewards - Ordinary income
-	if (type.includes("staking")) {
-		return {
-			type: "Staking Reward",
-			taxTreatment: "INCOME",
-			reasoning:
-				"Staking rewards are treated as ordinary income at time of receipt",
-		};
-	}
+  // Staking rewards - Ordinary income
+  if (type.includes("staking")) {
+    return {
+      type: "Staking Reward",
+      taxTreatment: "INCOME",
+      reasoning:
+        "Staking rewards are treated as ordinary income at time of receipt",
+    };
+  }
 
-	// Liquidity pool operations
-	if (type.includes("liquidity")) {
-		return {
-			type: "Liquidity Pool Operation",
-			taxTreatment: "CAPITAL",
-			reasoning:
-				"Adding/removing liquidity is disposal and acquisition of assets",
-		};
-	}
+  // Liquidity pool operations
+  if (type.includes("liquidity")) {
+    return {
+      type: "Liquidity Pool Operation",
+      taxTreatment: "CAPITAL",
+      reasoning:
+        "Adding/removing liquidity is disposal and acquisition of assets",
+    };
+  }
 
-	// Yield farming/Interest - Ordinary income
-	if (type.includes("interest")) {
-		return {
-			type: "Lending Interest",
-			taxTreatment: "INCOME",
-			reasoning: "Interest earned from lending is ordinary income",
-		};
-	}
+  // Yield farming/Interest - Ordinary income
+  if (type.includes("interest")) {
+    return {
+      type: "Lending Interest",
+      taxTreatment: "INCOME",
+      reasoning: "Interest earned from lending is ordinary income",
+    };
+  }
 
-	// Airdrops - Ordinary income
-	if (type.includes("airdrop")) {
-		return {
-			type: "Airdrop",
-			taxTreatment: "INCOME",
-			reasoning: "Airdrops are ordinary income at market value when received",
-		};
-	}
+  // Airdrops - Ordinary income
+  if (type.includes("airdrop")) {
+    return {
+      type: "Airdrop",
+      taxTreatment: "INCOME",
+      reasoning: "Airdrops are ordinary income at market value when received",
+    };
+  }
 
-	// Token swaps - Capital transaction
-	if (type.includes("swap")) {
-		return {
-			type: "Token Swap",
-			taxTreatment: "CAPITAL",
-			reasoning: "Swapping tokens is disposal and acquisition (CGT event)",
-		};
-	}
+  // Token swaps - Capital transaction
+  if (type.includes("swap")) {
+    return {
+      type: "Token Swap",
+      taxTreatment: "CAPITAL",
+      reasoning: "Swapping tokens is disposal and acquisition (CGT event)",
+    };
+  }
 
-	// Default - requires manual review
-	return {
-		type: "Unknown DeFi Transaction",
-		taxTreatment: "MIXED",
-		reasoning: "Transaction requires manual classification",
-	};
+  // Default - requires manual review
+  return {
+    type: "Unknown DeFi Transaction",
+    taxTreatment: "MIXED",
+    reasoning: "Transaction requires manual classification",
+  };
 }
 
 /**
@@ -316,10 +316,10 @@ export function classifyDeFiTransaction(transaction: Transaction): {
  * @returns True if taxable
  */
 export function isDeFiTaxableEvent(transaction: Transaction): boolean {
-	const classification = classifyDeFiTransaction(transaction);
+  const classification = classifyDeFiTransaction(transaction);
 
-	// All income and capital events are taxable
-	return classification.taxTreatment !== "MIXED";
+  // All income and capital events are taxable
+  return classification.taxTreatment !== "MIXED";
 }
 
 /**
@@ -330,55 +330,55 @@ export function isDeFiTaxableEvent(transaction: Transaction): boolean {
  * @returns Income amount in AUD
  */
 export function calculateDeFiIncomeAmount(
-	transaction: Transaction,
-	marketPrice: number,
+  transaction: Transaction,
+  marketPrice: number,
 ): number {
-	const amount = Math.abs(getBaseAmount(transaction));
-	return amount * marketPrice;
+  const amount = Math.abs(getBaseAmount(transaction));
+  return amount * marketPrice;
 }
 
 /**
  * Get DeFi classification tax rule
  */
 export function getDeFiClassificationRule(): TaxRule {
-	return {
-		id: "AU_DEFI_CLASSIFICATION",
-		jurisdiction: "AU",
-		name: "DeFi Transaction Classification",
-		description:
-			"Classification rules for DeFi transactions including staking, yield farming, and liquidity provision",
-		effectiveFrom: new Date("2021-01-01"), // ATO guidance on DeFi
-		category: "REPORTING",
-		applicableTransactionTypes: [
-			"STAKING",
-			"YIELD",
-			"LIQUIDITY",
-			"SWAP",
-			"AIRDROP",
-		],
-		calculationLogic: "classifyDeFiTransaction",
-	};
+  return {
+    id: "AU_DEFI_CLASSIFICATION",
+    jurisdiction: "AU",
+    name: "DeFi Transaction Classification",
+    description:
+      "Classification rules for DeFi transactions including staking, yield farming, and liquidity provision",
+    effectiveFrom: new Date("2021-01-01"), // ATO guidance on DeFi
+    category: "REPORTING",
+    applicableTransactionTypes: [
+      "STAKING",
+      "YIELD",
+      "LIQUIDITY",
+      "SWAP",
+      "AIRDROP",
+    ],
+    calculationLogic: "classifyDeFiTransaction",
+  };
 }
 
 /**
  * Get all Australian tax rules
  */
 export function getAustralianTaxRules(): TaxRule[] {
-	return [
-		getCGTDiscountRule(),
-		getPersonalUseAssetRule(),
-		getDeFiClassificationRule(),
-	];
+  return [
+    getCGTDiscountRule(),
+    getPersonalUseAssetRule(),
+    getDeFiClassificationRule(),
+  ];
 }
 
 /**
  * Get Australian jurisdiction with all rules
  */
 export function getAustralianJurisdiction(): TaxJurisdiction {
-	return {
-		...AUSTRALIAN_JURISDICTION,
-		rules: getAustralianTaxRules(),
-	};
+  return {
+    ...AUSTRALIAN_JURISDICTION,
+    rules: getAustralianTaxRules(),
+  };
 }
 
 /**
@@ -388,16 +388,16 @@ export function getAustralianJurisdiction(): TaxJurisdiction {
  * @returns Start and end dates
  */
 export function getAustralianTaxYearBoundaries(year: number): {
-	startDate: Date;
-	endDate: Date;
-	label: string;
+  startDate: Date;
+  endDate: Date;
+  label: string;
 } {
-	const startDate = new Date(year - 1, 6, 1); // July 1 of previous year
-	const endDate = new Date(year, 5, 30, 23, 59, 59); // June 30 of current year
+  const startDate = new Date(year - 1, 6, 1); // July 1 of previous year
+  const endDate = new Date(year, 5, 30, 23, 59, 59); // June 30 of current year
 
-	return {
-		startDate,
-		endDate,
-		label: `${year - 1}-${year}`,
-	};
+  return {
+    startDate,
+    endDate,
+    label: `${year - 1}-${year}`,
+  };
 }

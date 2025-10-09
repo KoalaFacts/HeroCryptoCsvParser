@@ -17,20 +17,20 @@ import type { Transfer } from "./Transfer";
 import type { Unknown } from "./Unknown";
 
 export type Transaction =
-	| SpotTrade
-	| Transfer
-	| StakingDeposit
-	| StakingWithdrawal
-	| StakingReward
-	| Swap
-	| LiquidityAdd
-	| LiquidityRemove
-	| Airdrop
-	| Fee
-	| Loan
-	| Interest
-	| MarginTrade
-	| FuturesTrade
-	| Unknown;
+  | SpotTrade
+  | Transfer
+  | StakingDeposit
+  | StakingWithdrawal
+  | StakingReward
+  | Swap
+  | LiquidityAdd
+  | LiquidityRemove
+  | Airdrop
+  | Fee
+  | Loan
+  | Interest
+  | MarginTrade
+  | FuturesTrade
+  | Unknown;
 
 export type TransactionType = Transaction["type"];
