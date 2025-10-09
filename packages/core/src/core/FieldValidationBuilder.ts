@@ -1,7 +1,7 @@
 import type { FieldValidatorContext } from "./FieldContext";
 import { ValidationResult } from "./ValidationResult";
 
-export class FieldValidationBuilder<TRecord, TProperty = any> {
+export class FieldValidationBuilder<TRecord, TProperty = unknown> {
   private validationRules: Array<
     (context: FieldValidatorContext<TRecord>) => ValidationResult<TRecord>
   > = [];
@@ -356,7 +356,7 @@ export class FieldValidationBuilder<TRecord, TProperty = any> {
     return this;
   }
 
-  oneOfEnum<E extends Record<string, any>>(
+  oneOfEnum<E extends Record<string, unknown>>(
     enumType?: E,
     errorMessage?: string,
   ): this {

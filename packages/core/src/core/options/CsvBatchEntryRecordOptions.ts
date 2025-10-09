@@ -10,7 +10,7 @@ export class CsvBatchEntryRecordOptions implements BatchEntryRecordOptions {
   static Default = new CsvBatchEntryRecordOptions();
 
   validateFieldDefinitions(
-    descriptors: FieldDescriptor<any>[],
+    descriptors: FieldDescriptor<unknown, unknown>[],
     recordName: string,
   ): void {
     const indices = descriptors.map(
@@ -31,7 +31,10 @@ export class CsvBatchEntryRecordOptions implements BatchEntryRecordOptions {
     }
   }
 
-  writeLine(fields: string[], descriptors: FieldDescriptor<any>[]): string {
+  writeLine(
+    fields: string[],
+    descriptors: FieldDescriptor<unknown, unknown>[],
+  ): string {
     const orderedFields = descriptors
       .sort(
         (a, b) =>
@@ -43,7 +46,10 @@ export class CsvBatchEntryRecordOptions implements BatchEntryRecordOptions {
     return orderedFields.map((f) => this.escapeField(f)).join(this.delimiter);
   }
 
-  readLine(line: string, descriptors: FieldDescriptor<any>[]): string[] {
+  readLine(
+    line: string,
+    descriptors: FieldDescriptor<unknown, unknown>[],
+  ): string[] {
     const fields = this.parseCSVLine(line);
     const result: string[] = [];
 

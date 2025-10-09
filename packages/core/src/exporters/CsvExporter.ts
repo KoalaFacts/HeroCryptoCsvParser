@@ -304,13 +304,13 @@ export class CsvExporter {
   /**
    * Convert rows to CSV string
    */
-  private rowsToCSV(rows: any[]): string {
+  private rowsToCSV(rows: unknown[]): string {
     if (rows.length === 0) return "";
 
     const fields =
       this.options.fields.length > 0
         ? this.options.fields
-        : Object.keys(rows[0]);
+        : Object.keys(rows[0] as Record<string, unknown>);
 
     const lines: string[] = [];
 
@@ -321,7 +321,9 @@ export class CsvExporter {
 
     // Add data rows
     rows.forEach((row) => {
-      const values = fields.map((field) => row[field] ?? "");
+      const values = fields.map(
+        (field) => (row as Record<string, unknown>)[field] ?? "",
+      );
       lines.push(this.formatCSVLine(values));
     });
 
@@ -331,7 +333,7 @@ export class CsvExporter {
   /**
    * Format a single CSV line
    */
-  private formatCSVLine(values: any[]): string {
+  private formatCSVLine(values: unknown[]): string {
     return values
       .map((value) => this.escapeCSVValue(value))
       .join(this.options.delimiter);
@@ -340,10 +342,10 @@ export class CsvExporter {
   /**
    * Escape CSV value
    */
-  private escapeCSVValue(value: any): string {
+  private escapeCSVValue(value: unknown): string {
     if (value === null || value === undefined) return "";
 
-    const str = value.toString();
+    const str = String(value);
     const needsQuoting =
       str.includes(this.options.delimiter) ||
       str.includes(this.options.quote) ||

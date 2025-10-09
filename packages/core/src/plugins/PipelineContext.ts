@@ -7,6 +7,6 @@ export interface PipelineContext<T> {
   metadata?: {
     lineNumber?: number;
     source?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }

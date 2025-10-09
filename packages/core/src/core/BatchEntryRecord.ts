@@ -16,8 +16,8 @@ import { ValidationResult } from "./ValidationResult";
 export abstract class BatchEntryRecord<
   TRecord extends BatchEntryRecord<TRecord>,
 > {
-  private _fieldBuilders: FieldDescriptor<TRecord>[] = [];
-  private _fieldDescriptors?: ReadonlyArray<FieldDescriptor<TRecord>>;
+  private _fieldBuilders: FieldDescriptor<TRecord, unknown>[] = [];
+  private _fieldDescriptors?: ReadonlyArray<FieldDescriptor<TRecord, unknown>>;
   private _recordHeaders?: string[];
   private _options?: BatchEntryRecordOptions;
 
@@ -34,7 +34,9 @@ export abstract class BatchEntryRecord<
     return this as unknown as TRecord;
   }
 
-  public getFieldDescriptors(): ReadonlyArray<FieldDescriptor<TRecord>> {
+  public getFieldDescriptors(): ReadonlyArray<
+    FieldDescriptor<TRecord, unknown>
+  > {
     if (!this._fieldDescriptors) {
       this._fieldDescriptors = this._fieldBuilders.sort((a, b) => {
         const aKey = a.definition.fieldLocator.getOrderingKey();
@@ -60,7 +62,7 @@ export abstract class BatchEntryRecord<
 
       const options = this.getOptions();
       options.validateFieldDefinitions(
-        this._fieldDescriptors as FieldDescriptor<any>[],
+        this._fieldDescriptors as FieldDescriptor<unknown, unknown>[],
         this.constructor.name,
       );
     }
@@ -201,7 +203,7 @@ export abstract class BatchEntryRecord<
     // Set default setter for the property
     descriptor.setter = (ctx, value) => {
       if (propertyName) {
-        (ctx.record as any)[propertyName] = value;
+        (ctx.record as Record<string, unknown>)[propertyName] = value;
       }
     };
 
@@ -210,7 +212,7 @@ export abstract class BatchEntryRecord<
       const result = new ValidationResult<TRecord>();
       try {
         // Default behavior: pass the raw value directly through (identity function)
-        const mappedValue = ctx.rawValue as any as TProperty;
+        const mappedValue = ctx.rawValue as unknown as TProperty;
         if (descriptor.setter) {
           const getterContext = new FieldGetterContext(
             ctx.fieldName,
@@ -228,7 +230,7 @@ export abstract class BatchEntryRecord<
       return result;
     };
 
-    this._fieldBuilders.push(descriptor);
+    this._fieldBuilders.push(descriptor as FieldDescriptor<TRecord, unknown>);
     return descriptor;
   }
 
@@ -241,12 +243,12 @@ export abstract class BatchEntryRecord<
   protected fieldForSpare(
     fieldName: string,
     fieldIndex: number,
-  ): FieldDescriptor<TRecord, any> {
+  ): FieldDescriptor<TRecord, unknown> {
     const definition = new FieldDefinition(
       fieldName,
       new FieldLocator(fieldIndex),
     );
-    const descriptor = new FieldDescriptor<TRecord, any>(definition);
+    const descriptor = new FieldDescriptor<TRecord, unknown>(definition);
 
     // Spare fields have no getter/setter
     descriptor.getter = () => undefined;
@@ -294,7 +296,7 @@ export abstract class BatchEntryRecord<
         try {
           const mappedValue = mapper(ctx.rawValue);
           if (mappedValue !== undefined && propertyName) {
-            (ctx.record as any)[propertyName] = mappedValue;
+            (ctx.record as Record<string, unknown>)[propertyName] = mappedValue;
           }
         } catch (error) {
           result.addError({
@@ -308,7 +310,7 @@ export abstract class BatchEntryRecord<
       return this;
     };
 
-    this._fieldBuilders.push(descriptor);
+    this._fieldBuilders.push(descriptor as FieldDescriptor<TRecord, unknown>);
     return descriptor;
   }
 
@@ -319,7 +321,10 @@ export abstract class BatchEntryRecord<
 
     const options = this.getOptions();
     const descriptors = [...this.getFieldDescriptors()];
-    return options.writeLine(fields, descriptors as FieldDescriptor<any>[]);
+    return options.writeLine(
+      fields,
+      descriptors as FieldDescriptor<unknown, unknown>[],
+    );
   }
 
   protected readLine(line: string): string[] {
@@ -329,7 +334,10 @@ export abstract class BatchEntryRecord<
 
     const options = this.getOptions();
     const descriptors = [...this.getFieldDescriptors()];
-    return options.readLine(line, descriptors as FieldDescriptor<any>[]);
+    return options.readLine(
+      line,
+      descriptors as FieldDescriptor<unknown, unknown>[],
+    );
   }
 
   private getFormattedFields(): string[] {

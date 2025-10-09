@@ -2,6 +2,7 @@ import {
   type OperationMapping,
   TransactionCategorizer,
 } from "../../core/TransactionCategorizer";
+import type { TransactionType } from "../../types/transactions";
 
 /**
  * Binance-specific transaction categorizer
@@ -601,7 +602,7 @@ export function createBinanceCategorizer(
     Object.entries(operationOverrides).forEach(([operation, type]) => {
       mappings.push({
         pattern: new RegExp(`^${operation}$`, "i"),
-        type: type as any,
+        type: type as TransactionType,
         priority: 200, // High priority for user overrides
       });
     });

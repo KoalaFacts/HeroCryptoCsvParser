@@ -7,9 +7,15 @@ export interface BatchEntryRecordOptions {
   trim?: boolean;
 
   validateFieldDefinitions(
-    descriptors: FieldDescriptor<any>[],
+    descriptors: FieldDescriptor<unknown, unknown>[],
     recordName: string,
   ): void;
-  writeLine(fields: string[], descriptors: FieldDescriptor<any>[]): string;
-  readLine(line: string, descriptors: FieldDescriptor<any>[]): string[];
+  writeLine(
+    fields: string[],
+    descriptors: FieldDescriptor<unknown, unknown>[],
+  ): string;
+  readLine(
+    line: string,
+    descriptors: FieldDescriptor<unknown, unknown>[],
+  ): string[];
 }

@@ -2,7 +2,7 @@ export interface ValidationError {
   code: string;
   message: string;
   field?: string;
-  value?: any;
+  value?: unknown;
 }
 
 export class ValidationResult<T = void> {
@@ -64,7 +64,7 @@ export class ValidationResult<T = void> {
     return result;
   }
 
-  static combine<T>(results: ValidationResult<any>[]): ValidationResult<T> {
+  static combine<T>(results: ValidationResult<unknown>[]): ValidationResult<T> {
     const combined = new ValidationResult<T>();
     for (const result of results) {
       combined.merge(result);
@@ -92,7 +92,7 @@ export class ValidationResult<T = void> {
     return this;
   }
 
-  merge(other: ValidationResult<any>): this {
+  merge(other: ValidationResult<unknown>): this {
     this._errors.push(...other._errors);
     this._warnings.push(...other._warnings);
     return this;

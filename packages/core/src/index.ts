@@ -55,9 +55,13 @@ import { Source, type SourceProcessResult } from "./core/Source";
 import type { OperationMapping } from "./core/TransactionCategorizer";
 
 // Lazy-load sources to avoid mixing static and dynamic imports
+// biome-ignore lint/suspicious/noExplicitAny: Source registry needs to store different record types
 const sourceRegistry = new Map<string, Source<any>>();
 
-async function getSource(sourceName: string): Promise<Source<any> | undefined> {
+async function getSource(
+  sourceName: string,
+  // biome-ignore lint/suspicious/noExplicitAny: Source registry needs to store different record types
+): Promise<Source<any> | undefined> {
   const key = sourceName.toLowerCase();
 
   // Check if already loaded
@@ -134,10 +138,18 @@ export async function process(
     );
   }
 
+  if (!sourceInstance) {
+    throw new Error(`Source instance not found after initialization`);
+  }
+
   return sourceInstance.process(content, options);
 }
 
-export function registerSource(name: string, source: Source<any>): void {
+export function registerSource(
+  name: string,
+  // biome-ignore lint/suspicious/noExplicitAny: Source registry needs to store different record types
+  source: Source<any>,
+): void {
   sourceRegistry.set(name.toLowerCase(), source);
 }
 

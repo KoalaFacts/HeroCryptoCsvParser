@@ -33,7 +33,7 @@ export class FieldDefinition {
   ) {}
 }
 
-export class FieldDescriptor<TRecord, TProperty = any> {
+export class FieldDescriptor<TRecord, TProperty = unknown> {
   public getter?: (context: FieldGetterContext<TRecord>) => TProperty;
   public setter?: (
     context: FieldGetterContext<TRecord>,

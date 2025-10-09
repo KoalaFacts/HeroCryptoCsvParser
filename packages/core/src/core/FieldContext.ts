@@ -17,7 +17,7 @@ export class FieldMapperContext<TRecord> {
 export class FieldFormatterContext<TRecord> {
   constructor(
     public readonly fieldName: string,
-    public readonly currentValue: any,
+    public readonly currentValue: unknown,
     public readonly record: TRecord,
   ) {}
 }
@@ -25,7 +25,7 @@ export class FieldFormatterContext<TRecord> {
 export class FieldValidatorContext<TRecord> {
   constructor(
     public readonly fieldName: string,
-    public readonly currentValue: any,
+    public readonly currentValue: unknown,
     public readonly record: TRecord,
   ) {}
 }
