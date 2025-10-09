@@ -11,16 +11,31 @@ import jsPDF from 'jspdf';
 const getTransactionAsset = (tx: Transaction): string => {
   // Try to get primary asset from various transaction types
   if ('baseAsset' in tx && tx.baseAsset) {
-    return typeof tx.baseAsset === 'string' ? tx.baseAsset : tx.baseAsset.toString();
+    // AssetAmount type
+    if (typeof tx.baseAsset === 'object' && tx.baseAsset !== null && 'asset' in tx.baseAsset) {
+      const asset = (tx.baseAsset as any).asset;
+      if (!asset) return 'N/A';
+      return typeof asset === 'string' ? asset : (asset.symbol || String(asset));
+    }
+    return typeof tx.baseAsset === 'string' ? tx.baseAsset : String(tx.baseAsset);
   }
   if ('asset' in tx && tx.asset) {
-    return typeof tx.asset === 'string' ? tx.asset : tx.asset.toString();
+    if (typeof tx.asset === 'object' && tx.asset !== null && 'symbol' in tx.asset) {
+      return (tx.asset as any).symbol || String(tx.asset);
+    }
+    return typeof tx.asset === 'string' ? tx.asset : String(tx.asset);
   }
   if ('fromAsset' in tx && tx.fromAsset) {
-    return typeof tx.fromAsset === 'string' ? tx.fromAsset : tx.fromAsset.toString();
+    if (typeof tx.fromAsset === 'object' && tx.fromAsset !== null && 'symbol' in tx.fromAsset) {
+      return (tx.fromAsset as any).symbol || String(tx.fromAsset);
+    }
+    return typeof tx.fromAsset === 'string' ? tx.fromAsset : String(tx.fromAsset);
   }
   if ('toAsset' in tx && tx.toAsset) {
-    return typeof tx.toAsset === 'string' ? tx.toAsset : tx.toAsset.toString();
+    if (typeof tx.toAsset === 'object' && tx.toAsset !== null && 'symbol' in tx.toAsset) {
+      return (tx.toAsset as any).symbol || String(tx.toAsset);
+    }
+    return typeof tx.toAsset === 'string' ? tx.toAsset : String(tx.toAsset);
   }
   return 'N/A';
 };
@@ -33,29 +48,27 @@ const getTransactionQuoteAsset = (tx: Transaction): string | undefined => {
 };
 
 const getTransactionAmount = (tx: Transaction): string => {
+  // For SpotTrade, use baseAsset's amount (AssetAmount type)
+  if ('baseAsset' in tx && tx.baseAsset) {
+    if (typeof tx.baseAsset === 'object' && tx.baseAsset !== null && 'amount' in tx.baseAsset) {
+      const amt = (tx.baseAsset as any).amount;
+      return amt?.toString() || 'N/A';
+    }
+  }
   if ('amount' in tx && tx.amount) {
     if (typeof tx.amount === 'object' && tx.amount !== null && 'amount' in tx.amount) {
       // AssetAmount type
-      return (tx.amount.amount as any).toString();
+      return (tx.amount as any).amount?.toString() || 'N/A';
     }
     return tx.amount.toString();
   }
   if ('baseAmount' in tx && tx.baseAmount) {
-    if (typeof tx.baseAmount === 'object' && tx.baseAmount !== null && 'amount' in tx.baseAmount) {
-      return (tx.baseAmount.amount as any).toString();
-    }
     return tx.baseAmount.toString();
   }
   if ('fromAmount' in tx && tx.fromAmount) {
-    if (typeof tx.fromAmount === 'object' && tx.fromAmount !== null && 'amount' in tx.fromAmount) {
-      return (tx.fromAmount.amount as any).toString();
-    }
     return tx.fromAmount.toString();
   }
   if ('toAmount' in tx && tx.toAmount) {
-    if (typeof tx.toAmount === 'object' && tx.toAmount !== null && 'amount' in tx.toAmount) {
-      return (tx.toAmount.amount as any).toString();
-    }
     return tx.toAmount.toString();
   }
   return 'N/A';
