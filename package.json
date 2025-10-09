@@ -7,6 +7,10 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./tax": {
+      "import": "./dist/tax/index.js",
+      "types": "./dist/tax/index.d.ts"
     }
   },
   "scripts": {

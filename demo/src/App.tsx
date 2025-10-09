@@ -1,5 +1,7 @@
 import { process } from '@beingciteable/hero-csv-crypto-parser';
 import type { Transaction, SourceProcessResult } from '@beingciteable/hero-csv-crypto-parser';
+import { generateTaxReport, exportTaxReportPDF, exportSummaryToCSV } from '@beingciteable/hero-csv-crypto-parser/tax';
+import type { TaxReport } from '@beingciteable/hero-csv-crypto-parser/tax';
 import { useState, useEffect, useCallback } from 'react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
@@ -81,6 +83,9 @@ function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [taxReport, setTaxReport] = useState<TaxReport | null>(null);
+  const [taxYear, setTaxYear] = useState(new Date().getFullYear());
+  const [generatingTaxReport, setGeneratingTaxReport] = useState(false);
 
   const handleProcess = useCallback(async (source: string, input: string) => {
     if (!input.trim()) {
@@ -142,6 +147,74 @@ function App() {
       URL.revokeObjectURL(url);
     } catch (_err) {
       setError('Export failed');
+    }
+  };
+
+  const handleGenerateTaxReport = async () => {
+    if (transactions.length === 0) return;
+
+    setGeneratingTaxReport(true);
+    setError('');
+
+    try {
+      const report = await generateTaxReport({
+        jurisdictionCode: 'AU',
+        taxYear,
+        transactions,
+        options: {
+          includeOptimization: true,
+          costBasisMethod: 'FIFO',
+          handleDeFi: true,
+        },
+      });
+
+      setTaxReport(report);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Tax report generation failed');
+      setTaxReport(null);
+    } finally {
+      setGeneratingTaxReport(false);
+    }
+  };
+
+  const handleExportTaxReportPDF = async () => {
+    if (!taxReport) return;
+
+    try {
+      const pdfBuffer = await exportTaxReportPDF(taxReport, {
+        includeTransactionDetails: true,
+        includeOptimizationStrategies: true,
+      });
+
+      // Convert Buffer to Uint8Array for browser compatibility
+      const uint8Array = new Uint8Array(pdfBuffer);
+      const blob = new Blob([uint8Array], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tax-report-AU-${taxYear}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'PDF export failed');
+    }
+  };
+
+  const handleExportTaxReportCSV = async () => {
+    if (!taxReport) return;
+
+    try {
+      const csv = exportSummaryToCSV(taxReport);
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tax-summary-AU-${taxYear}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'CSV export failed');
     }
   };
 
@@ -533,6 +606,108 @@ function App() {
                           </tbody>
                         </table>
                       </div>
+                    </div>
+
+                    {/* Tax Report Section */}
+                    <div className="mt-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200/50">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                            🇦🇺 Australian Tax Report
+                            <span className="text-xs font-semibold px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">
+                              NEW
+                            </span>
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1">Generate ATO-compliant tax reports (FY runs Jul-Jun)</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <select
+                            className="select select-sm select-bordered bg-white border-emerald-200 focus:border-emerald-500 focus:outline-none"
+                            value={taxYear}
+                            onChange={(e) => setTaxYear(Number(e.target.value))}
+                          >
+                            <option value={2024}>FY 2024-25</option>
+                            <option value={2023}>FY 2023-24</option>
+                            <option value={2022}>FY 2022-23</option>
+                            <option value={2021}>FY 2021-22</option>
+                            <option value={2020}>FY 2020-21</option>
+                          </select>
+                          <button
+                            type="button"
+                            className="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-none"
+                            onClick={handleGenerateTaxReport}
+                            disabled={generatingTaxReport || transactions.length === 0}
+                          >
+                            {generatingTaxReport ? (
+                              <>
+                                <span className="loading loading-spinner loading-xs"></span>
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                Generate Report
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {taxReport && (
+                        <div className="bg-white rounded-lg p-5 border border-emerald-200/50">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div className="bg-emerald-50 rounded-lg p-3">
+                              <p className="text-xs text-emerald-700 font-medium mb-1">Capital Gains</p>
+                              <p className="text-lg font-bold text-emerald-900">
+                                ${taxReport.summary.totalCapitalGains.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="bg-teal-50 rounded-lg p-3">
+                              <p className="text-xs text-teal-700 font-medium mb-1">CGT Discount</p>
+                              <p className="text-lg font-bold text-teal-900">
+                                ${taxReport.summary.cgtDiscount.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="bg-blue-50 rounded-lg p-3">
+                              <p className="text-xs text-blue-700 font-medium mb-1">Ordinary Income</p>
+                              <p className="text-lg font-bold text-blue-900">
+                                ${taxReport.summary.ordinaryIncome.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="bg-purple-50 rounded-lg p-3">
+                              <p className="text-xs text-purple-700 font-medium mb-1">Net Taxable</p>
+                              <p className="text-lg font-bold text-purple-900">
+                                ${taxReport.summary.netTaxableAmount.toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className="btn btn-sm bg-red-600 hover:bg-red-700 text-white border-none"
+                              onClick={handleExportTaxReportPDF}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              Export PDF
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none"
+                              onClick={handleExportTaxReportCSV}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Export CSV
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
