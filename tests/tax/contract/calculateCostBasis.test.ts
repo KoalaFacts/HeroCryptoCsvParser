@@ -4,8 +4,9 @@ import type {
   CostBasis,
   CostBasisMethod,
   AcquisitionLot
-} from '../../../specs/001-cryto-tax-report/contracts/function-interfaces';
-import type { Transaction } from '../../../src/types/transactions/Transaction';
+} from '@/tax/contracts/function-interfaces';
+import type { Transaction } from '@/types/transactions/Transaction';
+import { createMockSpotTrade } from '@tests/tax/helpers/mockFactories';
 
 /**
  * Contract Test T009: calculateCostBasis Function
@@ -15,36 +16,20 @@ import type { Transaction } from '../../../src/types/transactions/Transaction';
  */
 describe('T009: Contract Test - calculateCostBasis Function', () => {
   // Mock data for testing
-  const createMockAcquisition = (date: string, amount: number, unitPrice: number): Transaction => ({
-    id: `acquisition-${Date.now()}-${Math.random()}`,
-    type: 'SPOT_TRADE',
-    timestamp: new Date(date),
-    source: {
-      name: 'TestExchange',
-      type: 'exchange'
-    },
-    taxEvents: [],
-    originalData: {
-      side: 'buy',
-      amount: amount.toString(),
+  const createMockAcquisition = (date: string, amount: number, unitPrice: number): Transaction =>
+    createMockSpotTrade({
+      id: `acquisition-${Date.now()}-${Math.random()}`,
+      timestamp: new Date(date),
+      side: 'BUY',
       price: unitPrice.toString()
-    }
-  });
+    });
 
-  const createMockDisposal = (date: string, amount: number): Transaction => ({
-    id: `disposal-${Date.now()}-${Math.random()}`,
-    type: 'SPOT_TRADE',
-    timestamp: new Date(date),
-    source: {
-      name: 'TestExchange',
-      type: 'exchange'
-    },
-    taxEvents: [],
-    originalData: {
-      side: 'sell',
-      amount: amount.toString()
-    }
-  });
+  const createMockDisposal = (date: string, amount: number): Transaction =>
+    createMockSpotTrade({
+      id: `disposal-${Date.now()}-${Math.random()}`,
+      timestamp: new Date(date),
+      side: 'SELL'
+    });
 
   describe('Function Interface Contract', () => {
     it('should have calculateCostBasis function available', () => {

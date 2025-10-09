@@ -5,12 +5,13 @@
  * Supports traditional trades, DeFi operations, and various transaction types.
  */
 
-import type { Transaction } from '../../../types/transactions/Transaction';
+import type { Transaction } from '../../types/transactions';
 import type {
   TransactionTaxTreatment,
   TaxEventType
 } from '../models/TransactionTaxTreatment';
 import type { TaxRule } from '../models/TaxRule';
+import { getBaseAmount } from '../utils/transactionHelpers';
 
 /**
  * Classification context
@@ -96,43 +97,34 @@ export class TransactionClassifier {
    */
   classifyDeFiTransaction(transaction: Transaction): string {
     const type = transaction.type?.toLowerCase() || '';
-    const description = transaction.description?.toLowerCase() || '';
 
     // Staking rewards
-    if (type.includes('staking') || description.includes('staking reward')) {
+    if (type.includes('staking_reward')) {
       return 'DeFi Staking Reward - Ordinary Income';
     }
 
     // Liquidity pool operations
-    if (
-      type.includes('liquidity') ||
-      description.includes('add liquidity') ||
-      description.includes('remove liquidity')
-    ) {
+    if (type.includes('liquidity')) {
       return 'DeFi Liquidity Pool - Capital Transaction';
     }
 
-    // Yield farming
-    if (type.includes('farm') || description.includes('yield')) {
+    // Yield farming (covered by staking rewards)
+    if (type.includes('interest')) {
       return 'DeFi Yield Farming - Ordinary Income';
     }
 
     // Lending/borrowing
-    if (
-      type.includes('lend') ||
-      type.includes('borrow') ||
-      description.includes('interest')
-    ) {
+    if (type.includes('loan')) {
       return 'DeFi Lending/Borrowing - Interest Income/Expense';
     }
 
     // Airdrops
-    if (type.includes('airdrop') || description.includes('airdrop')) {
+    if (type.includes('airdrop')) {
       return 'DeFi Airdrop - Ordinary Income';
     }
 
     // Swaps
-    if (type.includes('swap') || description.includes('swap')) {
+    if (type.includes('swap')) {
       return 'DeFi Swap - Disposal and Acquisition';
     }
 
@@ -155,9 +147,6 @@ export class TransactionClassifier {
    * Determine the tax event type
    */
   private determineEventType(transaction: Transaction): TaxEventType {
-    const type = transaction.type?.toLowerCase() || '';
-    const baseAmount = transaction.baseAmount;
-
     // Check for income events
     if (this.isIncomeEvent(transaction)) {
       return 'INCOME';
@@ -174,6 +163,7 @@ export class TransactionClassifier {
     }
 
     // Disposal: selling, trading away, spending
+    const baseAmount = getBaseAmount(transaction);
     if (baseAmount < 0) {
       return 'DISPOSAL';
     }
@@ -192,23 +182,15 @@ export class TransactionClassifier {
    */
   private isIncomeEvent(transaction: Transaction): boolean {
     const type = transaction.type?.toLowerCase() || '';
-    const description = transaction.description?.toLowerCase() || '';
 
     const incomeKeywords = [
       'staking',
       'reward',
-      'mining',
       'airdrop',
-      'interest',
-      'dividend',
-      'cashback',
-      'referral',
-      'bonus'
+      'interest'
     ];
 
-    return incomeKeywords.some(
-      keyword => type.includes(keyword) || description.includes(keyword)
-    );
+    return incomeKeywords.some(keyword => type.includes(keyword));
   }
 
   /**
@@ -227,7 +209,6 @@ export class TransactionClassifier {
    */
   private isNonTaxableEvent(transaction: Transaction): boolean {
     const type = transaction.type?.toLowerCase() || '';
-    const description = transaction.description?.toLowerCase() || '';
 
     const nonTaxableKeywords = [
       'transfer',
@@ -236,9 +217,7 @@ export class TransactionClassifier {
       'internal'
     ];
 
-    return nonTaxableKeywords.some(
-      keyword => type.includes(keyword) || description.includes(keyword)
-    );
+    return nonTaxableKeywords.some(keyword => type.includes(keyword));
   }
 
   /**

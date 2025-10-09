@@ -305,7 +305,9 @@ export class StorageManager {
    */
   static reset(): void {
     if (StorageManager.instance) {
-      StorageManager.instance.closeAll().catch(console.error);
+      StorageManager.instance.closeAll().catch(() => {
+        // Ignore close errors during reset
+      });
       StorageManager.instance = null;
     }
   }

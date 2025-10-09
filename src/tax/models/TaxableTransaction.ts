@@ -95,10 +95,8 @@ export class TaxableTransactionModel implements TaxableTransaction {
     }
 
     // Business rule: cost basis should be provided for disposal events
-    if (data.taxTreatment.eventType === 'DISPOSAL' && !data.costBasis) {
-      // This is a warning rather than an error, as cost basis might be calculated later
-      console.warn(`Disposal transaction ${data.originalTransaction.id} does not have cost basis information`);
-    }
+    // If missing, it should be calculated later by the TaxReportGenerator
+    // This is acceptable during initial creation of TaxableTransaction
   }
 
   /**

@@ -3,8 +3,8 @@ import type {
   GenerateTaxReportFunction,
   TaxReportConfig,
   TaxReport
-} from '../../../specs/001-cryto-tax-report/contracts/function-interfaces';
-import type { Transaction } from '../../../src/types/transactions/Transaction';
+} from '@/tax/contracts/function-interfaces';
+import type { Transaction } from '@/types/transactions/Transaction';
 import { createMockTransaction } from './mock-data';
 
 /**

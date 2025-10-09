@@ -6,7 +6,7 @@ import type {
   TaxJurisdiction,
   TaxPeriod,
   TaxSummary
-} from '../../../specs/001-cryto-tax-report/contracts/function-interfaces';
+} from '@/tax/contracts/function-interfaces';
 
 /**
  * Contract Test T006: exportTaxReportPDF Function

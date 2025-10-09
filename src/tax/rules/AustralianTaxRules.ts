@@ -7,7 +7,8 @@
 
 import type { TaxJurisdiction } from '../models/TaxJurisdiction';
 import type { TaxRule, RuleCategory } from '../models/TaxRule';
-import type { Transaction } from '../../../types/transactions/Transaction';
+import type { Transaction } from '../../types/transactions';
+import { getQuoteAmount, getBaseAmount } from '../utils/transactionHelpers';
 
 /**
  * Australian tax jurisdiction configuration
@@ -197,15 +198,14 @@ export class PersonalUseAssetRules {
   } {
     const missingItems: string[] = [];
 
-    // Check for documentation of personal use intent
-    if (!transaction.description?.toLowerCase().includes('personal')) {
-      missingItems.push('Documentation of personal use intent');
-    }
-
     // Check for acquisition value
-    if (!transaction.quoteAmount || transaction.quoteAmount === 0) {
+    const quoteAmount = getQuoteAmount(transaction);
+    if (!quoteAmount || quoteAmount === 0) {
       missingItems.push('Acquisition value documentation');
     }
+
+    // Note: Personal use intent documentation should be tracked separately
+    // in the transaction metadata or tax events
 
     return {
       isValid: missingItems.length === 0,
@@ -249,10 +249,9 @@ export class DeFiClassificationRules {
     reasoning: string;
   } {
     const type = transaction.type?.toLowerCase() || '';
-    const description = transaction.description?.toLowerCase() || '';
 
     // Staking rewards - Ordinary income
-    if (type.includes('staking') || description.includes('staking')) {
+    if (type.includes('staking')) {
       return {
         type: 'Staking Reward',
         taxTreatment: 'INCOME',
@@ -260,24 +259,8 @@ export class DeFiClassificationRules {
       };
     }
 
-    // Liquidity pool rewards - Ordinary income
-    if (
-      type.includes('liquidity') ||
-      description.includes('lp reward') ||
-      description.includes('liquidity reward')
-    ) {
-      return {
-        type: 'Liquidity Pool Reward',
-        taxTreatment: 'INCOME',
-        reasoning: 'LP rewards are ordinary income when received'
-      };
-    }
-
-    // Adding/removing liquidity - Capital transaction
-    if (
-      description.includes('add liquidity') ||
-      description.includes('remove liquidity')
-    ) {
+    // Liquidity pool operations
+    if (type.includes('liquidity')) {
       return {
         type: 'Liquidity Pool Operation',
         taxTreatment: 'CAPITAL',
@@ -285,17 +268,8 @@ export class DeFiClassificationRules {
       };
     }
 
-    // Yield farming - Ordinary income
-    if (type.includes('farm') || description.includes('yield')) {
-      return {
-        type: 'Yield Farming',
-        taxTreatment: 'INCOME',
-        reasoning: 'Yield farming rewards are ordinary income'
-      };
-    }
-
-    // Lending interest - Ordinary income
-    if (type.includes('interest') || description.includes('lending')) {
+    // Yield farming/Interest - Ordinary income
+    if (type.includes('interest')) {
       return {
         type: 'Lending Interest',
         taxTreatment: 'INCOME',
@@ -304,7 +278,7 @@ export class DeFiClassificationRules {
     }
 
     // Airdrops - Ordinary income
-    if (type.includes('airdrop') || description.includes('airdrop')) {
+    if (type.includes('airdrop')) {
       return {
         type: 'Airdrop',
         taxTreatment: 'INCOME',
@@ -313,7 +287,7 @@ export class DeFiClassificationRules {
     }
 
     // Token swaps - Capital transaction
-    if (type.includes('swap') || description.includes('swap')) {
+    if (type.includes('swap')) {
       return {
         type: 'Token Swap',
         taxTreatment: 'CAPITAL',
@@ -353,7 +327,7 @@ export class DeFiClassificationRules {
     transaction: Transaction,
     marketPrice: number
   ): number {
-    const amount = Math.abs(transaction.baseAmount);
+    const amount = Math.abs(getBaseAmount(transaction));
     return amount * marketPrice;
   }
 

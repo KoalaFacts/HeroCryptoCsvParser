@@ -20,6 +20,7 @@ import type { Transaction } from '@/types/transactions/Transaction';
 import type { SpotTrade } from '@/types/transactions/SpotTrade';
 import type { Transfer } from '@/types/transactions/Transfer';
 import type { Airdrop } from '@/types/transactions/Airdrop';
+import { createMockSpotTrade, createMockAirdrop } from '@tests/tax/helpers/mockFactories';
 
 // These interfaces will be implemented in the tax module
 interface FIFOLot {
@@ -62,262 +63,81 @@ describe('T015: FIFO Cost Basis Calculation Integration', () => {
     // Complex transaction dataset for FIFO testing
     testTransactions = [
       // First BTC purchase - $30,000 AUD
-      {
+      createMockSpotTrade({
         id: 'btc-buy-001',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-01-10T10:00:00Z'),
-        source: {
-          name: 'binance',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '1.00000000', decimals: 8 },
-          fiatValue: { amount: 30000, currency: 'AUD', timestamp: new Date('2023-01-10T10:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '30000.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '30000.00',
-        fee: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '30.00', decimals: 2 }
-        },
-        taxEvents: []
-      } as SpotTrade,
+        price: '30000.00'
+      }),
 
       // Second BTC purchase - $45,000 AUD (higher price)
-      {
+      createMockSpotTrade({
         id: 'btc-buy-002',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-03-15T14:30:00Z'),
-        source: {
-          name: 'coinbase',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '0.50000000', decimals: 8 },
-          fiatValue: { amount: 22500, currency: 'AUD', timestamp: new Date('2023-03-15T14:30:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '22500.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '45000.00',
-        fee: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '22.50', decimals: 2 }
-        },
-        taxEvents: []
-      } as SpotTrade,
+        price: '45000.00'
+      }),
 
       // Third BTC purchase - $35,000 AUD (middle price)
-      {
+      createMockSpotTrade({
         id: 'btc-buy-003',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-05-20T09:15:00Z'),
-        source: {
-          name: 'kraken',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '0.75000000', decimals: 8 },
-          fiatValue: { amount: 26250, currency: 'AUD', timestamp: new Date('2023-05-20T09:15:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '26250.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '35000.00',
-        fee: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '26.25', decimals: 2 }
-        },
-        taxEvents: []
-      } as SpotTrade,
+        price: '35000.00'
+      }),
 
       // BTC airdrop - zero cost basis
-      {
+      createMockAirdrop({
         id: 'btc-airdrop-001',
-        type: 'AIRDROP',
-        timestamp: new Date('2023-07-01T00:00:00Z'),
-        source: {
-          name: 'bitcoin_fork',
-          type: 'protocol',
-          country: 'AU'
-        },
-        asset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '0.10000000', decimals: 8 },
-          fiatValue: { amount: 4200, currency: 'AUD', timestamp: new Date('2023-07-01T00:00:00Z') }
-        },
-        reason: 'Bitcoin network upgrade bonus',
-        taxEvents: []
-      } as Airdrop,
+        timestamp: new Date('2023-07-01T00:00:00Z')
+      }),
 
       // First partial disposal - should use FIFO (first lot at $30,000)
-      {
+      createMockSpotTrade({
         id: 'btc-sell-001',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-08-10T16:45:00Z'),
-        source: {
-          name: 'binance',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '0.30000000', decimals: 8 },
-          fiatValue: { amount: 15600, currency: 'AUD', timestamp: new Date('2023-08-10T16:45:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '15600.00', decimals: 2 }
-        },
         side: 'SELL',
-        price: '52000.00',
-        fee: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '15.60', decimals: 2 }
-        },
-        taxEvents: []
-      } as SpotTrade,
+        price: '52000.00'
+      }),
 
       // Second disposal - should continue with remaining first lot
-      {
+      createMockSpotTrade({
         id: 'btc-sell-002',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-10-15T11:20:00Z'),
-        source: {
-          name: 'coinbase',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '0.80000000', decimals: 8 },
-          fiatValue: { amount: 48000, currency: 'AUD', timestamp: new Date('2023-10-15T11:20:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '48000.00', decimals: 2 }
-        },
         side: 'SELL',
-        price: '60000.00',
-        fee: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '48.00', decimals: 2 }
-        },
-        taxEvents: []
-      } as SpotTrade,
+        price: '60000.00'
+      }),
 
       // Large disposal that spans multiple lots
-      {
+      createMockSpotTrade({
         id: 'btc-sell-003',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2024-01-30T13:00:00Z'),
-        source: {
-          name: 'kraken',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '1.00000000', decimals: 8 },
-          fiatValue: { amount: 70000, currency: 'AUD', timestamp: new Date('2024-01-30T13:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '70000.00', decimals: 2 }
-        },
         side: 'SELL',
-        price: '70000.00',
-        fee: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '70.00', decimals: 2 }
-        },
-        taxEvents: []
-      } as SpotTrade,
+        price: '70000.00'
+      }),
 
       // ETH purchases for separate asset tracking
-      {
+      createMockSpotTrade({
         id: 'eth-buy-001',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-02-01T10:00:00Z'),
-        source: {
-          name: 'binance',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '5.00000000', decimals: 18 },
-          fiatValue: { amount: 10000, currency: 'AUD', timestamp: new Date('2023-02-01T10:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '10000.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '2000.00',
-        taxEvents: []
-      } as SpotTrade,
+        price: '2000.00'
+      }),
 
-      {
+      createMockSpotTrade({
         id: 'eth-buy-002',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-04-01T10:00:00Z'),
-        source: {
-          name: 'binance',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '3.00000000', decimals: 18 },
-          fiatValue: { amount: 9000, currency: 'AUD', timestamp: new Date('2023-04-01T10:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '9000.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '3000.00',
-        taxEvents: []
-      } as SpotTrade,
+        price: '3000.00'
+      }),
 
       // ETH disposal
-      {
+      createMockSpotTrade({
         id: 'eth-sell-001',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-09-01T10:00:00Z'),
-        source: {
-          name: 'binance',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '6.00000000', decimals: 18 },
-          fiatValue: { amount: 18000, currency: 'AUD', timestamp: new Date('2023-09-01T10:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '18000.00', decimals: 2 }
-        },
         side: 'SELL',
-        price: '3000.00',
-        taxEvents: []
-      } as SpotTrade
+        price: '3000.00'
+      })
     ];
   });
 

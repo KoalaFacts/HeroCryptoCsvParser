@@ -20,6 +20,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { writeFile, unlink, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
+import { createMockSpotTrade, createMockStakingReward } from '@tests/tax/helpers/mockFactories';
 import type { Transaction } from '@/types/transactions/Transaction';
 import type { SpotTrade } from '@/types/transactions/SpotTrade';
 import type { StakingReward } from '@/types/transactions/StakingReward';
@@ -223,39 +224,17 @@ describe('T019: Export Formats Integration', () => {
         ]
       },
       transactionLog: [
-        {
+        createMockSpotTrade({
           id: 'btc-001',
-          type: 'SPOT_TRADE',
           timestamp: new Date('2022-06-01T10:00:00Z'),
-          source: { name: 'binance', type: 'exchange', country: 'AU' },
-          baseAsset: {
-            asset: { symbol: 'BTC', name: 'Bitcoin' },
-            amount: { value: '0.50000000', decimals: 8 },
-            fiatValue: { amount: 30000, currency: 'AUD', timestamp: new Date('2022-06-01T10:00:00Z') }
-          },
-          quoteAsset: {
-            asset: { symbol: 'AUD', name: 'Australian Dollar' },
-            amount: { value: '30000.00', decimals: 2 }
-          },
           side: 'BUY',
-          price: '60000.00',
-          taxEvents: []
-        } as SpotTrade,
+          price: '60000.00'
+        }),
 
-        {
+        createMockStakingReward({
           id: 'ada-staking-001',
-          type: 'STAKING_REWARD',
-          timestamp: new Date('2023-12-01T00:00:00Z'),
-          source: { name: 'cardano', type: 'protocol', country: 'AU' },
-          asset: {
-            asset: { symbol: 'ADA', name: 'Cardano' },
-            amount: { value: '3125.000000', decimals: 6 },
-            fiatValue: { amount: 2500, currency: 'AUD', timestamp: new Date('2023-12-01T00:00:00Z') }
-          },
-          stakingProduct: 'Cardano Staking Pool',
-          apr: '5.2%',
-          taxEvents: []
-        } as StakingReward
+          timestamp: new Date('2023-12-01T00:00:00Z')
+        })
       ]
     };
   });

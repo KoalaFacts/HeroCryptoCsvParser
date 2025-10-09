@@ -16,6 +16,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
+import { createMockSpotTrade, createMockStakingReward, createMockSwap, createMockInterest } from '@tests/tax/helpers/mockFactories';
 import type { Transaction } from '@/types/transactions/Transaction';
 import type { SpotTrade } from '@/types/transactions/SpotTrade';
 import type { Transfer } from '@/types/transactions/Transfer';
@@ -69,185 +70,54 @@ describe('T014: Australian Tax Report Generation Integration', () => {
     // Realistic transaction dataset based on quickstart guide
     testTransactions = [
       // Initial BTC purchase - acquisition for CGT
-      {
+      createMockSpotTrade({
         id: 'binance-001',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-01-15T10:30:45Z'),
-        source: {
-          name: 'binance',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '0.00125000', decimals: 8 },
-          fiatValue: { amount: 35000, currency: 'AUD', timestamp: new Date('2023-01-15T10:30:45Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '35000.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '28000000.00',
-        fee: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '0.00000125', decimals: 8 },
-          fiatValue: { amount: 35, currency: 'AUD', timestamp: new Date('2023-01-15T10:30:45Z') }
-        },
-        taxEvents: []
-      } as SpotTrade,
+        price: '28000000.00'
+      }),
 
       // ETH purchase for DeFi activities
-      {
+      createMockSpotTrade({
         id: 'binance-002',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-02-20T14:22:10Z'),
-        source: {
-          name: 'binance',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '2.55000000', decimals: 18 },
-          fiatValue: { amount: 6500, currency: 'AUD', timestamp: new Date('2023-02-20T14:22:10Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '6500.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '2549.02',
-        fee: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '6.50', decimals: 2 }
-        },
-        taxEvents: []
-      } as SpotTrade,
+        price: '2549.02'
+      }),
 
       // Staking reward - ordinary income for Australian tax
-      {
+      createMockStakingReward({
         id: 'binance-003',
-        type: 'STAKING_REWARD',
-        timestamp: new Date('2023-03-15T00:00:00Z'),
-        source: {
-          name: 'binance',
-          type: 'exchange',
-          country: 'AU'
-        },
-        asset: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '0.05000000', decimals: 18 },
-          fiatValue: { amount: 125, currency: 'AUD', timestamp: new Date('2023-03-15T00:00:00Z') }
-        },
-        stakingProduct: 'ETH 2.0 Staking',
-        apr: '4.5%',
-        taxEvents: []
-      } as StakingReward,
+        timestamp: new Date('2023-03-15T00:00:00Z')
+      }),
 
       // DeFi swap - capital gains event
-      {
+      createMockSwap({
         id: 'uniswap-001',
-        type: 'SWAP',
-        timestamp: new Date('2023-04-10T16:45:30Z'),
-        source: {
-          name: 'uniswap',
-          type: 'protocol',
-          country: 'AU'
-        },
-        from: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '1.00000000', decimals: 18 },
-          fiatValue: { amount: 2800, currency: 'AUD', timestamp: new Date('2023-04-10T16:45:30Z') }
-        },
-        to: {
-          asset: { symbol: 'USDC', name: 'USD Coin' },
-          amount: { value: '1850.000000', decimals: 6 },
-          fiatValue: { amount: 2800, currency: 'AUD', timestamp: new Date('2023-04-10T16:45:30Z') }
-        },
-        route: {
-          protocol: 'Uniswap V3',
-          slippage: '0.5%'
-        },
-        gasUsed: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '0.002000000', decimals: 18 },
-          fiatValue: { amount: 5.6, currency: 'AUD', timestamp: new Date('2023-04-10T16:45:30Z') }
-        },
-        taxEvents: []
-      } as Swap,
+        timestamp: new Date('2023-04-10T16:45:30Z')
+      }),
 
       // Large BTC sale after 12+ months (eligible for CGT discount)
-      {
+      createMockSpotTrade({
         id: 'binance-004',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2024-03-20T11:15:22Z'),
-        source: {
-          name: 'binance',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '0.00125000', decimals: 8 },
-          fiatValue: { amount: 85000, currency: 'AUD', timestamp: new Date('2024-03-20T11:15:22Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '85000.00', decimals: 2 }
-        },
         side: 'SELL',
-        price: '68000000.00',
-        fee: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '85.00', decimals: 2 }
-        },
-        taxEvents: []
-      } as SpotTrade,
+        price: '68000000.00'
+      }),
 
       // Interest from lending platform
-      {
+      createMockInterest({
         id: 'compound-001',
-        type: 'INTEREST',
-        timestamp: new Date('2024-01-15T00:00:00Z'),
-        source: {
-          name: 'compound',
-          type: 'protocol',
-          country: 'AU'
-        },
-        asset: {
-          asset: { symbol: 'USDC', name: 'USD Coin' },
-          amount: { value: '15.000000', decimals: 6 },
-          fiatValue: { amount: 22.5, currency: 'AUD', timestamp: new Date('2024-01-15T00:00:00Z') }
-        },
-        interestRate: '3.2%',
-        period: 30,
-        taxEvents: []
-      } as Interest,
+        timestamp: new Date('2024-01-15T00:00:00Z')
+      }),
 
       // Small crypto purchase under personal use threshold
-      {
+      createMockSpotTrade({
         id: 'binance-005',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2024-05-10T09:30:15Z'),
-        source: {
-          name: 'binance',
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: 'DOGE', name: 'Dogecoin' },
-          amount: { value: '5000.00000000', decimals: 8 },
-          fiatValue: { amount: 500, currency: 'AUD', timestamp: new Date('2024-05-10T09:30:15Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '500.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '0.10',
-        taxEvents: []
-      } as SpotTrade
+        price: '0.10'
+      })
     ];
   });
 

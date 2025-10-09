@@ -7,7 +7,7 @@
 
 import type { TaxableTransaction } from '../models/TaxableTransaction';
 import type { TaxReport } from '../models/TaxReport';
-import type { TaxEvent } from '../models/TransactionTaxTreatment';
+import type { TaxEvent } from '../models/TaxEvent';
 
 export interface TransactionFilter {
   dateRange?: [Date, Date];

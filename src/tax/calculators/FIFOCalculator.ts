@@ -5,8 +5,16 @@
  * Processes acquisition lots in chronological order to determine cost basis for disposals.
  */
 
-import type { Transaction } from '../../../types/transactions/Transaction';
+import type { Transaction } from '../../types/transactions';
 import type { CostBasis, AcquisitionLot } from '../models/CostBasis';
+import {
+  getTransactionAsset,
+  getTransactionTimestamp,
+  getBaseAmount,
+  getQuoteAmount,
+  getTransactionFee,
+  getAssetKey
+} from '../utils/transactionHelpers';
 
 /**
  * Acquisition lot tracking for FIFO calculations
@@ -40,7 +48,7 @@ export class FIFOCalculator {
    * @param transaction Acquisition transaction
    */
   addAcquisition(transaction: Transaction): void {
-    const asset = this.normalizeAsset(transaction.baseCurrency);
+    const asset = getAssetKey(transaction);
 
     if (!this.lotsByAsset.has(asset)) {
       this.lotsByAsset.set(asset, []);
@@ -49,10 +57,10 @@ export class FIFOCalculator {
     const lots = this.lotsByAsset.get(asset)!;
 
     const lot: FIFOLot = {
-      date: transaction.date,
-      amount: Math.abs(transaction.baseAmount),
+      date: getTransactionTimestamp(transaction),
+      amount: Math.abs(getBaseAmount(transaction)),
       unitPrice: this.calculateUnitPrice(transaction),
-      remainingAmount: Math.abs(transaction.baseAmount),
+      remainingAmount: Math.abs(getBaseAmount(transaction)),
       transactionId: transaction.id
     };
 
@@ -71,8 +79,8 @@ export class FIFOCalculator {
     disposal: Transaction,
     acquisitions: Transaction[]
   ): CostBasis {
-    const asset = this.normalizeAsset(disposal.baseCurrency);
-    const disposalAmount = Math.abs(disposal.baseAmount);
+    const asset = getAssetKey(disposal);
+    const disposalAmount = Math.abs(getBaseAmount(disposal));
 
     // Build FIFO queue from acquisitions
     this.rebuildLots(asset, acquisitions);
@@ -109,8 +117,9 @@ export class FIFOCalculator {
     }
 
     // Calculate fees proportionally
-    if (disposal.fee) {
-      totalFees = Math.abs(disposal.fee);
+    const feeAmount = getTransactionFee(disposal);
+    if (feeAmount > 0) {
+      totalFees = Math.abs(feeAmount);
     }
 
     // Handle insufficient lots
@@ -123,13 +132,14 @@ export class FIFOCalculator {
 
     // Calculate holding period (from earliest lot used)
     const earliestLot = usedLots[0];
+    const disposalDate = getTransactionTimestamp(disposal);
     const holdingPeriod = earliestLot
-      ? Math.floor((disposal.date.getTime() - earliestLot.date.getTime()) / (1000 * 60 * 60 * 24))
+      ? Math.floor((disposalDate.getTime() - earliestLot.date.getTime()) / (1000 * 60 * 60 * 24))
       : 0;
 
     return {
       method: 'FIFO',
-      acquisitionDate: earliestLot?.date || disposal.date,
+      acquisitionDate: earliestLot?.date || disposalDate,
       acquisitionPrice: totalCost,
       acquisitionFees: totalFees,
       totalCost: totalCost + totalFees,
@@ -258,15 +268,15 @@ export class FIFOCalculator {
    * @param acquisitions Acquisition transactions
    */
   private rebuildLots(asset: string, acquisitions: Transaction[]): void {
-    const normalizedAsset = this.normalizeAsset(asset);
+    const normalizedAsset = asset; // Already normalized via getAssetKey
 
     // Clear existing lots for this asset
     this.lotsByAsset.set(normalizedAsset, []);
 
     // Sort acquisitions by date
     const sortedAcquisitions = acquisitions
-      .filter(tx => this.normalizeAsset(tx.baseCurrency) === normalizedAsset)
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
+      .filter(tx => getAssetKey(tx) === normalizedAsset)
+      .sort((a, b) => getTransactionTimestamp(a).getTime() - getTransactionTimestamp(b).getTime());
 
     // Add each acquisition
     for (const acquisition of sortedAcquisitions) {
@@ -300,15 +310,16 @@ export class FIFOCalculator {
    * @returns Unit price
    */
   private calculateUnitPrice(transaction: Transaction): number {
-    const amount = Math.abs(transaction.baseAmount);
+    const amount = Math.abs(getBaseAmount(transaction));
 
     if (amount === 0) {
       return 0;
     }
 
     // If quote amount exists, use it to calculate price
-    if (transaction.quoteAmount) {
-      return Math.abs(transaction.quoteAmount) / amount;
+    const quoteAmt = getQuoteAmount(transaction);
+    if (quoteAmt) {
+      return Math.abs(quoteAmt) / amount;
     }
 
     // Fallback to transaction value or 0

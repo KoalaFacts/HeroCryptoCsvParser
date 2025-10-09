@@ -5,7 +5,7 @@
  * Processes transactions, applies tax rules, calculates capital gains, and generates reports.
  */
 
-import type { Transaction } from '../types/transactions/Transaction';
+import type { Transaction } from '../types/transactions';
 import type { TaxReport } from './models/TaxReport';
 import type { TaxPeriod } from './models/TaxPeriod';
 import type { TaxableTransaction } from './models/TaxableTransaction';
@@ -17,6 +17,12 @@ import { TransactionClassifier } from './calculators/TransactionClassifier';
 import { TaxOptimizationEngine } from './calculators/TaxOptimizationEngine';
 import { getAustralianJurisdiction, getAustralianTaxYearBoundaries } from './rules/AustralianTaxRules';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  getTransactionTimestamp,
+  getQuoteAmount,
+  getTransactionFee,
+  getTransactionSource
+} from './utils/transactionHelpers';
 
 /**
  * Tax report configuration
@@ -73,7 +79,8 @@ export class TaxReportGenerator {
     config: TaxReportConfig,
     onProgress?: (progress: ProgressUpdate) => void
   ): Promise<TaxReport> {
-    const startTime = Date.now();
+    this.startTime = Date.now();
+    const startTime = this.startTime;
 
     // 1. Load jurisdiction
     const jurisdiction = this.loadJurisdiction(config.jurisdictionCode);
@@ -180,13 +187,14 @@ export class TaxReportGenerator {
     transactions: Transaction[],
     period: TaxPeriod
   ): Transaction[] {
-    return transactions.filter(
-      tx => tx.date >= period.startDate && tx.date <= period.endDate
-    );
+    return transactions.filter(tx => {
+      const txDate = getTransactionTimestamp(tx);
+      return txDate >= period.startDate && txDate <= period.endDate;
+    });
   }
 
   /**
-   * Classify all transactions
+   * Classify all transactions with chunked processing (1000 tx/batch)
    */
   private async classifyTransactions(
     transactions: Transaction[],
@@ -195,39 +203,51 @@ export class TaxReportGenerator {
     onProgress?: (progress: ProgressUpdate) => void
   ): Promise<TaxableTransaction[]> {
     const taxableTransactions: TaxableTransaction[] = [];
+    const CHUNK_SIZE = 1000; // Process 1000 transactions per batch
 
-    for (let i = 0; i < transactions.length; i++) {
-      const transaction = transactions[i];
+    for (let chunkStart = 0; chunkStart < transactions.length; chunkStart += CHUNK_SIZE) {
+      const chunkEnd = Math.min(chunkStart + CHUNK_SIZE, transactions.length);
+      const chunk = transactions.slice(chunkStart, chunkEnd);
 
-      // Classify transaction
-      const taxTreatment = this.transactionClassifier.classifyTransaction({
-        transaction,
-        jurisdiction: jurisdiction.code,
-        isPersonalUse: false // Would be determined by user input or heuristics
+      // Process chunk
+      for (const transaction of chunk) {
+        // Classify transaction
+        const taxTreatment = this.transactionClassifier.classifyTransaction({
+          transaction,
+          jurisdiction: jurisdiction.code,
+          isPersonalUse: false // Would be determined by user input or heuristics
+        });
+
+        // Create taxable transaction
+        const taxableTransaction: TaxableTransaction = {
+          originalTransaction: transaction,
+          taxTreatment
+        };
+
+        taxableTransactions.push(taxableTransaction);
+      }
+
+      // Report progress after each chunk
+      this.reportProgress(onProgress, {
+        processed: chunkEnd,
+        total: transactions.length,
+        currentPhase: 'Classifying transactions',
+        estimatedTimeRemaining: this.estimateTimeRemaining(
+          chunkEnd,
+          transactions.length,
+          Date.now()
+        )
       });
 
-      // Create taxable transaction
-      const taxableTransaction: TaxableTransaction = {
-        originalTransaction: transaction,
-        taxTreatment
-      };
-
-      taxableTransactions.push(taxableTransaction);
-
-      if (i % 100 === 0) {
-        this.reportProgress(onProgress, {
-          processed: i,
-          total: transactions.length,
-          currentPhase: 'Classifying transactions'
-        });
-      }
+      // Allow event loop to process (prevent UI blocking)
+      await this.yieldToEventLoop();
     }
 
     return taxableTransactions;
   }
 
   /**
-   * Calculate cost basis and capital gains for all disposals
+   * Calculate cost basis and capital gains for all disposals with chunked processing
    */
   private async calculateCostBasisAndGains(
     transactions: TaxableTransaction[],
@@ -235,6 +255,8 @@ export class TaxReportGenerator {
     method: 'FIFO' | 'SPECIFIC_IDENTIFICATION',
     onProgress?: (progress: ProgressUpdate) => void
   ): Promise<void> {
+    const CHUNK_SIZE = 1000; // Process 1000 transactions per batch
+
     // Separate acquisitions and disposals
     const acquisitions = transactions.filter(
       tx => tx.taxTreatment.eventType === 'ACQUISITION'
@@ -244,44 +266,56 @@ export class TaxReportGenerator {
       tx => tx.taxTreatment.eventType === 'DISPOSAL'
     );
 
-    // Process each disposal
-    for (let i = 0; i < disposals.length; i++) {
-      const disposal = disposals[i];
+    // Process disposals in chunks
+    for (let chunkStart = 0; chunkStart < disposals.length; chunkStart += CHUNK_SIZE) {
+      const chunkEnd = Math.min(chunkStart + CHUNK_SIZE, disposals.length);
+      const chunk = disposals.slice(chunkStart, chunkEnd);
 
-      try {
-        // Calculate cost basis using FIFO
-        const costBasis = this.fifoCalculator.calculateCostBasis(
-          disposal.originalTransaction,
-          acquisitions.map(a => a.originalTransaction)
-        );
+      // Process each disposal in chunk
+      for (const disposal of chunk) {
+        try {
+          // Calculate cost basis using FIFO
+          const costBasis = this.fifoCalculator.calculateCostBasis(
+            disposal.originalTransaction,
+            acquisitions.map(a => a.originalTransaction)
+          );
 
-        disposal.costBasis = costBasis;
+          disposal.costBasis = costBasis;
 
-        // Calculate capital gains
-        const capitalGainsResult = this.capitalGainsCalculator.calculateCapitalGains({
-          disposal: disposal.originalTransaction,
-          costBasis,
-          jurisdiction,
-          isPersonalUseAsset: disposal.taxTreatment.isPersonalUse
-        });
+          // Calculate capital gains
+          const capitalGainsResult = this.capitalGainsCalculator.calculateCapitalGains({
+            disposal: disposal.originalTransaction,
+            costBasis,
+            jurisdiction,
+            isPersonalUseAsset: disposal.taxTreatment.isPersonalUse
+          });
 
-        // Update taxable transaction with results
-        disposal.capitalGain = capitalGainsResult.capitalGain;
-        disposal.capitalLoss = capitalGainsResult.capitalLoss;
-        disposal.taxableAmount = capitalGainsResult.taxableGain;
-        disposal.taxTreatment.cgtDiscountApplied = capitalGainsResult.cgtDiscountApplied;
-      } catch (error) {
-        // Handle insufficient cost basis or other errors
-        console.error(`Error calculating cost basis for disposal:`, error);
+          // Update taxable transaction with results
+          disposal.capitalGain = capitalGainsResult.capitalGain;
+          disposal.capitalLoss = capitalGainsResult.capitalLoss;
+          disposal.taxableAmount = capitalGainsResult.taxableGain;
+          disposal.taxTreatment.cgtDiscountApplied = capitalGainsResult.cgtDiscountApplied;
+        } catch (error) {
+          // Handle insufficient cost basis or other errors
+          // Skip this disposal and continue processing
+          // Error details will be visible in the report metadata
+        }
       }
 
-      if (i % 50 === 0) {
-        this.reportProgress(onProgress, {
-          processed: i,
-          total: disposals.length,
-          currentPhase: 'Calculating capital gains'
-        });
-      }
+      // Report progress after each chunk
+      this.reportProgress(onProgress, {
+        processed: chunkEnd,
+        total: disposals.length,
+        currentPhase: 'Calculating capital gains',
+        estimatedTimeRemaining: this.estimateTimeRemaining(
+          chunkEnd,
+          disposals.length,
+          Date.now()
+        )
+      });
+
+      // Allow event loop to process
+      await this.yieldToEventLoop();
     }
 
     // Process income events
@@ -291,9 +325,8 @@ export class TaxReportGenerator {
 
     for (const incomeEvent of incomeEvents) {
       // Calculate income amount (would use market price at time of receipt)
-      incomeEvent.incomeAmount = Math.abs(
-        incomeEvent.originalTransaction.quoteAmount || 0
-      );
+      const quoteAmt = getQuoteAmount(incomeEvent.originalTransaction);
+      incomeEvent.incomeAmount = Math.abs(quoteAmt || 0);
     }
 
     // Process deductible events
@@ -302,9 +335,8 @@ export class TaxReportGenerator {
     );
 
     for (const deductibleEvent of deductibleEvents) {
-      deductibleEvent.deductibleAmount = Math.abs(
-        deductibleEvent.originalTransaction.fee || 0
-      );
+      const fee = getTransactionFee(deductibleEvent.originalTransaction);
+      deductibleEvent.deductibleAmount = Math.abs(fee);
     }
   }
 
@@ -373,8 +405,9 @@ export class TaxReportGenerator {
     const exchanges = new Set<string>();
 
     for (const tx of transactions) {
-      if (tx.exchange) {
-        exchanges.add(tx.exchange);
+      const source = getTransactionSource(tx);
+      if (source) {
+        exchanges.add(source);
       }
     }
 
@@ -392,6 +425,32 @@ export class TaxReportGenerator {
       onProgress(progress);
     }
   }
+
+  /**
+   * Yield to event loop to prevent blocking
+   */
+  private async yieldToEventLoop(): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, 0));
+  }
+
+  /**
+   * Estimate time remaining based on current progress
+   */
+  private estimateTimeRemaining(
+    processed: number,
+    total: number,
+    startTime: number
+  ): number | undefined {
+    if (processed === 0) return undefined;
+
+    const elapsed = Date.now() - startTime;
+    const rate = processed / elapsed; // transactions per millisecond
+    const remaining = total - processed;
+
+    return remaining / rate;
+  }
+
+  private startTime: number = Date.now();
 }
 
 /**

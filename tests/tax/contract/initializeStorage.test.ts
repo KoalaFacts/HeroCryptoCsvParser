@@ -1,15 +1,16 @@
 import { describe, it, expect } from 'vitest';
+import { createMockDataSource, createMockSpotTrade } from '@tests/tax/helpers/mockFactories';
 import type {
   StorageAdapter,
   TaxableTransaction,
   TransactionFilter,
   TaxReport,
   TaxReportSummary,
-  TaxEvent,
   StorageStats,
   TransactionTaxTreatment
-} from '../../../specs/001-cryto-tax-report/contracts/function-interfaces';
-import type { Transaction } from '../../../src/types/transactions/Transaction';
+} from '@/tax/contracts/function-interfaces';
+import type { Transaction } from '@/types/transactions/Transaction';
+import type { TaxEvent } from '@/types/common/TaxEvent';
 
 /**
  * Contract Test T011: Storage Adapter Interfaces
@@ -20,16 +21,10 @@ import type { Transaction } from '../../../src/types/transactions/Transaction';
 describe('T011: Contract Test - Storage Adapter Interfaces', () => {
   // Mock data for testing
   const createMockTaxableTransaction = (): TaxableTransaction => ({
-    originalTransaction: {
+    originalTransaction: createMockSpotTrade({
       id: 'test-tx-001',
-      type: 'SPOT_TRADE',
-      timestamp: new Date('2024-01-15T10:30:00Z'),
-      source: {
-        name: 'TestExchange',
-        type: 'exchange'
-      },
-      taxEvents: []
-    } as Transaction,
+      timestamp: new Date('2024-01-15T10:30:00Z')
+    }),
     taxTreatment: {
       eventType: 'DISPOSAL',
       classification: 'Capital Asset',
@@ -405,7 +400,7 @@ describe('T011: Contract Test - Storage Adapter Interfaces', () => {
         for (const transaction of result) {
           // Asset information should be in originalData or taxEvents
           const hasAsset = transaction.originalTransaction.originalData?.asset === asset ||
-            transaction.originalTransaction.taxEvents.some(event => event.asset?.symbol === asset);
+            transaction.originalTransaction.taxEvents.some(event => event.amount?.asset.symbol === asset);
           expect(hasAsset).toBe(true);
         }
 

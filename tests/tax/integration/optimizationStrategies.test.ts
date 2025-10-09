@@ -22,6 +22,7 @@ import type { Transaction } from '@/types/transactions/Transaction';
 import type { SpotTrade } from '@/types/transactions/SpotTrade';
 import type { Transfer } from '@/types/transactions/Transfer';
 import type { StakingReward } from '@/types/transactions/StakingReward';
+import { createMockSpotTrade, createMockStakingReward } from '@tests/tax/helpers/mockFactories';
 
 // These interfaces will be implemented in the tax optimization module
 interface TaxOptimizationSuggestion {
@@ -110,178 +111,72 @@ describe('T017: Tax Optimization Strategies Integration', () => {
     // Comprehensive transaction dataset for optimization testing
     testTransactions = [
       // BTC purchases at different prices (some now underwater)
-      {
+      createMockSpotTrade({
         id: 'btc-buy-high-001',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-01-01T10:00:00Z'),
-        source: { name: 'binance', type: 'exchange', country: 'AU' },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '0.50000000', decimals: 8 },
-          fiatValue: { amount: 30000, currency: 'AUD', timestamp: new Date('2023-01-01T10:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '30000.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '60000.00', // Now underwater at $45k
-        taxEvents: []
-      } as SpotTrade,
+        price: '60000.00'
+      }),
 
-      {
+      createMockSpotTrade({
         id: 'btc-buy-low-001',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-06-01T10:00:00Z'),
-        source: { name: 'coinbase', type: 'exchange', country: 'AU' },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '1.00000000', decimals: 8 },
-          fiatValue: { amount: 35000, currency: 'AUD', timestamp: new Date('2023-06-01T10:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '35000.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '35000.00', // Now profitable at $45k
-        taxEvents: []
-      } as SpotTrade,
+        price: '35000.00'
+      }),
 
       // ETH purchase (11 months ago - close to CGT discount)
-      {
+      createMockSpotTrade({
         id: 'eth-buy-001',
-        type: 'SPOT_TRADE',
-        timestamp: new Date('2023-01-15T14:30:00Z'), // 11 months ago
-        source: { name: 'kraken', type: 'exchange', country: 'AU' },
-        baseAsset: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '5.00000000', decimals: 18 },
-          fiatValue: { amount: 12500, currency: 'AUD', timestamp: new Date('2023-01-15T14:30:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '12500.00', decimals: 2 }
-        },
+        timestamp: new Date('2023-01-15T14:30:00Z'),
         side: 'BUY',
-        price: '2500.00', // Break-even now
-        taxEvents: []
-      } as SpotTrade,
+        price: '2500.00'
+      }),
 
       // ADA purchases with significant gains
-      {
+      createMockSpotTrade({
         id: 'ada-buy-001',
-        type: 'SPOT_TRADE',
-        timestamp: new Date('2022-12-01T10:00:00Z'), // Over 12 months ago
-        source: { name: 'binance', type: 'exchange', country: 'AU' },
-        baseAsset: {
-          asset: { symbol: 'ADA', name: 'Cardano' },
-          amount: { value: '10000.00000000', decimals: 6 },
-          fiatValue: { amount: 5000, currency: 'AUD', timestamp: new Date('2022-12-01T10:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '5000.00', decimals: 2 }
-        },
+        timestamp: new Date('2022-12-01T10:00:00Z'),
         side: 'BUY',
-        price: '0.50', // Now profitable at $0.80 (eligible for CGT discount)
-        taxEvents: []
-      } as SpotTrade,
+        price: '0.50'
+      }),
 
       // DOT purchases (mixed timeframes and performance)
-      {
+      createMockSpotTrade({
         id: 'dot-buy-recent-001',
-        type: 'SPOT_TRADE',
-        timestamp: new Date('2023-11-01T10:00:00Z'), // Recent - no CGT discount
-        source: { name: 'coinbase', type: 'exchange', country: 'AU' },
-        baseAsset: {
-          asset: { symbol: 'DOT', name: 'Polkadot' },
-          amount: { value: '200.00000000', decimals: 10 },
-          fiatValue: { amount: 4000, currency: 'AUD', timestamp: new Date('2023-11-01T10:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '4000.00', decimals: 2 }
-        },
+        timestamp: new Date('2023-11-01T10:00:00Z'),
         side: 'BUY',
-        price: '20.00', // Now at loss at $15
-        taxEvents: []
-      } as SpotTrade,
+        price: '20.00'
+      }),
 
-      {
+      createMockSpotTrade({
         id: 'dot-buy-old-001',
-        type: 'SPOT_TRADE',
-        timestamp: new Date('2022-10-01T10:00:00Z'), // Over 12 months ago
-        source: { name: 'kraken', type: 'exchange', country: 'AU' },
-        baseAsset: {
-          asset: { symbol: 'DOT', name: 'Polkadot' },
-          amount: { value: '500.00000000', decimals: 10 },
-          fiatValue: { amount: 5000, currency: 'AUD', timestamp: new Date('2022-10-01T10:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '5000.00', decimals: 2 }
-        },
+        timestamp: new Date('2022-10-01T10:00:00Z'),
         side: 'BUY',
-        price: '10.00', // Now profitable at $15 (eligible for CGT discount)
-        taxEvents: []
-      } as SpotTrade,
+        price: '10.00'
+      }),
 
       // Staking rewards (ordinary income)
-      {
+      createMockStakingReward({
         id: 'ada-staking-001',
-        type: 'STAKING_REWARD',
-        timestamp: new Date('2023-09-01T00:00:00Z'),
-        source: { name: 'cardano', type: 'protocol', country: 'AU' },
-        asset: {
-          asset: { symbol: 'ADA', name: 'Cardano' },
-          amount: { value: '500.00000000', decimals: 6 },
-          fiatValue: { amount: 400, currency: 'AUD', timestamp: new Date('2023-09-01T00:00:00Z') }
-        },
-        stakingProduct: 'Cardano Staking Pool',
-        apr: '5.2%',
-        taxEvents: []
-      } as StakingReward,
+        timestamp: new Date('2023-09-01T00:00:00Z')
+      }),
 
       // Recent sale that might trigger wash sale if repurchased
-      {
+      createMockSpotTrade({
         id: 'btc-sell-wash-001',
-        type: 'SPOT_TRADE',
-        timestamp: new Date('2023-11-20T15:30:00Z'), // Recent sale
-        source: { name: 'binance', type: 'exchange', country: 'AU' },
-        baseAsset: {
-          asset: { symbol: 'BTC', name: 'Bitcoin' },
-          amount: { value: '0.25000000', decimals: 8 },
-          fiatValue: { amount: 11250, currency: 'AUD', timestamp: new Date('2023-11-20T15:30:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '11250.00', decimals: 2 }
-        },
+        timestamp: new Date('2023-11-20T15:30:00Z'),
         side: 'SELL',
-        price: '45000.00', // Loss of $3,750 from $60k purchase
-        taxEvents: []
-      } as SpotTrade,
+        price: '45000.00'
+      }),
 
       // Small crypto purchases (potential personal use)
-      {
+      createMockSpotTrade({
         id: 'small-crypto-001',
-        type: 'SPOT_TRADE',
         timestamp: new Date('2023-10-01T10:00:00Z'),
-        source: { name: 'coinbase', type: 'exchange', country: 'AU' },
-        baseAsset: {
-          asset: { symbol: 'USDC', name: 'USD Coin' },
-          amount: { value: '5000.000000', decimals: 6 },
-          fiatValue: { amount: 5000, currency: 'AUD', timestamp: new Date('2023-10-01T10:00:00Z') }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: '5000.00', decimals: 2 }
-        },
         side: 'BUY',
-        price: '1.00',
-        taxEvents: []
-      } as SpotTrade
+        price: '1.00'
+      })
     ];
   });
 

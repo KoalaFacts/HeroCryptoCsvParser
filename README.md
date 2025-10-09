@@ -215,12 +215,135 @@ npm run build        # Production build
 npm test -- --grep "binance"
 ```
 
+## 💰 Tax Reporting (NEW!)
+
+**Privacy-First Australian Cryptocurrency Tax Reports**
+
+Generate complete, ATO-compliant tax reports entirely on your device - no data ever leaves your browser or app.
+
+### ✨ Features
+
+- **🇦🇺 Australian Tax Rules** - CGT discount, personal use exemptions, DeFi classification
+- **🔒 Privacy-First** - All calculations happen locally, zero external API calls
+- **📊 Multiple Formats** - PDF, ATO XML, CSV exports
+- **⚡ High Performance** - Process 100,000+ transactions in under 30 seconds
+- **🎯 FIFO Cost Basis** - Automatic capital gains calculation
+- **💡 Tax Optimization** - Actionable strategies to reduce tax liability
+- **💾 Offline Storage** - Browser (IndexedDB), Mobile (MMKV), Unified (RxDB)
+
+### Quick Example
+
+```typescript
+import { generateTaxReport, exportTaxReportPDF } from 'hero-crypto-csv-parser/tax';
+
+// Generate comprehensive tax report
+const report = await generateTaxReport({
+  jurisdictionCode: 'AU',
+  taxYear: 2024,
+  transactions: myTransactions,
+  options: {
+    includeOptimization: true,
+    costBasisMethod: 'FIFO',
+    handleDeFi: true
+  }
+}, (progress) => {
+  console.log(`${progress.currentPhase}: ${progress.processed}/${progress.total}`);
+});
+
+// View summary
+console.log(`Capital Gains: $${report.summary.totalCapitalGains}`);
+console.log(`CGT Discount: $${report.summary.cgtDiscount}`);
+console.log(`Net Taxable: $${report.summary.netTaxableAmount}`);
+
+// Export to PDF
+const pdfBuffer = await exportTaxReportPDF(report, {
+  includeTransactionDetails: true,
+  includeOptimizationStrategies: true
+});
+
+// Export to ATO XML format
+import { exportTaxReportATO } from 'hero-crypto-csv-parser/tax';
+const atoXml = await exportTaxReportATO(report, {
+  taxpayerDetails: { tfn: '123456789', name: 'John Smith', address: '...' }
+});
+```
+
+### What Gets Calculated
+
+- **Capital Gains/Losses** - Using FIFO cost basis method (ATO default)
+- **CGT Discount** - Automatic 50% discount for assets held >12 months
+- **Personal Use Exemption** - Purchases under $10,000 AUD
+- **DeFi Income** - Staking rewards, yield farming, airdrops as ordinary income
+- **Deductions** - Transaction fees and trading costs
+- **Tax Optimization** - Loss harvesting, timing strategies, lot selection
+
+### Storage & Privacy
+
+```typescript
+import { initializeStorage, getStorageManager } from 'hero-crypto-csv-parser/tax';
+
+// Browser storage (IndexedDB)
+await initializeStorage({
+  platform: 'browser',
+  encryptionKey: 'your-encryption-key' // Optional
+});
+
+const storage = getStorageManager();
+await storage.saveReport(report);
+
+// Retrieve later
+const reports = await storage.getReports({ taxYear: 2024 });
+```
+
+**Privacy Guarantee:**
+- ✅ All calculations happen on your device
+- ✅ No external API calls
+- ✅ No data sent to servers
+- ✅ Optional encryption for stored data
+- ✅ Complete data ownership
+
+### Documentation
+
+- **[Usage Examples](docs/tax-report-examples.md)** - Comprehensive code examples
+- **[ATO References](docs/ato-references.md)** - Australian tax law guidance
+- **[API Documentation](src/tax/index.ts)** - Complete API reference
+
+### Supported Features
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Australian Jurisdiction | ✅ | Full CGT, personal use, DeFi support |
+| FIFO Cost Basis | ✅ | ATO default method |
+| Specific Identification | ✅ | Manual lot selection |
+| CGT Discount (50%) | ✅ | >12 months holding period |
+| Personal Use Exemption | ✅ | <$10k AUD threshold |
+| DeFi Classification | ✅ | Staking, yield, LP tokens |
+| PDF Export | ✅ | Professional tax reports |
+| ATO XML Export | ✅ | Direct myTax integration |
+| Tax Optimization | ✅ | 5 strategy types |
+| Multi-Platform Storage | ✅ | Browser, Mobile, Desktop |
+| Progress Tracking | ✅ | Real-time updates with ETA |
+| Other Jurisdictions | 🔄 | US, UK, EU coming soon |
+
+### Performance
+
+Optimized for large transaction volumes:
+
+- **1,000 transactions**: <1 second
+- **10,000 transactions**: <5 seconds
+- **100,000 transactions**: <30 seconds
+- **Chunked processing**: 1,000 tx/batch
+- **Progress callbacks**: Real-time updates
+- **Memory efficient**: Streaming architecture
+
 ## 🗺️ Roadmap
 
 - [x] **Core Engine** - Type-safe parsing and categorization
 - [x] **Binance** - Full support with 150+ patterns
 - [x] **Web Demo** - Browser-based processing
+- [x] **Australian Tax Reports** - Privacy-first, ATO-compliant (NEW!)
 - [ ] **Community Exchanges** - Coinbase, Kraken, KuCoin
+- [ ] **More Jurisdictions** - US (IRS), UK (HMRC), EU tax support
 - [ ] **Advanced Features** - Portfolio tracking, PnL calculation
 - [ ] **Mobile App** - iOS/Android transaction processing
 

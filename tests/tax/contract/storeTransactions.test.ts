@@ -3,7 +3,7 @@ import type {
   InitializeStorageFunction,
   StorageConfig,
   StorageAdapter
-} from '../../../specs/001-cryto-tax-report/contracts/function-interfaces';
+} from '@/tax/contracts/function-interfaces';
 
 /**
  * Contract Test T012: initializeStorage Function

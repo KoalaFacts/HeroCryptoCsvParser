@@ -20,6 +20,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Transaction } from '@/types/transactions/Transaction';
 import type { SpotTrade } from '@/types/transactions/SpotTrade';
+import { createMockSpotTrade } from '@tests/tax/helpers/mockFactories';
 
 // These interfaces will be implemented in the storage module
 interface StorageMetrics {
@@ -116,28 +117,12 @@ describe('T018: Offline Storage Performance Integration', () => {
       const price = Math.random() * 100000 + 10;
       const amount = Math.random() * 10 + 0.001;
 
-      transactions.push({
+      transactions.push(createMockSpotTrade({
         id: `tx-${i.toString().padStart(6, '0')}`,
-        type: 'SPOT_TRADE',
         timestamp,
-        source: {
-          name: source,
-          type: 'exchange',
-          country: 'AU'
-        },
-        baseAsset: {
-          asset: { symbol: baseAsset, name: baseAsset },
-          amount: { value: amount.toFixed(8), decimals: 8 },
-          fiatValue: { amount: price * amount, currency: 'AUD', timestamp }
-        },
-        quoteAsset: {
-          asset: { symbol: 'AUD', name: 'Australian Dollar' },
-          amount: { value: (price * amount).toFixed(2), decimals: 2 }
-        },
         side: Math.random() > 0.5 ? 'BUY' : 'SELL',
-        price: price.toFixed(2),
-        taxEvents: []
-      } as SpotTrade);
+        price: price.toFixed(2)
+      }));
     }
 
     return transactions;

@@ -4,7 +4,13 @@ import { resolve } from 'path';
 export default defineConfig({
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src')
+      '@': resolve(__dirname, 'src'),
+      '@/tax': resolve(__dirname, 'src/tax'),
+      '@/types': resolve(__dirname, 'src/types'),
+      '@/core': resolve(__dirname, 'src/core'),
+      '@/sources': resolve(__dirname, 'src/sources'),
+      '@tests': resolve(__dirname, 'tests'),
+      '@specs': resolve(__dirname, 'specs')
     }
   },
   test: {

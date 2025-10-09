@@ -8,6 +8,12 @@
 import type { Transaction } from '../../types/transactions';
 import type { CostBasis } from '../models/CostBasis';
 import type { TaxJurisdiction } from '../models/TaxJurisdiction';
+import {
+  getDisposalValue,
+  getTransactionAsset,
+  getTransactionTimestamp,
+  isSameAsset
+} from '../utils/transactionHelpers';
 
 /**
  * Capital gains calculation result
@@ -176,7 +182,7 @@ export class CapitalGainsCalculator {
     const byAsset = new Map<string, any>();
 
     for (const context of contexts) {
-      const asset = context.disposal.baseCurrency.toUpperCase();
+      const asset = (getTransactionAsset(context.disposal) || 'UNKNOWN').toUpperCase();
       const result = this.calculateCapitalGains(context);
 
       if (!byAsset.has(asset)) {
@@ -213,13 +219,14 @@ export class CapitalGainsCalculator {
     washSalePeriod: number = 30
   ): number {
     // Check for reacquisitions within wash sale period
-    const washSaleEnd = new Date(disposal.date.getTime() + washSalePeriod * 24 * 60 * 60 * 1000);
+    const disposalDate = getTransactionTimestamp(disposal);
+    const washSaleEnd = new Date(disposalDate.getTime() + washSalePeriod * 24 * 60 * 60 * 1000);
 
     const washSaleReacquisitions = reacquisitions.filter(
       tx =>
-        tx.date >= disposal.date &&
-        tx.date <= washSaleEnd &&
-        tx.baseCurrency === disposal.baseCurrency
+        getTransactionTimestamp(tx) >= disposalDate &&
+        getTransactionTimestamp(tx) <= washSaleEnd &&
+        isSameAsset(tx, disposal)
     );
 
     if (washSaleReacquisitions.length === 0) {
@@ -241,13 +248,8 @@ export class CapitalGainsCalculator {
    * @returns Disposal value
    */
   private calculateDisposalValue(disposal: Transaction): number {
-    // Use quote amount as disposal proceeds
-    const proceeds = Math.abs(disposal.quoteAmount || 0);
-
-    // Subtract disposal fees
-    const fees = Math.abs(disposal.fee || 0);
-
-    return proceeds - fees;
+    // Use helper function to get disposal value safely
+    return getDisposalValue(disposal);
   }
 
   /**

@@ -8,8 +8,9 @@
 import type { StorageAdapter, TransactionFilter, TaxReportSummary, StorageStats, StorageConfig } from './StorageAdapter';
 import type { TaxableTransaction } from '../models/TaxableTransaction';
 import type { TaxReport } from '../models/TaxReport';
-import type { TaxEvent } from '../models/TransactionTaxTreatment';
+import type { TaxEvent } from '../models/TaxEvent';
 import { StorageError, DEFAULT_BATCH_CONFIG } from './StorageAdapter';
+import { getTransactionAsset, getTransactionSource, getTransactionTimestamp } from '../utils/transactionHelpers';
 
 // MMKV types for React Native
 interface MMKV {
@@ -523,52 +524,56 @@ export class MMKVAdapter implements StorageAdapter {
   private updateIndices(transaction: TaxableTransaction): void {
     try {
       // Asset index
-      const assetKey = this.getIndexKey('asset', transaction.originalTransaction.asset.symbol);
+      const asset = getTransactionAsset(transaction.originalTransaction) || 'UNKNOWN';
+      const assetKey = this.getIndexKey('asset', asset);
       const assetIds = this.getIndexSet(assetKey);
       assetIds.add(transaction.originalTransaction.id);
       this.setIndexSet(assetKey, assetIds);
 
       // Exchange index
-      const exchangeKey = this.getIndexKey('exchange', transaction.originalTransaction.dataSource.name);
+      const source = getTransactionSource(transaction.originalTransaction);
+      const exchangeKey = this.getIndexKey('exchange', source);
       const exchangeIds = this.getIndexSet(exchangeKey);
       exchangeIds.add(transaction.originalTransaction.id);
       this.setIndexSet(exchangeKey, exchangeIds);
 
       // Date index (by year-month)
-      const date = new Date(transaction.originalTransaction.timestamp);
+      const date = getTransactionTimestamp(transaction.originalTransaction);
       const dateKey = this.getIndexKey('date', `${date.getFullYear()}-${date.getMonth()}`);
       const dateIds = this.getIndexSet(dateKey);
       dateIds.add(transaction.originalTransaction.id);
       this.setIndexSet(dateKey, dateIds);
     } catch (error) {
-      // Index updates are not critical, log but don't throw
-      console.warn('Index update failed:', error);
+      // Index updates are not critical, silently continue
+      // Storage will still work without indices
     }
   }
 
   private removeFromIndices(transaction: TaxableTransaction): void {
     try {
       // Asset index
-      const assetKey = this.getIndexKey('asset', transaction.originalTransaction.asset.symbol);
+      const asset = getTransactionAsset(transaction.originalTransaction) || 'UNKNOWN';
+      const assetKey = this.getIndexKey('asset', asset);
       const assetIds = this.getIndexSet(assetKey);
       assetIds.delete(transaction.originalTransaction.id);
       this.setIndexSet(assetKey, assetIds);
 
       // Exchange index
-      const exchangeKey = this.getIndexKey('exchange', transaction.originalTransaction.dataSource.name);
+      const source = getTransactionSource(transaction.originalTransaction);
+      const exchangeKey = this.getIndexKey('exchange', source);
       const exchangeIds = this.getIndexSet(exchangeKey);
       exchangeIds.delete(transaction.originalTransaction.id);
       this.setIndexSet(exchangeKey, exchangeIds);
 
       // Date index
-      const date = new Date(transaction.originalTransaction.timestamp);
+      const date = getTransactionTimestamp(transaction.originalTransaction);
       const dateKey = this.getIndexKey('date', `${date.getFullYear()}-${date.getMonth()}`);
       const dateIds = this.getIndexSet(dateKey);
       dateIds.delete(transaction.originalTransaction.id);
       this.setIndexSet(dateKey, dateIds);
     } catch (error) {
-      // Index updates are not critical, log but don't throw
-      console.warn('Index removal failed:', error);
+      // Index updates are not critical, silently continue
+      // Storage will still work without indices
     }
   }
 
@@ -602,17 +607,19 @@ export class MMKVAdapter implements StorageAdapter {
 
   private matchesFilter(transaction: TaxableTransaction, filter: TransactionFilter): boolean {
     if (filter.dateRange) {
-      const txDate = new Date(transaction.originalTransaction.timestamp);
+      const txDate = getTransactionTimestamp(transaction.originalTransaction);
       if (txDate < filter.dateRange[0] || txDate > filter.dateRange[1]) {
         return false;
       }
     }
 
-    if (filter.assets && !filter.assets.includes(transaction.originalTransaction.asset.symbol)) {
+    const asset = getTransactionAsset(transaction.originalTransaction);
+    if (filter.assets && asset && !filter.assets.includes(asset)) {
       return false;
     }
 
-    if (filter.exchanges && !filter.exchanges.includes(transaction.originalTransaction.dataSource.name)) {
+    const source = getTransactionSource(transaction.originalTransaction);
+    if (filter.exchanges && !filter.exchanges.includes(source)) {
       return false;
     }
 

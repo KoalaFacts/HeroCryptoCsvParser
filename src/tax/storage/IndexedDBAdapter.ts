@@ -8,8 +8,9 @@
 import type { StorageAdapter, TransactionFilter, TaxReportSummary, StorageStats, StorageConfig, StorageResult, BatchConfig } from './StorageAdapter';
 import type { TaxableTransaction } from '../models/TaxableTransaction';
 import type { TaxReport } from '../models/TaxReport';
-import type { TaxEvent } from '../models/TransactionTaxTreatment';
+import type { TaxEvent } from '../models/TaxEvent';
 import { StorageError, DEFAULT_BATCH_CONFIG } from './StorageAdapter';
+import { getTransactionAsset, getTransactionSource } from '../utils/transactionHelpers';
 
 export class IndexedDBAdapter implements StorageAdapter {
   private db: IDBDatabase | null = null;
@@ -532,11 +533,13 @@ export class IndexedDBAdapter implements StorageAdapter {
   }
 
   private matchesFilter(transaction: TaxableTransaction, filter: TransactionFilter): boolean {
-    if (filter.assets && !filter.assets.includes(transaction.originalTransaction.asset.symbol)) {
+    const asset = getTransactionAsset(transaction.originalTransaction);
+    if (filter.assets && asset && !filter.assets.includes(asset)) {
       return false;
     }
 
-    if (filter.exchanges && !filter.exchanges.includes(transaction.originalTransaction.dataSource.name)) {
+    const source = getTransactionSource(transaction.originalTransaction);
+    if (filter.exchanges && !filter.exchanges.includes(source)) {
       return false;
     }
 

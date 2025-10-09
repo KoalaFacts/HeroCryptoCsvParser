@@ -11,12 +11,12 @@ import type {
   TaxReportSummary,
   StorageStats,
   StorageConfig,
-  StorageError,
-  DEFAULT_BATCH_CONFIG
+  StorageError
 } from './StorageAdapter';
+import { DEFAULT_BATCH_CONFIG } from './StorageAdapter';
 import type { TaxableTransaction } from '../models/TaxableTransaction';
 import type { TaxReport } from '../models/TaxReport';
-import type { TaxEvent } from '../models/TransactionTaxTreatment';
+import type { TaxEvent } from '../models/TaxEvent';
 
 /**
  * RxDB-based storage adapter for unified cross-platform storage

@@ -6,6 +6,12 @@
 
 import type { TaxReport } from '../models/TaxReport';
 import type { TaxableTransaction } from '../models/TaxableTransaction';
+import {
+  getTransactionTimestamp,
+  getBaseCurrency,
+  getBaseAmount,
+  getQuoteAmount
+} from '../utils/transactionHelpers';
 
 /**
  * CSV export options
@@ -123,14 +129,14 @@ export class CSVExporter {
     includeOptimizationNotes: boolean
   ): string {
     const tx = transaction.originalTransaction;
-    const date = this.formatDate(tx.date, dateFormat);
+    const date = this.formatDate(getTransactionTimestamp(tx), dateFormat);
 
     const fields = [
       date,
       tx.type || '',
-      tx.baseCurrency || '',
-      tx.baseAmount?.toString() || '0',
-      tx.quoteAmount?.toString() || '0',
+      getBaseCurrency(tx) || '',
+      getBaseAmount(tx)?.toString() || '0',
+      getQuoteAmount(tx)?.toString() || '0',
       transaction.taxTreatment.eventType,
       transaction.taxTreatment.classification,
       transaction.costBasis?.totalCost?.toString() || '0',

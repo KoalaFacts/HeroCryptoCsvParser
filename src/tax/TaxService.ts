@@ -17,6 +17,7 @@ import { exportTransactionsToCSV, exportSummaryToCSV, type CSVExportOptions } fr
 import { getAustralianJurisdiction } from './rules/AustralianTaxRules';
 import { initializeStorage, closeAllStorage } from './storage/StorageManager';
 import type { StorageAdapter } from './storage/StorageAdapter';
+import { getTransactionAsset, getBaseAmount, getQuoteAmount } from './utils/transactionHelpers';
 
 /**
  * Tax service configuration
@@ -293,7 +294,7 @@ export class TaxService {
 
     for (const tx of transactions) {
       // Validate required fields
-      if (!tx.date) {
+      if (!tx.timestamp) {
         errors.push({
           code: 'MISSING_DATE',
           message: 'Transaction missing date',
@@ -301,7 +302,8 @@ export class TaxService {
         });
       }
 
-      if (!tx.baseCurrency) {
+      const asset = getTransactionAsset(tx);
+      if (!asset) {
         errors.push({
           code: 'MISSING_ASSET',
           message: 'Transaction missing asset/currency',
@@ -309,7 +311,10 @@ export class TaxService {
         });
       }
 
-      if (tx.baseAmount === undefined || tx.baseAmount === null) {
+      const baseAmount = getBaseAmount(tx);
+      const quoteAmount = getQuoteAmount(tx);
+
+      if (baseAmount === undefined || baseAmount === null) {
         errors.push({
           code: 'MISSING_AMOUNT',
           message: 'Transaction missing amount',
@@ -318,7 +323,7 @@ export class TaxService {
       }
 
       // Warnings
-      if (!tx.quoteAmount) {
+      if (!quoteAmount) {
         warnings.push({
           code: 'MISSING_VALUE',
           message: 'Transaction missing value - may affect cost basis calculation',

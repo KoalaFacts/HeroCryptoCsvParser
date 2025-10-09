@@ -5,10 +5,11 @@
  * Recommends legal strategies to minimize tax liability within Australian tax law.
  */
 
-import type { Transaction } from '../../../types/transactions/Transaction';
+import type { Transaction } from '../../types/transactions';
 import type { TaxableTransaction } from '../models/TaxableTransaction';
 import type { TaxStrategy, StrategyType, ComplianceLevel } from '../models/TaxStrategy';
 import type { TaxJurisdiction } from '../models/TaxJurisdiction';
+import { getTransactionTimestamp } from '../utils/transactionHelpers';
 
 /**
  * Optimization analysis context
@@ -315,7 +316,7 @@ export class TaxOptimizationEngine {
     const thirtyDaysBefore = new Date(taxYearEnd.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     return transactions.filter(tx => {
-      const txDate = tx.originalTransaction.date;
+      const txDate = getTransactionTimestamp(tx.originalTransaction);
       return (
         txDate >= thirtyDaysBefore &&
         txDate <= taxYearEnd &&
@@ -338,11 +339,12 @@ export class TaxOptimizationEngine {
     strategies: TaxStrategy[],
     riskTolerance: 'CONSERVATIVE' | 'MODERATE' | 'AGGRESSIVE'
   ): TaxStrategy[] {
-    const allowedCompliance: ComplianceLevel[] = {
+    const allowedComplianceMap: Record<string, ComplianceLevel[]> = {
       CONSERVATIVE: ['SAFE'],
       MODERATE: ['SAFE', 'MODERATE'],
       AGGRESSIVE: ['SAFE', 'MODERATE', 'AGGRESSIVE']
-    }[riskTolerance];
+    };
+    const allowedCompliance = allowedComplianceMap[riskTolerance] || ['SAFE'];
 
     return strategies.filter(s => allowedCompliance.includes(s.compliance));
   }

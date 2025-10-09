@@ -18,6 +18,14 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  createMockLiquidityAdd,
+  createMockLiquidityRemove,
+  createMockInterest,
+  createMockStakingReward,
+  createMockSwap,
+  createMockTransfer
+} from '@tests/tax/helpers/mockFactories';
 import type { Transaction } from '@/types/transactions/Transaction';
 import type { Swap } from '@/types/transactions/Swap';
 import type { LiquidityAdd } from '@/types/transactions/LiquidityAdd';
@@ -77,358 +85,68 @@ describe('T016: DeFi Transaction Classification Integration', () => {
     // Comprehensive DeFi transaction dataset
     testTransactions = [
       // Uniswap V3 liquidity provision
-      {
+      createMockLiquidityAdd({
         id: 'uniswap-lp-add-001',
-        type: 'LIQUIDITY_ADD',
-        timestamp: new Date('2023-06-01T14:30:00Z'),
-        source: {
-          name: 'uniswap-v3',
-          type: 'protocol',
-          country: 'AU'
-        },
-        tokenA: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '2.00000000', decimals: 18 },
-          fiatValue: { amount: 4000, currency: 'AUD', timestamp: new Date('2023-06-01T14:30:00Z') }
-        },
-        tokenB: {
-          asset: { symbol: 'USDC', name: 'USD Coin' },
-          amount: { value: '4000.000000', decimals: 6 },
-          fiatValue: { amount: 4000, currency: 'AUD', timestamp: new Date('2023-06-01T14:30:00Z') }
-        },
-        lpToken: {
-          asset: { symbol: 'UNI-V3-ETH-USDC', name: 'Uniswap V3 ETH/USDC LP' },
-          amount: { value: '1.00000000', decimals: 18 },
-          fiatValue: { amount: 8000, currency: 'AUD', timestamp: new Date('2023-06-01T14:30:00Z') }
-        },
-        pool: {
-          protocol: 'Uniswap V3',
-          address: '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640',
-          fee: '0.3%',
-          priceRange: { min: 1800, max: 2200 }
-        },
-        gasUsed: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '0.015000000', decimals: 18 },
-          fiatValue: { amount: 30, currency: 'AUD', timestamp: new Date('2023-06-01T14:30:00Z') }
-        },
-        taxEvents: []
-      } as LiquidityAdd,
+        timestamp: new Date('2023-06-01T14:30:00Z')
+      }),
 
       // Compound yield farming reward
-      {
+      createMockInterest({
         id: 'compound-farming-001',
-        type: 'INTEREST',
-        timestamp: new Date('2023-06-15T00:00:00Z'),
-        source: {
-          name: 'compound',
-          type: 'protocol',
-          country: 'AU'
-        },
-        asset: {
-          asset: { symbol: 'COMP', name: 'Compound' },
-          amount: { value: '5.000000000', decimals: 18 },
-          fiatValue: { amount: 250, currency: 'AUD', timestamp: new Date('2023-06-15T00:00:00Z') }
-        },
-        interestRate: '8.5%',
-        period: 14,
-        protocol: {
-          name: 'Compound',
-          type: 'lending',
-          version: 'v2'
-        },
-        taxEvents: []
-      } as Interest,
+        timestamp: new Date('2023-06-15T00:00:00Z')
+      }),
 
       // Sushiswap governance token reward
-      {
+      createMockStakingReward({
         id: 'sushi-governance-001',
-        type: 'STAKING_REWARD',
-        timestamp: new Date('2023-06-20T12:00:00Z'),
-        source: {
-          name: 'sushiswap',
-          type: 'protocol',
-          country: 'AU'
-        },
-        asset: {
-          asset: { symbol: 'SUSHI', name: 'SushiSwap' },
-          amount: { value: '15.000000000', decimals: 18 },
-          fiatValue: { amount: 180, currency: 'AUD', timestamp: new Date('2023-06-20T12:00:00Z') }
-        },
-        stakingProduct: 'SushiBar (xSUSHI)',
-        apr: '12.5%',
-        governanceRights: true,
-        taxEvents: []
-      } as StakingReward,
+        timestamp: new Date('2023-06-20T12:00:00Z')
+      }),
 
       // 1inch DEX aggregator multi-hop swap
-      {
+      createMockSwap({
         id: 'oneinch-swap-001',
-        type: 'SWAP',
-        timestamp: new Date('2023-07-01T16:45:00Z'),
-        source: {
-          name: '1inch',
-          type: 'protocol',
-          country: 'AU'
-        },
-        from: {
-          asset: { symbol: 'USDT', name: 'Tether' },
-          amount: { value: '5000.000000', decimals: 6 },
-          fiatValue: { amount: 5000, currency: 'AUD', timestamp: new Date('2023-07-01T16:45:00Z') }
-        },
-        to: {
-          asset: { symbol: 'LINK', name: 'Chainlink' },
-          amount: { value: '500.000000000', decimals: 18 },
-          fiatValue: { amount: 5000, currency: 'AUD', timestamp: new Date('2023-07-01T16:45:00Z') }
-        },
-        route: {
-          protocol: '1inch',
-          pools: ['Uniswap V2', 'SushiSwap', 'Curve'],
-          slippage: '1.2%'
-        },
-        gasUsed: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '0.008000000', decimals: 18 },
-          fiatValue: { amount: 16, currency: 'AUD', timestamp: new Date('2023-07-01T16:45:00Z') }
-        },
-        taxEvents: []
-      } as Swap,
+        timestamp: new Date('2023-07-01T16:45:00Z')
+      }),
 
       // Lido liquid staking (ETH -> stETH)
-      {
+      createMockSwap({
         id: 'lido-staking-001',
-        type: 'SWAP',
-        timestamp: new Date('2023-07-15T10:20:00Z'),
-        source: {
-          name: 'lido',
-          type: 'protocol',
-          country: 'AU'
-        },
-        from: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '5.000000000', decimals: 18 },
-          fiatValue: { amount: 10000, currency: 'AUD', timestamp: new Date('2023-07-15T10:20:00Z') }
-        },
-        to: {
-          asset: { symbol: 'stETH', name: 'Liquid staked Ether 2.0' },
-          amount: { value: '5.000000000', decimals: 18 },
-          fiatValue: { amount: 10000, currency: 'AUD', timestamp: new Date('2023-07-15T10:20:00Z') }
-        },
-        route: {
-          protocol: 'Lido',
-          pools: ['Lido Staking Pool'],
-          slippage: '0%'
-        },
-        stakingDerivative: {
-          underlying: 'ETH',
-          derivative: 'stETH',
-          apr: '4.8%',
-          validator: 'Lido Node Operators'
-        },
-        taxEvents: []
-      } as Swap,
+        timestamp: new Date('2023-07-15T10:20:00Z')
+      }),
 
       // Curve 3pool liquidity removal with impermanent loss
-      {
+      createMockLiquidityRemove({
         id: 'curve-lp-remove-001',
-        type: 'LIQUIDITY_REMOVE',
-        timestamp: new Date('2023-08-01T11:15:00Z'),
-        source: {
-          name: 'curve',
-          type: 'protocol',
-          country: 'AU'
-        },
-        lpToken: {
-          asset: { symbol: '3CRV', name: 'Curve 3pool LP' },
-          amount: { value: '1000.000000000', decimals: 18 },
-          fiatValue: { amount: 3150, currency: 'AUD', timestamp: new Date('2023-08-01T11:15:00Z') }
-        },
-        tokenA: {
-          asset: { symbol: 'USDC', name: 'USD Coin' },
-          amount: { value: '1050.000000', decimals: 6 },
-          fiatValue: { amount: 1050, currency: 'AUD', timestamp: new Date('2023-08-01T11:15:00Z') }
-        },
-        tokenB: {
-          asset: { symbol: 'USDT', name: 'Tether' },
-          amount: { value: '1050.000000', decimals: 6 },
-          fiatValue: { amount: 1050, currency: 'AUD', timestamp: new Date('2023-08-01T11:15:00Z') }
-        },
-        tokenC: {
-          asset: { symbol: 'DAI', name: 'Dai Stablecoin' },
-          amount: { value: '1050.000000000000000000', decimals: 18 },
-          fiatValue: { amount: 1050, currency: 'AUD', timestamp: new Date('2023-08-01T11:15:00Z') }
-        },
-        pool: {
-          protocol: 'Curve',
-          address: '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7',
-          fee: '0.04%'
-        },
-        taxEvents: []
-      } as LiquidityRemove,
+        timestamp: new Date('2023-08-01T11:15:00Z')
+      }),
 
       // Flash loan arbitrage sequence (3 transactions)
-      {
+      createMockTransfer({
         id: 'flashloan-borrow-001',
-        type: 'TRANSFER',
-        timestamp: new Date('2023-08-15T14:25:00.000Z'),
-        source: {
-          name: 'aave',
-          type: 'protocol',
-          country: 'AU'
-        },
-        asset: {
-          asset: { symbol: 'USDC', name: 'USD Coin' },
-          amount: { value: '100000.000000', decimals: 6 },
-          fiatValue: { amount: 100000, currency: 'AUD', timestamp: new Date('2023-08-15T14:25:00.000Z') }
-        },
-        direction: 'IN',
-        from: {
-          address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9', // AAVE lending pool
-          name: 'AAVE Flash Loan'
-        },
-        to: {
-          address: '0x742d35cc6688c532b9b9b8c43b13d7e4fd8d8a9e', // User wallet
-          name: 'User Wallet'
-        },
-        flashLoan: {
-          protocol: 'AAVE',
-          fee: '0.09%',
-          blockNumber: 17925000
-        },
-        taxEvents: []
-      } as Transfer,
+        timestamp: new Date('2023-08-15T14:25:00.000Z')
+      }),
 
-      {
+      createMockSwap({
         id: 'flashloan-arbitrage-001',
-        type: 'SWAP',
-        timestamp: new Date('2023-08-15T14:25:00.001Z'),
-        source: {
-          name: 'sushiswap',
-          type: 'protocol',
-          country: 'AU'
-        },
-        from: {
-          asset: { symbol: 'USDC', name: 'USD Coin' },
-          amount: { value: '100000.000000', decimals: 6 },
-          fiatValue: { amount: 100000, currency: 'AUD', timestamp: new Date('2023-08-15T14:25:00.001Z') }
-        },
-        to: {
-          asset: { symbol: 'USDT', name: 'Tether' },
-          amount: { value: '100200.000000', decimals: 6 },
-          fiatValue: { amount: 100200, currency: 'AUD', timestamp: new Date('2023-08-15T14:25:00.001Z') }
-        },
-        route: {
-          protocol: 'SushiSwap',
-          pools: ['USDC/USDT'],
-          slippage: '0.1%'
-        },
-        arbitrageOpportunity: {
-          priceDiscrepancy: '0.2%',
-          expectedProfit: 200
-        },
-        taxEvents: []
-      } as Swap,
+        timestamp: new Date('2023-08-15T14:25:00.001Z')
+      }),
 
-      {
+      createMockTransfer({
         id: 'flashloan-repay-001',
-        type: 'TRANSFER',
-        timestamp: new Date('2023-08-15T14:25:00.002Z'),
-        source: {
-          name: 'aave',
-          type: 'protocol',
-          country: 'AU'
-        },
-        asset: {
-          asset: { symbol: 'USDC', name: 'USD Coin' },
-          amount: { value: '100090.000000', decimals: 6 }, // Principal + 0.09% fee
-          fiatValue: { amount: 100090, currency: 'AUD', timestamp: new Date('2023-08-15T14:25:00.002Z') }
-        },
-        direction: 'OUT',
-        from: {
-          address: '0x742d35cc6688c532b9b9b8c43b13d7e4fd8d8a9e', // User wallet
-          name: 'User Wallet'
-        },
-        to: {
-          address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9', // AAVE lending pool
-          name: 'AAVE Flash Loan Repayment'
-        },
-        flashLoan: {
-          protocol: 'AAVE',
-          fee: '0.09%',
-          blockNumber: 17925000
-        },
-        taxEvents: []
-      } as Transfer,
+        timestamp: new Date('2023-08-15T14:25:00.002Z')
+      }),
 
       // Polygon bridge transaction
-      {
+      createMockTransfer({
         id: 'polygon-bridge-001',
-        type: 'TRANSFER',
-        timestamp: new Date('2023-09-01T09:30:00Z'),
-        source: {
-          name: 'polygon-bridge',
-          type: 'protocol',
-          country: 'AU'
-        },
-        asset: {
-          asset: { symbol: 'USDC', name: 'USD Coin' },
-          amount: { value: '2000.000000', decimals: 6 },
-          fiatValue: { amount: 2000, currency: 'AUD', timestamp: new Date('2023-09-01T09:30:00Z') }
-        },
-        direction: 'OUT',
-        from: {
-          address: '0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf', // Ethereum mainnet
-          name: 'Ethereum Mainnet',
-          chain: 'ethereum'
-        },
-        to: {
-          address: '0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf', // Polygon
-          name: 'Polygon Network',
-          chain: 'polygon'
-        },
-        bridge: {
-          protocol: 'Polygon PoS Bridge',
-          sourceChain: 'ethereum',
-          targetChain: 'polygon',
-          lockupPeriod: '7 days'
-        },
-        taxEvents: []
-      } as Transfer,
+        timestamp: new Date('2023-09-01T09:30:00Z')
+      }),
 
       // OpenSea NFT marketplace transaction
-      {
+      createMockSwap({
         id: 'opensea-nft-001',
-        type: 'SWAP',
-        timestamp: new Date('2023-09-15T16:00:00Z'),
-        source: {
-          name: 'opensea',
-          type: 'marketplace',
-          country: 'AU'
-        },
-        from: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '1.500000000', decimals: 18 },
-          fiatValue: { amount: 3000, currency: 'AUD', timestamp: new Date('2023-09-15T16:00:00Z') }
-        },
-        to: {
-          asset: { symbol: 'BAYC-001', name: 'Bored Ape Yacht Club #001' },
-          amount: { value: '1', decimals: 0 },
-          fiatValue: { amount: 3000, currency: 'AUD', timestamp: new Date('2023-09-15T16:00:00Z') }
-        },
-        nft: {
-          collection: 'Bored Ape Yacht Club',
-          tokenId: '001',
-          standard: 'ERC-721',
-          marketplace: 'OpenSea',
-          royaltyFee: '2.5%'
-        },
-        fee: {
-          asset: { symbol: 'ETH', name: 'Ethereum' },
-          amount: { value: '0.037500000', decimals: 18 }, // 2.5% marketplace fee
-          fiatValue: { amount: 75, currency: 'AUD', timestamp: new Date('2023-09-15T16:00:00Z') }
-        },
-        taxEvents: []
-      } as Swap
+        timestamp: new Date('2023-09-15T16:00:00Z')
+      })
     ];
   });
 

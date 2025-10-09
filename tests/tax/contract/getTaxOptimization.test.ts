@@ -5,8 +5,8 @@ import type {
   TaxStrategy,
   TaxableTransaction,
   TransactionTaxTreatment
-} from '../../../specs/001-cryto-tax-report/contracts/function-interfaces';
-import type { Transaction } from '../../../src/types/transactions/Transaction';
+} from '@/tax/contracts/function-interfaces';
+import { createMockSpotTrade } from '@tests/tax/helpers/mockFactories';
 
 /**
  * Contract Test T008: getTaxOptimizationStrategies Function
@@ -17,16 +17,10 @@ import type { Transaction } from '../../../src/types/transactions/Transaction';
 describe('T008: Contract Test - getTaxOptimizationStrategies Function', () => {
   // Mock data for testing
   const createMockTaxableTransaction = (): TaxableTransaction => ({
-    originalTransaction: {
+    originalTransaction: createMockSpotTrade({
       id: 'test-tx-001',
-      type: 'SPOT_TRADE',
-      timestamp: new Date('2024-01-15T10:30:00Z'),
-      source: {
-        name: 'TestExchange',
-        type: 'exchange'
-      },
-      taxEvents: []
-    } as Transaction,
+      timestamp: new Date('2024-01-15T10:30:00Z')
+    }),
     taxTreatment: {
       eventType: 'DISPOSAL',
       classification: 'Capital Asset',
@@ -385,7 +379,7 @@ describe('T008: Contract Test - getTaxOptimizationStrategies Function', () => {
 
         // Should include relevant crypto tax strategies
         const strategyTypes = result.map(s => s.type);
-        const expectedTypes = ['TAX_LOSS_HARVESTING', 'CGT_DISCOUNT_TIMING', 'DISPOSAL_TIMING', 'LOT_SELECTION'];
+        const expectedTypes: Array<'TAX_LOSS_HARVESTING' | 'CGT_DISCOUNT_TIMING' | 'DISPOSAL_TIMING' | 'LOT_SELECTION'> = ['TAX_LOSS_HARVESTING', 'CGT_DISCOUNT_TIMING', 'DISPOSAL_TIMING', 'LOT_SELECTION'];
 
         // At least some of these should be present
         const hasRelevantStrategies = expectedTypes.some(type => strategyTypes.includes(type));

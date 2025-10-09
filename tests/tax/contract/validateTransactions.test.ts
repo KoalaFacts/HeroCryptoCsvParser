@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
+import { createMockDataSource, createMockAsset, createMockAssetAmount, createMockSpotTrade } from '@tests/tax/helpers/mockFactories';
 import type {
   ValidateTransactionsFunction,
   ValidationResult,
   ValidationError,
   ValidationWarning
-} from '../../../specs/001-cryto-tax-report/contracts/function-interfaces';
-import type { Transaction } from '../../../src/types/transactions/Transaction';
+} from '@/tax/contracts/function-interfaces';
+import type { Transaction } from '@/types/transactions/Transaction';
 
 /**
  * Contract Test T013: validateTransactions Function
@@ -15,79 +16,39 @@ import type { Transaction } from '../../../src/types/transactions/Transaction';
  */
 describe('T013: Contract Test - validateTransactions Function', () => {
   // Mock data for testing
-  const createValidTransaction = (): Transaction => ({
-    id: 'test-tx-001',
-    type: 'SPOT_TRADE',
-    timestamp: new Date('2024-01-15T10:30:00Z'),
-    source: {
-      name: 'TestExchange',
-      type: 'exchange'
-    },
-    taxEvents: [
-      {
-        type: 'DISPOSAL',
-        timestamp: new Date('2024-01-15T10:30:00Z'),
-        asset: {
-          symbol: 'BTC',
-          name: 'Bitcoin',
-          decimals: 8
-        },
-        amount: {
-          value: 1.5,
-          asset: {
-            symbol: 'BTC',
-            name: 'Bitcoin',
-            decimals: 8
-          }
-        },
-        fiatValue: {
-          amount: 75000,
-          currency: 'AUD',
+  const createValidTransaction = (): Transaction =>
+    createMockSpotTrade({
+      id: 'test-tx-001',
+      timestamp: new Date('2024-01-15T10:30:00Z'),
+      taxEvents: [
+        {
+          type: 'CAPITAL_GAIN',
           timestamp: new Date('2024-01-15T10:30:00Z'),
-          exchangeRate: 50000
+          description: 'Capital gain from BTC sale',
+          amount: createMockAssetAmount('BTC', '1.5', { value: '75000', currency: 'AUD' }),
+          transactionId: 'test-tx-001',
+          gain: '75000'
         }
-      }
-    ],
-    originalData: {
-      side: 'sell',
-      amount: '1.5',
-      price: '50000',
-      asset: 'BTC'
-    }
-  });
+      ]
+    });
 
-  const createTransactionWithMissingId = (): Transaction => ({
-    id: '', // Invalid empty ID
-    type: 'SPOT_TRADE',
-    timestamp: new Date('2024-01-15T10:30:00Z'),
-    source: {
-      name: 'TestExchange',
-      type: 'exchange'
-    },
-    taxEvents: []
-  });
+  const createTransactionWithMissingId = (): Transaction =>
+    createMockSpotTrade({
+      id: '', // Invalid empty ID
+      timestamp: new Date('2024-01-15T10:30:00Z')
+    });
 
-  const createTransactionWithInvalidTimestamp = (): Transaction => ({
-    id: 'test-tx-002',
-    type: 'SPOT_TRADE',
-    timestamp: null as any, // Invalid timestamp
-    source: {
-      name: 'TestExchange',
-      type: 'exchange'
-    },
-    taxEvents: []
-  });
+  const createTransactionWithInvalidTimestamp = (): Transaction =>
+    createMockSpotTrade({
+      id: 'test-tx-002',
+      timestamp: null as any // Invalid timestamp
+    });
 
-  const createTransactionWithFutureDate = (): Transaction => ({
-    id: 'test-tx-003',
-    type: 'SPOT_TRADE',
-    timestamp: new Date('2025-12-31T10:30:00Z'), // Future date
-    source: {
-      name: 'TestExchange',
-      type: 'exchange'
-    },
-    taxEvents: []
-  });
+  const createTransactionWithFutureDate = (): Transaction =>
+    createMockSpotTrade({
+      id: 'test-tx-003',
+      timestamp: new Date('2025-12-31T10:30:00Z') // Future date
+    });
 
   describe('Function Interface Contract', () => {
     it('should have validateTransactions function available', () => {
@@ -409,7 +370,7 @@ describe('T013: Contract Test - validateTransactions Function', () => {
 
     it('should validate asset information in tax events', () => {
       const transactionWithMissingAsset = createValidTransaction();
-      transactionWithMissingAsset.taxEvents[0].asset = undefined as any;
+      transactionWithMissingAsset.taxEvents[0].amount = undefined as any;
       const transactions = [transactionWithMissingAsset];
 
       try {
@@ -437,12 +398,9 @@ describe('T013: Contract Test - validateTransactions Function', () => {
 
     it('should validate fiat value information', () => {
       const transactionWithInvalidFiatValue = createValidTransaction();
-      transactionWithInvalidFiatValue.taxEvents[0].fiatValue = {
-        amount: -1000, // Negative amount
-        currency: 'INVALID',
-        timestamp: new Date(),
-        exchangeRate: 0
-      };
+      if (transactionWithInvalidFiatValue.taxEvents[0].amount?.fiatValue) {
+        transactionWithInvalidFiatValue.taxEvents[0].amount.fiatValue.currency = 'INVALID';
+      }
       const transactions = [transactionWithInvalidFiatValue];
 
       try {

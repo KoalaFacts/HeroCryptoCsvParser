@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { createMockSpotTrade, createMockDataSource, createMockAsset } from '@tests/tax/helpers/mockFactories';
 import type {
   ClassifyTransactionFunction,
   TransactionTaxTreatment,
@@ -6,8 +7,8 @@ import type {
   PortfolioSnapshot,
   InvestorProfile,
   TaxRule
-} from '../../../specs/001-cryto-tax-report/contracts/function-interfaces';
-import type { Transaction } from '../../../src/types/transactions/Transaction';
+} from '@/tax/contracts/function-interfaces';
+import type { Transaction } from '@/types/transactions/Transaction';
 
 /**
  * Contract Test T010: classifyTransaction Function
@@ -21,10 +22,7 @@ describe('T010: Contract Test - classifyTransaction Function', () => {
     id: 'test-tx-001',
     type: type as any,
     timestamp: new Date('2024-01-15T10:30:00Z'),
-    source: {
-      name: 'TestExchange',
-      type: 'exchange'
-    },
+    source: createMockDataSource('test-exchange', 'exchange', 'TestExchange'),
     taxEvents: [],
     originalData: {
       'side': 'sell',
