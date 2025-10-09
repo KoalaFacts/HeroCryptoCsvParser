@@ -6,10 +6,6 @@ import { FieldValidationBuilder } from "@/core/FieldValidationBuilder";
 // Test record
 class TestRecord extends BatchEntryRecord<TestRecord> {
 	value: any = "";
-
-	constructor() {
-		super();
-	}
 }
 
 describe("FieldValidationBuilder", () => {

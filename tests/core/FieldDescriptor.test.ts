@@ -18,10 +18,6 @@ class TestRecord extends BatchEntryRecord<TestRecord> {
 	name: string = "";
 	age: number = 0;
 	active: boolean = false;
-
-	constructor() {
-		super();
-	}
 }
 
 describe("FieldDescriptor", () => {

@@ -13,10 +13,6 @@ class TestRecord extends BatchEntryRecord<TestRecord> {
 	name: string = "Test Name";
 	age: number = 25;
 	active: boolean = true;
-
-	constructor() {
-		super();
-	}
 }
 
 describe("FieldContext", () => {

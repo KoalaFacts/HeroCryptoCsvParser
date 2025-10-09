@@ -7,10 +7,6 @@ import { Amount, Asset, DataSource, type Transfer } from "@/types/transactions";
 
 class TestRecord extends BatchEntryRecord<TestRecord> {
 	public value: string = "";
-
-	constructor() {
-		super();
-	}
 }
 
 describe("PluginRegistry", () => {
