@@ -188,17 +188,17 @@ export class TaxSummaryAggregator {
   ): void {
     const asset = getTransactionAsset(tx.originalTransaction) || "UNKNOWN";
 
-    if (!summary.byAsset.has(asset)) {
-      summary.byAsset.set(asset, {
+    let assetSummary = summary.byAsset.get(asset);
+    if (!assetSummary) {
+      assetSummary = {
         asset,
         disposals: 0,
         acquisitions: 0,
         netGain: 0,
         netLoss: 0,
-      });
+      };
+      summary.byAsset.set(asset, assetSummary);
     }
-
-    const assetSummary = summary.byAsset.get(asset)!;
 
     if (tx.taxTreatment.eventType === "DISPOSAL") {
       assetSummary.disposals++;
@@ -225,16 +225,17 @@ export class TaxSummaryAggregator {
     const exchange = tx.originalTransaction.source.name || "UNKNOWN";
     const disposalValue = tx.taxableAmount || 0;
 
-    if (!summary.byExchange.has(exchange)) {
-      summary.byExchange.set(exchange, {
+    let exchangeSummary = summary.byExchange.get(exchange);
+    if (!exchangeSummary) {
+      exchangeSummary = {
         exchange,
         transactions: 0,
         totalValue: 0,
         netGain: 0,
-      });
+      };
+      summary.byExchange.set(exchange, exchangeSummary);
     }
 
-    const exchangeSummary = summary.byExchange.get(exchange)!;
     exchangeSummary.transactions++;
     exchangeSummary.totalValue += Math.abs(disposalValue);
 
@@ -257,16 +258,17 @@ export class TaxSummaryAggregator {
     const date = getTransactionTimestamp(tx.originalTransaction);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
-    if (!summary.byMonth.has(monthKey)) {
-      summary.byMonth.set(monthKey, {
+    let monthlySummary = summary.byMonth.get(monthKey);
+    if (!monthlySummary) {
+      monthlySummary = {
         month: monthKey,
         transactions: 0,
         gains: 0,
         losses: 0,
-      });
+      };
+      summary.byMonth.set(monthKey, monthlySummary);
     }
 
-    const monthlySummary = summary.byMonth.get(monthKey)!;
     monthlySummary.transactions++;
 
     if (tx.capitalGain && tx.capitalGain > 0) {

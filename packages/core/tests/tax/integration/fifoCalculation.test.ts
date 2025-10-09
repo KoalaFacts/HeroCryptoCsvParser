@@ -50,7 +50,7 @@ interface FIFOCalculator {
   calculateUnrealizedGains(
     marketPrices: Map<string, number>,
   ): Map<string, number>;
-  exportTaxReport(): any;
+  exportTaxReport(): unknown;
   reset(): void;
 }
 

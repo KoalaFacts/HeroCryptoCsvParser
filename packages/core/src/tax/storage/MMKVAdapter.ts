@@ -255,14 +255,17 @@ export class MMKVAdapter implements StorageAdapter {
     }
   }
 
-  async getCachedCalculation(key: string): Promise<any> {
+  async getCachedCalculation(key: string): Promise<unknown> {
     try {
       const cacheKey = this.getCacheKey(key);
       const serialized = this.mmkv.getString(cacheKey);
 
       if (!serialized) return null;
 
-      const entry = this.deserialize<any>(serialized);
+      const entry = this.deserialize<{
+        result: unknown;
+        expiresAt: number;
+      }>(serialized);
 
       // Check expiration
       if (entry.expiresAt < Date.now()) {
@@ -332,7 +335,9 @@ export class MMKVAdapter implements StorageAdapter {
 
       if (!serialized) return null;
 
-      const data = this.deserialize<any>(serialized);
+      const data = this.deserialize<TaxReport & { serializedAt?: number }>(
+        serialized,
+      );
       // Remove serialization metadata
       const { serializedAt: _serializedAt, ...report } = data;
       return report as TaxReport;

@@ -49,11 +49,11 @@ export class FIFOCalculator {
   addAcquisition(transaction: Transaction): void {
     const asset = getAssetKey(transaction);
 
-    if (!this.lotsByAsset.has(asset)) {
-      this.lotsByAsset.set(asset, []);
+    let lots = this.lotsByAsset.get(asset);
+    if (!lots) {
+      lots = [];
+      this.lotsByAsset.set(asset, lots);
     }
-
-    const lots = this.lotsByAsset.get(asset)!;
 
     const lot: FIFOLot = {
       date: getTransactionTimestamp(transaction),

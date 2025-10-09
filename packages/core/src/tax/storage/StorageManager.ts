@@ -47,8 +47,9 @@ export class StorageManager {
     const adapterId = this.getAdapterId(platform, config.databaseName);
 
     // Return existing adapter if already created
-    if (this.adapters.has(adapterId)) {
-      return this.adapters.get(adapterId)!;
+    const existingAdapter = this.adapters.get(adapterId);
+    if (existingAdapter) {
+      return existingAdapter;
     }
 
     // Create new adapter based on platform
@@ -95,8 +96,9 @@ export class StorageManager {
   async createRxDBAdapter(config: StorageConfig): Promise<StorageAdapter> {
     const adapterId = this.getAdapterId("rxdb", config.databaseName);
 
-    if (this.adapters.has(adapterId)) {
-      return this.adapters.get(adapterId)!;
+    const existingAdapter = this.adapters.get(adapterId);
+    if (existingAdapter) {
+      return existingAdapter;
     }
 
     const adapter = new RxDBAdapter({

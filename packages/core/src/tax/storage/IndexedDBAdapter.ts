@@ -148,7 +148,14 @@ export class IndexedDBAdapter implements StorageAdapter {
 
   private async insertBatch(transactions: TaxableTransaction[]): Promise<void> {
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(
+      if (!this.db) {
+        reject(
+          new StorageError("Database not initialized", "DB_NOT_INITIALIZED"),
+        );
+        return;
+      }
+
+      const transaction = this.db.transaction(
         [this.TRANSACTIONS_STORE],
         "readwrite",
       );
@@ -181,6 +188,7 @@ export class IndexedDBAdapter implements StorageAdapter {
       );
 
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction(
         [this.TRANSACTIONS_STORE],
         "readonly",
@@ -251,6 +259,7 @@ export class IndexedDBAdapter implements StorageAdapter {
       );
 
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction(
         [this.TRANSACTIONS_STORE],
         "readwrite",
@@ -307,6 +316,7 @@ export class IndexedDBAdapter implements StorageAdapter {
       );
 
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction(
         [this.TRANSACTIONS_STORE],
         "readwrite",
@@ -322,7 +332,7 @@ export class IndexedDBAdapter implements StorageAdapter {
     });
   }
 
-  async cacheTaxCalculation(key: string, result: any): Promise<void> {
+  async cacheTaxCalculation(key: string, result: unknown): Promise<void> {
     if (!this.db)
       throw new StorageError(
         "Database not initialized",
@@ -331,6 +341,7 @@ export class IndexedDBAdapter implements StorageAdapter {
       );
 
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction([this.CACHE_STORE], "readwrite");
       const store = transaction.objectStore(this.CACHE_STORE);
 
@@ -355,7 +366,7 @@ export class IndexedDBAdapter implements StorageAdapter {
     });
   }
 
-  async getCachedCalculation(key: string): Promise<any> {
+  async getCachedCalculation(key: string): Promise<unknown> {
     if (!this.db)
       throw new StorageError(
         "Database not initialized",
@@ -364,6 +375,7 @@ export class IndexedDBAdapter implements StorageAdapter {
       );
 
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction([this.CACHE_STORE], "readonly");
       const store = transaction.objectStore(this.CACHE_STORE);
 
@@ -422,6 +434,7 @@ export class IndexedDBAdapter implements StorageAdapter {
       );
 
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction([this.CACHE_STORE], "readwrite");
       const store = transaction.objectStore(this.CACHE_STORE);
 
@@ -447,6 +460,7 @@ export class IndexedDBAdapter implements StorageAdapter {
       );
 
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction(
         [this.REPORTS_STORE],
         "readwrite",
@@ -482,6 +496,7 @@ export class IndexedDBAdapter implements StorageAdapter {
       );
 
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction(
         [this.REPORTS_STORE],
         "readonly",
@@ -515,6 +530,7 @@ export class IndexedDBAdapter implements StorageAdapter {
       );
 
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction(
         [this.REPORTS_STORE],
         "readonly",
@@ -671,7 +687,9 @@ export class IndexedDBAdapter implements StorageAdapter {
     return chunks;
   }
 
-  private serializeTransaction(transaction: TaxableTransaction): any {
+  private serializeTransaction(
+    transaction: TaxableTransaction,
+  ): TaxableTransaction & { id: string; serializedAt: Date } {
     return {
       id: `${transaction.originalTransaction.id}`,
       ...transaction,
@@ -679,7 +697,9 @@ export class IndexedDBAdapter implements StorageAdapter {
     };
   }
 
-  private deserializeTransaction(data: any): TaxableTransaction {
+  private deserializeTransaction(
+    data: TaxableTransaction & { serializedAt?: Date },
+  ): TaxableTransaction {
     // Remove serialization metadata
     const { serializedAt: _serializedAt, ...transaction } = data;
     return transaction as TaxableTransaction;
@@ -718,6 +738,7 @@ export class IndexedDBAdapter implements StorageAdapter {
 
   private async countRecords(storeName: string): Promise<number> {
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction([storeName], "readonly");
       const store = transaction.objectStore(storeName);
 
@@ -735,6 +756,7 @@ export class IndexedDBAdapter implements StorageAdapter {
   private async getCacheSize(): Promise<number> {
     // Estimate cache size in bytes
     return new Promise((resolve, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: db is checked above
       const transaction = this.db!.transaction([this.CACHE_STORE], "readonly");
       const store = transaction.objectStore(this.CACHE_STORE);
       let totalSize = 0;
@@ -762,6 +784,7 @@ export class IndexedDBAdapter implements StorageAdapter {
   }
 
   private async cleanupCache(): Promise<void> {
+    // biome-ignore lint/style/noNonNullAssertion: db is checked above
     const transaction = this.db!.transaction([this.CACHE_STORE], "readwrite");
     const store = transaction.objectStore(this.CACHE_STORE);
     const now = Date.now();
@@ -780,6 +803,7 @@ export class IndexedDBAdapter implements StorageAdapter {
   }
 
   private async cleanupOldReports(cutoffDate: Date): Promise<void> {
+    // biome-ignore lint/style/noNonNullAssertion: db is checked above
     const transaction = this.db!.transaction([this.REPORTS_STORE], "readwrite");
     const store = transaction.objectStore(this.REPORTS_STORE);
     const index = store.index("generatedAt");

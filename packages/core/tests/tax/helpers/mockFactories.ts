@@ -46,7 +46,7 @@ export function createMockDataSource(
     | "marketplace" = "exchange",
   name?: string,
 ): DataSource {
-  return new DataSource(id, type as any, name || id);
+  return new DataSource(id, type as unknown, name || id);
 }
 
 /**
@@ -293,7 +293,7 @@ export function createMockLiquidityRemove(
  */
 export function createMockTransaction(
   type: Transaction["type"],
-  overrides?: any,
+  overrides?: unknown,
 ): Transaction {
   switch (type) {
     case "SPOT_TRADE":

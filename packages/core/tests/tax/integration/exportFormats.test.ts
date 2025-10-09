@@ -127,7 +127,7 @@ interface ReportExporter {
   ): Promise<ExportResult>;
   generateAuditTrail(
     transactions: Transaction[],
-    decisions: any[],
+    decisions: unknown[],
     options: ExportOptions,
   ): Promise<ExportResult>;
   validateATOCompliance(reportPath: string): Promise<{

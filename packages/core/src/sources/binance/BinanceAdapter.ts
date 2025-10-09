@@ -83,7 +83,10 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
       ) {
         if (changeAmount.isNegative()) {
           const feeTx = this.createFee(id, timestamp, record, changeAmount);
-          (feeTx as any).originalData = { categorization };
+          feeTx.originalData = {
+            categorizationType: categorization.type,
+            categorizationSubType: categorization.subType || "",
+          };
           return feeTx;
         } else {
           const interestTx = this.createInterest(
@@ -92,7 +95,10 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
             record,
             changeAmount,
           );
-          (interestTx as any).originalData = { categorization };
+          interestTx.originalData = {
+            categorizationType: categorization.type,
+            categorizationSubType: categorization.subType || "",
+          };
           return interestTx;
         }
       }
@@ -107,7 +113,10 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
           record,
           changeAmount,
         );
-        (spotTradeTx as any).originalData = { categorization };
+        spotTradeTx.originalData = {
+          categorizationType: categorization.type,
+          categorizationSubType: categorization.subType || "",
+        };
         return spotTradeTx;
       }
 
@@ -137,8 +146,9 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
 
       case "SWAP": {
         const swapTx = this.createSwap(id, timestamp, record, changeAmount);
-        (swapTx as any).originalData = {
-          categorization,
+        swapTx.originalData = {
+          categorizationType: categorization.type,
+          categorizationSubType: categorization.subType || "",
           swapType: categorization.subType || "instant",
         };
         return swapTx;
@@ -157,13 +167,19 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
           record,
           changeAmount,
         );
-        (airdropTx as any).originalData = { categorization };
+        airdropTx.originalData = {
+          categorizationType: categorization.type,
+          categorizationSubType: categorization.subType || "",
+        };
         return airdropTx;
       }
 
       case "FEE": {
         const feeTx = this.createFee(id, timestamp, record, changeAmount);
-        (feeTx as any).originalData = { categorization };
+        feeTx.originalData = {
+          categorizationType: categorization.type,
+          categorizationSubType: categorization.subType || "",
+        };
         return feeTx;
       }
 
@@ -174,7 +190,10 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
           record,
           changeAmount,
         );
-        (interestTx as any).originalData = { categorization };
+        interestTx.originalData = {
+          categorizationType: categorization.type,
+          categorizationSubType: categorization.subType || "",
+        };
         return interestTx;
       }
 
@@ -185,7 +204,10 @@ export class BinanceAdapter extends SourceAdapter<BinanceTransactionRecord> {
           record,
           changeAmount,
         );
-        (marginTradeTx as any).originalData = { categorization };
+        marginTradeTx.originalData = {
+          categorizationType: categorization.type,
+          categorizationSubType: categorization.subType || "",
+        };
         return marginTradeTx;
       }
 

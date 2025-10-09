@@ -47,8 +47,8 @@ interface AustralianTaxReport {
     incomeEvents: Transaction[];
   };
   atoCompliantSummary: {
-    capitalGainsLossSchedule: any;
-    supplementarySection: any;
+    capitalGainsLossSchedule: unknown;
+    supplementarySection: unknown;
   };
 }
 

@@ -125,10 +125,10 @@ describe("T012: Contract Test - initializeStorage Function", () => {
           .initializeStorage as InitializeStorageFunction;
 
         // Test with null config
-        await expect(initializeStorage(null as any)).rejects.toThrow();
+        await expect(initializeStorage(null as unknown)).rejects.toThrow();
 
         // Test with undefined config
-        await expect(initializeStorage(undefined as any)).rejects.toThrow();
+        await expect(initializeStorage(undefined as unknown)).rejects.toThrow();
 
         // Expected to fail until implementation
         expect(false).toBe(true);
@@ -146,7 +146,7 @@ describe("T012: Contract Test - initializeStorage Function", () => {
         const configWithoutPlatform = {
           databaseName: "test-db",
           // Missing platform
-        } as any;
+        } as unknown;
 
         await expect(initializeStorage(configWithoutPlatform)).rejects.toThrow(
           /platform|required/i,
@@ -180,7 +180,7 @@ describe("T012: Contract Test - initializeStorage Function", () => {
         }
 
         // Test invalid platform
-        const invalidConfig = { platform: "invalid" } as any;
+        const invalidConfig = { platform: "invalid" } as unknown;
         await expect(initializeStorage(invalidConfig)).rejects.toThrow(
           /platform|supported|invalid/i,
         );
@@ -262,7 +262,7 @@ describe("T012: Contract Test - initializeStorage Function", () => {
 
         const configWithInvalidIndexes: StorageConfig = {
           platform: "browser",
-          indexedFields: ["", null, undefined] as any,
+          indexedFields: ["", null, undefined] as unknown,
         };
 
         await expect(
@@ -533,7 +533,7 @@ describe("T012: Contract Test - initializeStorage Function", () => {
 
         const unsupportedConfig = {
           platform: "unsupported-platform",
-        } as any;
+        } as unknown;
 
         await expect(initializeStorage(unsupportedConfig)).rejects.toThrow(
           /platform.*supported|invalid.*platform/i,

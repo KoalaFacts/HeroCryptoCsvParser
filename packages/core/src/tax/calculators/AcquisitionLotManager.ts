@@ -57,11 +57,12 @@ export class AcquisitionLotManager {
       usedAmount: 0,
     };
 
-    if (!this.lotsByAsset.has(asset)) {
-      this.lotsByAsset.set(asset, []);
+    let lots = this.lotsByAsset.get(asset);
+    if (!lots) {
+      lots = [];
+      this.lotsByAsset.set(asset, lots);
     }
 
-    const lots = this.lotsByAsset.get(asset)!;
     lots.push(lot);
 
     // Keep sorted by date

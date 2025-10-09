@@ -75,7 +75,12 @@ describe("FieldDescriptor", () => {
 
       const record = new TestRecord();
       const context1 = new FieldMapperContext("Name", 0, "", record);
-      const context2 = new FieldMapperContext("Name", 0, null as any, record);
+      const context2 = new FieldMapperContext(
+        "Name",
+        0,
+        null as unknown as string,
+        record,
+      );
 
       if (field.mapper) {
         expect(field.mapper(context1).isValid).toBe(true);

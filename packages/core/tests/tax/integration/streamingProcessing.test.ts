@@ -80,7 +80,7 @@ interface LiveTaxCalculator {
     unrealizedLosses: number;
     ytdIncome: number;
   }>;
-  onPositionUpdate(callback: (update: any) => void): void;
+  onPositionUpdate(callback: (update: unknown) => void): void;
   getPerformanceMetrics(): Promise<{
     averageProcessingTime: number;
     transactionsPerSecond: number;

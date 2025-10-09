@@ -68,7 +68,7 @@ interface TaxOptimizer {
     marketPrices: Map<string, number>,
   ): Promise<HarvestingOpportunity[]>;
   optimizeDisposalTiming(
-    holdings: Map<string, any>,
+    holdings: Map<string, unknown>,
     plannedDisposals: {
       asset: string;
       amount: number;

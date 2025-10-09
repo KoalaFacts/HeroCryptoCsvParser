@@ -199,16 +199,17 @@ export class CapitalGainsCalculator {
       ).toUpperCase();
       const result = this.calculateCapitalGains(context);
 
-      if (!byAsset.has(asset)) {
-        byAsset.set(asset, {
+      let summary = byAsset.get(asset);
+      if (!summary) {
+        summary = {
           totalGains: 0,
           totalLosses: 0,
           netGainLoss: 0,
           taxableAmount: 0,
-        });
+        };
+        byAsset.set(asset, summary);
       }
 
-      const summary = byAsset.get(asset)!;
       summary.totalGains += result.capitalGain || 0;
       summary.totalLosses += result.capitalLoss || 0;
       summary.netGainLoss += result.netGainLoss;

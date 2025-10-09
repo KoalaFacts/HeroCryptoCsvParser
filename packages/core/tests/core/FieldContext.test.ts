@@ -58,7 +58,7 @@ describe("FieldContext", () => {
       const context = new FieldMapperContext(
         "Optional",
         3,
-        null as any,
+        null as unknown as string,
         record,
       );
 
@@ -133,7 +133,9 @@ describe("FieldContext", () => {
       );
 
       expect(context.currentValue).toEqual(complexValue);
-      expect((context.currentValue as any).nested.value).toBe(123);
+      expect(
+        (context.currentValue as { nested: { value: number } }).nested.value,
+      ).toBe(123);
     });
   });
 
@@ -249,13 +251,13 @@ describe("FieldContext", () => {
     });
 
     it("should handle circular references in record", () => {
-      const record = new TestRecord();
-      (record as any).circular = record;
+      const record = new TestRecord() as TestRecord & { circular?: TestRecord };
+      record.circular = record;
 
       const context = new FieldGetterContext("Circular", record);
 
       expect(context.record).toBe(record);
-      expect((context.record as any).circular).toBe(record);
+      expect(context.record.circular).toBe(record);
     });
 
     it("should handle large field index values", () => {

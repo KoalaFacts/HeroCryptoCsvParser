@@ -150,12 +150,12 @@ describe("T007: Contract Test - exportTaxReportATO Function", () => {
 
         // Test with null report
         await expect(
-          exportTaxReportATO(null as any, mockOptions),
+          exportTaxReportATO(null as unknown, mockOptions),
         ).rejects.toThrow();
 
         // Test with undefined report
         await expect(
-          exportTaxReportATO(undefined as any, mockOptions),
+          exportTaxReportATO(undefined as unknown, mockOptions),
         ).rejects.toThrow();
 
         // Expected to fail until implementation
@@ -176,12 +176,12 @@ describe("T007: Contract Test - exportTaxReportATO Function", () => {
 
         // Test with null options
         await expect(
-          exportTaxReportATO(mockReport, null as any),
+          exportTaxReportATO(mockReport, null as unknown),
         ).rejects.toThrow();
 
         // Test with undefined options
         await expect(
-          exportTaxReportATO(mockReport, undefined as any),
+          exportTaxReportATO(mockReport, undefined as unknown),
         ).rejects.toThrow();
 
         // Expected to fail until implementation
@@ -559,7 +559,7 @@ describe("T007: Contract Test - exportTaxReportATO Function", () => {
       const malformedReport = {
         id: "test",
         // Missing required fields
-      } as any;
+      } as unknown;
 
       try {
         const exportTaxReportATO =

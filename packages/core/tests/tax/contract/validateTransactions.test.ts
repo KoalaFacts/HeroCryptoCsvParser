@@ -42,7 +42,7 @@ describe("T013: Contract Test - validateTransactions Function", () => {
   const createTransactionWithInvalidTimestamp = (): Transaction =>
     createMockSpotTrade({
       id: "test-tx-002",
-      timestamp: null as any, // Invalid timestamp
+      timestamp: null as unknown, // Invalid timestamp
     });
 
   const createTransactionWithFutureDate = (): Transaction =>
@@ -122,10 +122,12 @@ describe("T013: Contract Test - validateTransactions Function", () => {
             .validateTransactions as ValidateTransactionsFunction;
 
         // Test with null transactions
-        expect(() => validateTransactions(null as any, "AU")).toThrow();
+        expect(() => validateTransactions(null as unknown, "AU")).toThrow();
 
         // Test with undefined transactions
-        expect(() => validateTransactions(undefined as any, "AU")).toThrow();
+        expect(() =>
+          validateTransactions(undefined as unknown, "AU"),
+        ).toThrow();
 
         // Expected to fail until implementation
         expect(false).toBe(true);
@@ -144,11 +146,13 @@ describe("T013: Contract Test - validateTransactions Function", () => {
             .validateTransactions as ValidateTransactionsFunction;
 
         // Test with null jurisdiction
-        expect(() => validateTransactions(transactions, null as any)).toThrow();
+        expect(() =>
+          validateTransactions(transactions, null as unknown),
+        ).toThrow();
 
         // Test with undefined jurisdiction
         expect(() =>
-          validateTransactions(transactions, undefined as any),
+          validateTransactions(transactions, undefined as unknown),
         ).toThrow();
 
         // Expected to fail until implementation
@@ -274,7 +278,7 @@ describe("T013: Contract Test - validateTransactions Function", () => {
 
     it("should validate transaction type is supported", () => {
       const transactionWithInvalidType = createValidTransaction();
-      transactionWithInvalidType.type = "INVALID_TYPE" as any;
+      transactionWithInvalidType.type = "INVALID_TYPE" as unknown;
       const transactions = [transactionWithInvalidType];
 
       try {
@@ -306,7 +310,7 @@ describe("T013: Contract Test - validateTransactions Function", () => {
 
     it("should validate transaction source information", () => {
       const transactionWithInvalidSource = createValidTransaction();
-      transactionWithInvalidSource.source = null as any;
+      transactionWithInvalidSource.source = null as unknown;
       const transactions = [transactionWithInvalidSource];
 
       try {
@@ -375,7 +379,7 @@ describe("T013: Contract Test - validateTransactions Function", () => {
           type: "INVALID_EVENT_TYPE",
           timestamp: null,
           asset: null,
-        } as any,
+        } as unknown,
       ];
       const transactions = [transactionWithInvalidTaxEvents];
 
@@ -407,7 +411,7 @@ describe("T013: Contract Test - validateTransactions Function", () => {
 
     it("should validate asset information in tax events", () => {
       const transactionWithMissingAsset = createValidTransaction();
-      transactionWithMissingAsset.taxEvents[0].amount = undefined as any;
+      transactionWithMissingAsset.taxEvents[0].amount = undefined as unknown;
       const transactions = [transactionWithMissingAsset];
 
       try {
@@ -709,7 +713,7 @@ describe("T013: Contract Test - validateTransactions Function", () => {
         undefined,
         { id: "test" }, // Missing required fields
         "not an object",
-      ] as any[];
+      ] as unknown[];
 
       try {
         const validateTransactions =

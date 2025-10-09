@@ -18,7 +18,7 @@ describe("T010: Contract Test - classifyTransaction Function", () => {
   // Mock data for testing
   const createMockTransaction = (type: string = "SPOT_TRADE"): Transaction => ({
     id: "test-tx-001",
-    type: type as any,
+    type: type as unknown,
     timestamp: new Date("2024-01-15T10:30:00Z"),
     source: createMockDataSource("test-exchange", "exchange", "TestExchange"),
     taxEvents: [],
@@ -136,10 +136,10 @@ describe("T010: Contract Test - classifyTransaction Function", () => {
             .classifyTransaction as ClassifyTransactionFunction;
 
         // Test with null transaction
-        expect(() => classifyTransaction(null as any, "AU")).toThrow();
+        expect(() => classifyTransaction(null as unknown, "AU")).toThrow();
 
         // Test with undefined transaction
-        expect(() => classifyTransaction(undefined as any, "AU")).toThrow();
+        expect(() => classifyTransaction(undefined as unknown, "AU")).toThrow();
 
         // Expected to fail until implementation
         expect(false).toBe(true);
@@ -159,12 +159,12 @@ describe("T010: Contract Test - classifyTransaction Function", () => {
 
         // Test with null jurisdiction
         expect(() =>
-          classifyTransaction(mockTransaction, null as any),
+          classifyTransaction(mockTransaction, null as unknown),
         ).toThrow();
 
         // Test with undefined jurisdiction
         expect(() =>
-          classifyTransaction(mockTransaction, undefined as any),
+          classifyTransaction(mockTransaction, undefined as unknown),
         ).toThrow();
 
         // Expected to fail until implementation
@@ -236,7 +236,7 @@ describe("T010: Contract Test - classifyTransaction Function", () => {
       const incompleteTransaction = {
         id: "test",
         // Missing type, timestamp, etc.
-      } as any;
+      } as unknown;
 
       try {
         const classifyTransaction =
@@ -661,7 +661,7 @@ describe("T010: Contract Test - classifyTransaction Function", () => {
         id: "test",
         timestamp: "invalid-date",
         originalData: null,
-      } as any;
+      } as unknown;
 
       try {
         const classifyTransaction =
