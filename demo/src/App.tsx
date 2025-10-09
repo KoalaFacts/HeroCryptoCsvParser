@@ -5,6 +5,7 @@ import type { TaxReport } from '@beingciteable/hero-csv-crypto-parser/tax';
 import { useState, useEffect, useCallback } from 'react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
+import jsPDF from 'jspdf';
 
 // Helper functions to safely extract properties from different transaction types
 const getTransactionAsset = (tx: Transaction): string => {
@@ -177,6 +178,61 @@ function App() {
     }
   };
 
+  const handleExportTaxReportPDF = () => {
+    if (!taxReport) return;
+
+    try {
+      const doc = new jsPDF();
+
+      // Title
+      doc.setFontSize(20);
+      doc.text('Australian Tax Report', 20, 20);
+
+      // Tax Year
+      doc.setFontSize(12);
+      doc.text(`Financial Year: ${taxYear}-${(taxYear + 1).toString().slice(-2)}`, 20, 30);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 37);
+
+      // Summary Section
+      doc.setFontSize(16);
+      doc.text('Tax Summary', 20, 50);
+
+      doc.setFontSize(11);
+      let yPos = 60;
+
+      doc.text(`Capital Gains: $${taxReport.summary.totalCapitalGains.toLocaleString()}`, 20, yPos);
+      yPos += 7;
+      doc.text(`CGT Discount (50%): $${taxReport.summary.cgtDiscount.toLocaleString()}`, 20, yPos);
+      yPos += 7;
+      doc.text(`Ordinary Income: $${taxReport.summary.ordinaryIncome.toLocaleString()}`, 20, yPos);
+      yPos += 7;
+      doc.text(`Net Taxable Amount: $${taxReport.summary.netTaxableAmount.toLocaleString()}`, 20, yPos);
+      yPos += 15;
+
+      // Asset Summary
+      doc.setFontSize(16);
+      doc.text('Assets Summary', 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      const assetEntries = Array.from(taxReport.summary.byAsset.entries());
+      for (const [asset, summary] of assetEntries.slice(0, 15)) { // Limit to first 15 assets
+        doc.text(`${asset}: Gain $${summary.netGain.toFixed(2)} | Loss $${summary.netLoss.toFixed(2)}`, 25, yPos);
+        yPos += 6;
+        if (yPos > 270) break; // Page limit
+      }
+
+      // Footer
+      doc.setFontSize(8);
+      doc.text('Generated with Hero Crypto CSV Parser', 20, 285);
+      doc.text('https://github.com/BeingCiteable/HeroCryptoCsvParser', 20, 290);
+
+      // Save
+      doc.save(`tax-report-AU-${taxYear}.pdf`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'PDF export failed');
+    }
+  };
 
   const handleExportTaxReportCSV = async () => {
     if (!taxReport) return;
@@ -685,22 +741,27 @@ function App() {
                             </div>
                           </div>
 
-                          <div className="flex flex-col gap-3">
-                            <div className="flex gap-2">
-                              <button
-                                type="button"
-                                className="btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none"
-                                onClick={handleExportTaxReportCSV}
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Export CSV
-                              </button>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              💡 PDF export available when using the npm package in Node.js
-                            </p>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className="btn btn-sm bg-red-600 hover:bg-red-700 text-white border-none"
+                              onClick={handleExportTaxReportPDF}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              Export PDF
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none"
+                              onClick={handleExportTaxReportCSV}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Export CSV
+                            </button>
                           </div>
                         </div>
                       )}
