@@ -202,7 +202,8 @@ class TransactionGenerator {
     if (sellableAssets.length === 0) return;
 
     const asset = randomChoice(sellableAssets);
-    const balance = this.holdings.get(asset)!;
+    const balance = this.holdings.get(asset);
+    if (balance === undefined) return;
     const sellPercentage = randomDecimal(0.2, 0.6, 2);
     const amount = parseFloat((balance * sellPercentage).toFixed(8));
 
@@ -239,7 +240,8 @@ class TransactionGenerator {
     if (convertibleAssets.length === 0) return;
 
     const fromAsset = randomChoice(convertibleAssets);
-    const balance = this.holdings.get(fromAsset)!;
+    const balance = this.holdings.get(fromAsset);
+    if (balance === undefined) return;
     const amount = parseFloat(
       (balance * randomDecimal(0.3, 0.7, 2)).toFixed(8),
     );

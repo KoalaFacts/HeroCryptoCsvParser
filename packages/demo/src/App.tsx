@@ -15,14 +15,20 @@ import { useCallback, useEffect, useId, useState } from "react";
 import { generateSampleCSV } from "./utils/generateSampleData";
 
 // Helper functions to safely extract properties from different transaction types
+type AssetField =
+  | string
+  | { asset?: string | { symbol?: string } }
+  | { symbol?: string }
+  | unknown;
+
 const getTransactionAsset = (tx: Transaction): string => {
   // Helper to extract asset symbol from AssetAmount or Asset
-  const extractAsset = (field: any): string | null => {
+  const extractAsset = (field: AssetField): string | null => {
     if (!field) return null;
 
     // If it's an AssetAmount object, extract the asset
     if (typeof field === "object" && field !== null && "asset" in field) {
-      const asset = field.asset;
+      const asset = (field as { asset?: string | { symbol?: string } }).asset;
       if (typeof asset === "string") return asset;
       if (asset && typeof asset === "object" && "symbol" in asset) {
         return asset.symbol || null;
@@ -31,7 +37,7 @@ const getTransactionAsset = (tx: Transaction): string => {
 
     // If it's an Asset object with symbol
     if (typeof field === "object" && field !== null && "symbol" in field) {
-      return field.symbol || null;
+      return (field as { symbol?: string }).symbol || null;
     }
 
     // If it's a string
@@ -50,11 +56,13 @@ const getTransactionAsset = (tx: Transaction): string => {
     "baseAsset", // SpotTrade
     "fromAsset", // Swap
     "toAsset", // Swap
-  ];
+  ] as const;
 
   for (const fieldName of fields) {
     if (fieldName in tx) {
-      const result = extractAsset((tx as any)[fieldName]);
+      const result = extractAsset(
+        (tx as unknown as Record<string, unknown>)[fieldName] as AssetField,
+      );
       if (result) return result;
     }
   }
@@ -70,9 +78,12 @@ const getTransactionQuoteAsset = (tx: Transaction): string | undefined => {
       tx.quoteAsset !== null &&
       "asset" in tx.quoteAsset
     ) {
-      const asset = (tx.quoteAsset as any).asset;
+      const asset = (tx.quoteAsset as { asset?: string | { symbol?: string } })
+        .asset;
       if (!asset) return undefined;
-      return typeof asset === "string" ? asset : asset.symbol || String(asset);
+      return typeof asset === "string"
+        ? asset
+        : (asset as { symbol?: string }).symbol || String(asset);
     }
     return typeof tx.quoteAsset === "string"
       ? tx.quoteAsset
@@ -81,15 +92,21 @@ const getTransactionQuoteAsset = (tx: Transaction): string | undefined => {
   return undefined;
 };
 
+type AmountField =
+  | string
+  | number
+  | { amount?: number | string; toString?: () => string }
+  | unknown;
+
 const getTransactionAmount = (tx: Transaction): string => {
   // Helper to extract amount from AssetAmount
-  const extractAmount = (field: any): string | null => {
+  const extractAmount = (field: AmountField): string | null => {
     if (!field) return null;
     if (typeof field === "object" && field !== null && "amount" in field) {
-      return field.amount?.toString() || null;
+      return (field as { amount?: number | string }).amount?.toString() || null;
     }
     if (typeof field === "object" && field !== null && "toString" in field) {
-      return field.toString();
+      return (field as { toString: () => string }).toString();
     }
     return String(field);
   };
@@ -106,11 +123,13 @@ const getTransactionAmount = (tx: Transaction): string => {
     "baseAmount",
     "fromAmount",
     "toAmount",
-  ];
+  ] as const;
 
   for (const fieldName of fields) {
     if (fieldName in tx) {
-      const result = extractAmount((tx as any)[fieldName]);
+      const result = extractAmount(
+        (tx as unknown as Record<string, unknown>)[fieldName] as AmountField,
+      );
       if (result) return result;
     }
   }

@@ -146,7 +146,8 @@ class SampleDataGenerator {
     if (sellableAssets.length === 0) return;
 
     const asset = randomChoice(sellableAssets);
-    const balance = this.holdings.get(asset)!;
+    const balance = this.holdings.get(asset);
+    if (balance === undefined) return;
     const sellPercentage = randomDecimal(0.2, 0.6, 2);
     const amount = parseFloat((balance * sellPercentage).toFixed(8));
 
