@@ -1,0 +1,7 @@
+dist
+.claude
+demo/dist
+coverage
+node_modules
+*.d.ts
+.vercel
