@@ -1,3 +1,6 @@
+// Package version
+export const VERSION = "0.2.3";
+
 export { BatchEntryRecord } from "./core/BatchEntryRecord";
 export {
   FieldFormatterContext,

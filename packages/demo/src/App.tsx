@@ -2,7 +2,7 @@ import type {
   SourceProcessResult,
   Transaction,
 } from "@koalafacts/hero-crypto-csv-parser";
-import { process } from "@koalafacts/hero-crypto-csv-parser";
+import { process, VERSION } from "@koalafacts/hero-crypto-csv-parser";
 import type { TaxReport } from "@koalafacts/hero-crypto-csv-parser/tax";
 import {
   exportSummaryToCSV,
@@ -463,6 +463,9 @@ function App() {
                     </svg>
                     npm
                   </a>
+                  <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-base-content/70 bg-base-200/50 rounded-lg">
+                    v{VERSION}
+                  </span>
                 </div>
                 <div className="relative">
                   <button
