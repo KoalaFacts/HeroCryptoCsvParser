@@ -94,7 +94,7 @@ npm run build
 - **Vite** - Build tool and dev server
 - **Tailwind CSS v4** - Styling framework
 - **DaisyUI v5** - Component library
-- **@beingciteable/hero-csv-crypto-parser** - Core parsing library
+- **@koalafacts/hero-crypto-csv-parser** - Core parsing library
 
 ## 📄 License
 

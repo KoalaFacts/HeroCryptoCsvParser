@@ -3,7 +3,7 @@ description: Suggest an idea for hero-crypto-csv-parser
 title: "[Feature]: "
 labels: ["enhancement", "triage"]
 assignees:
-  - BeingCiteable
+  - KoalaFacts
 
 body:
   - type: markdown

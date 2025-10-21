@@ -10,9 +10,9 @@ updates:
       timezone: "UTC"
     open-pull-requests-limit: 10
     reviewers:
-      - "BeingCiteable"
+      - "KoalaFacts"
     assignees:
-      - "BeingCiteable"
+      - "KoalaFacts"
     commit-message:
       prefix: "chore"
       prefix-development: "chore"
@@ -56,9 +56,9 @@ updates:
       timezone: "UTC"
     open-pull-requests-limit: 5
     reviewers:
-      - "BeingCiteable"
+      - "KoalaFacts"
     assignees:
-      - "BeingCiteable"
+      - "KoalaFacts"
     commit-message:
       prefix: "ci"
       include: "scope"

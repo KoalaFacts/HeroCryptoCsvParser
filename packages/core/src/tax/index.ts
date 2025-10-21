@@ -175,6 +175,6 @@ export const TAX_MODULE_INFO = {
     "PDF and ATO XML export",
     "Privacy-first architecture",
   ],
-  author: "BeingCiteable",
+  author: "KoalaFacts",
   license: "MIT",
 } as const;

@@ -1,5 +1,5 @@
 {
-  "name": "beingciteable",
+  "name": "koalafacts",
   "version": "1.0.0",
   "private": true,
   "description": "Universal cryptocurrency transaction parser monorepo with core library and demo",
@@ -28,15 +28,15 @@
     "cryptocurrency transaction parser",
     "cryptocurrency tax reporting"
   ],
-  "author": "BeingCiteable",
+  "author": "KoalaFacts",
   "license": "MIT",
-  "homepage": "https://github.com/BeingCiteable/hero-crypto-csv-parser#readme",
+  "homepage": "https://github.com/KoalaFacts/hero-crypto-csv-parser#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BeingCiteable/hero-crypto-csv-parser.git"
+    "url": "git+https://github.com/KoalaFacts/hero-crypto-csv-parser.git"
   },
   "bugs": {
-    "url": "https://github.com/BeingCiteable/hero-crypto-csv-parser/issues"
+    "url": "https://github.com/KoalaFacts/hero-crypto-csv-parser/issues"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -188,7 +188,7 @@ jobs:
           CURRENT_VERSION=$(node -p "require('./packages/core/package.json').version")
 
           # Check if this version exists on npm
-          if npm view @beingciteable/hero-csv-crypto-parser@$CURRENT_VERSION version 2>/dev/null; then
+          if npm view @koalafacts/hero-crypto-csv-parser@$CURRENT_VERSION version 2>/dev/null; then
             echo "Version $CURRENT_VERSION already published"
             echo "should_publish=false" >> $GITHUB_OUTPUT
           else
@@ -225,13 +225,13 @@ jobs:
 
           # Create release body
           cat > release_notes.md << EOF
-          ## 🚀 @beingciteable/hero-csv-crypto-parser v$VERSION
+          ## 🚀 @koalafacts/hero-crypto-csv-parser v$VERSION
 
           This release includes the latest features and improvements to the Hero Crypto CSV Parser library.
 
           ### 📦 Installation
           \`\`\`bash
-          npm install @beingciteable/hero-csv-crypto-parser@$VERSION
+          npm install @koalafacts/hero-crypto-csv-parser@$VERSION
           \`\`\`
 
           ### 📋 What's New
@@ -260,7 +260,7 @@ jobs:
           sleep 30
 
           # Verify the package was published successfully
-          PUBLISHED_VERSION=$(npm view @beingciteable/hero-csv-crypto-parser version)
+          PUBLISHED_VERSION=$(npm view @koalafacts/hero-crypto-csv-parser version)
           EXPECTED_VERSION="${{ steps.version-check.outputs.current_version }}"
 
           if [ "$PUBLISHED_VERSION" = "$EXPECTED_VERSION" ]; then
