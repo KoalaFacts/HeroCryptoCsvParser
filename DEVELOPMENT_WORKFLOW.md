@@ -37,7 +37,7 @@ npm run dev
 # Terminal 2: Link to local build
 npm link
 cd demo
-npm link @beingciteable/hero-csv-crypto-parser
+npm link @koalafacts/hero-crypto-csv-parser
 npm run dev
 ```
 
@@ -83,11 +83,11 @@ If you used `npm link` and want to go back to `file:` dependency:
 
 ```bash
 cd demo
-npm unlink @beingciteable/hero-csv-crypto-parser
+npm unlink @koalafacts/hero-crypto-csv-parser
 npm install  # Re-installs from package.json (file:../)
 
 # Optional: Remove global link
-npm unlink -g @beingciteable/hero-csv-crypto-parser
+npm unlink -g @koalafacts/hero-crypto-csv-parser
 ```
 
 ## Current Status

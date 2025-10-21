@@ -7,12 +7,12 @@ This project uses npm workspaces to organize the monorepo.
 ```
 HeroCryptoCsvParser/
 ├── packages/
-│   ├── core/                    # @beingciteable/hero-csv-crypto-parser
+│   ├── core/                    # @koalafacts/hero-crypto-csv-parser
 │   │   ├── src/                 # Core library source code
 │   │   ├── tests/               # Core library tests
 │   │   ├── package.json         # Core package config
 │   │   └── tsconfig.json        # TypeScript config
-│   └── demo/                    # @beingciteable/hero-csv-crypto-parser-demo
+│   └── demo/                    # @koalafacts/hero-crypto-csv-parser-demo
 │       ├── src/                 # Demo application source
 │       ├── public/              # Static assets
 │       ├── package.json         # Demo package config
@@ -25,14 +25,14 @@ HeroCryptoCsvParser/
 ## Packages
 
 ### `packages/core`
-The main library package `@beingciteable/hero-csv-crypto-parser`. Contains:
+The main library package `@koalafacts/hero-crypto-csv-parser`. Contains:
 - CSV parsing framework
 - Cryptocurrency transaction models
 - Tax reporting engine
 - Exchange adapters (Binance, etc.)
 
 ### `packages/demo`
-Demo application `@beingciteable/hero-csv-crypto-parser-demo`. Contains:
+Demo application `@koalafacts/hero-crypto-csv-parser-demo`. Contains:
 - React/Vite demo application
 - Example usage of the core library
 - Interactive showcase
@@ -102,7 +102,7 @@ The demo package uses a local file reference to the core package:
 ```json
 {
   "dependencies": {
-    "@beingciteable/hero-csv-crypto-parser": "file:../core"
+    "@koalafacts/hero-crypto-csv-parser": "file:../core"
   }
 }
 ```

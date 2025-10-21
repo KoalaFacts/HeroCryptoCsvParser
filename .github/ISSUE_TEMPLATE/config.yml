@@ -1,10 +1,10 @@
 blank_issues_enabled: false
 contact_links:
   - name: 💬 Discussions
-    url: https://github.com/BeingCiteable/hero-crypto-csv-parser/discussions
+    url: https://github.com/KoalaFacts/hero-crypto-csv-parser/discussions
     about: Ask questions, share ideas, and engage with the community
   - name: 📚 Documentation
-    url: https://github.com/BeingCiteable/hero-crypto-csv-parser#readme
+    url: https://github.com/KoalaFacts/hero-crypto-csv-parser#readme
     about: Read the documentation and examples
   - name: 🚀 NPM Package
     url: https://www.npmjs.com/package/hero-crypto-csv-parser

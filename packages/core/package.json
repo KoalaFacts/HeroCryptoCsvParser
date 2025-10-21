@@ -1,6 +1,6 @@
 {
-  "name": "@beingciteable/hero-csv-crypto-parser",
-  "version": "0.2.2",
+  "name": "@koalafacts/hero-crypto-csv-parser",
+  "version": "0.2.3",
   "description": "Universal cryptocurrency transaction parser for exchange exports, tax reporting, and portfolio tracking. Supports multiple formats beyond CSV.",
   "type": "module",
   "exports": {
@@ -30,16 +30,16 @@
     "portfolio tracking",
     "csv parser"
   ],
-  "author": "BeingCiteable",
+  "author": "KoalaFacts",
   "license": "MIT",
-  "homepage": "https://github.com/BeingCiteable/hero-crypto-csv-parser#readme",
+  "homepage": "https://github.com/KoalaFacts/hero-crypto-csv-parser#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BeingCiteable/hero-crypto-csv-parser.git",
+    "url": "git+https://github.com/KoalaFacts/hero-crypto-csv-parser.git",
     "directory": "packages/core"
   },
   "bugs": {
-    "url": "https://github.com/BeingCiteable/hero-crypto-csv-parser/issues"
+    "url": "https://github.com/KoalaFacts/hero-crypto-csv-parser/issues"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -109,7 +109,7 @@ jobs:
 
           ### 📦 Installation
           \`\`\`bash
-          npm install @beingciteable/hero-csv-crypto-parser@$VERSION
+          npm install @koalafacts/hero-crypto-csv-parser@$VERSION
           \`\`\`
 
           ### 📋 Changes

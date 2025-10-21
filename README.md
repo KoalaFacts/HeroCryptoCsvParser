@@ -19,11 +19,11 @@ Transform transaction exports from any cryptocurrency exchange into standardized
 ### Node.js/TypeScript
 
 ```bash
-npm install @beingciteable/hero-csv-crypto-parser
+npm install @koalafacts/hero-crypto-csv-parser
 ```
 
 ```typescript
-import { process, exportToCSV } from '@beingciteable/hero-csv-crypto-parser';
+import { process, exportToCSV } from '@koalafacts/hero-crypto-csv-parser';
 
 // Process Binance transaction export
 const result = await process('binance', csvContent, {
@@ -84,7 +84,7 @@ const result = await process('binance', content, {
 Export to multiple standardized formats:
 
 ```typescript
-import { exportToCSV } from '@beingciteable/hero-csv-crypto-parser';
+import { exportToCSV } from '@koalafacts/hero-crypto-csv-parser';
 
 const csv = await exportToCSV(transactions, {
   fields: ['timestamp', 'type', 'baseAsset', 'amount', 'feeAsset'],
@@ -234,7 +234,7 @@ Generate complete, ATO-compliant tax reports entirely on your device - no data e
 ### Quick Example
 
 ```typescript
-import { generateTaxReport, exportTaxReportPDF } from '@beingciteable/hero-csv-crypto-parser/tax';
+import { generateTaxReport, exportTaxReportPDF } from '@koalafacts/hero-crypto-csv-parser/tax';
 
 // Generate comprehensive tax report
 const report = await generateTaxReport({
@@ -262,7 +262,7 @@ const pdfBuffer = await exportTaxReportPDF(report, {
 });
 
 // Export to ATO XML format
-import { exportTaxReportATO } from '@beingciteable/hero-csv-crypto-parser/tax';
+import { exportTaxReportATO } from '@koalafacts/hero-crypto-csv-parser/tax';
 const atoXml = await exportTaxReportATO(report, {
   taxpayerDetails: { tfn: '123456789', name: 'John Smith', address: '...' }
 });
@@ -280,7 +280,7 @@ const atoXml = await exportTaxReportATO(report, {
 ### Storage & Privacy
 
 ```typescript
-import { initializeStorage, getStorageManager } from '@beingciteable/hero-csv-crypto-parser/tax';
+import { initializeStorage, getStorageManager } from '@koalafacts/hero-crypto-csv-parser/tax';
 
 // Browser storage (IndexedDB)
 await initializeStorage({

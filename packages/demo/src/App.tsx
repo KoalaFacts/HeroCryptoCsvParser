@@ -1,13 +1,13 @@
 import type {
   SourceProcessResult,
   Transaction,
-} from "@beingciteable/hero-csv-crypto-parser";
-import { process } from "@beingciteable/hero-csv-crypto-parser";
-import type { TaxReport } from "@beingciteable/hero-csv-crypto-parser/tax";
+} from "@koalafacts/hero-crypto-csv-parser";
+import { process, VERSION } from "@koalafacts/hero-crypto-csv-parser";
+import type { TaxReport } from "@koalafacts/hero-crypto-csv-parser/tax";
 import {
   exportSummaryToCSV,
   generateTaxReport,
-} from "@beingciteable/hero-csv-crypto-parser/tax";
+} from "@koalafacts/hero-crypto-csv-parser/tax";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import jsPDF from "jspdf";
@@ -341,7 +341,7 @@ function App() {
       // Footer
       doc.setFontSize(8);
       doc.text("Generated with Hero Crypto CSV Parser", 20, 285);
-      doc.text("https://github.com/BeingCiteable/HeroCryptoCsvParser", 20, 290);
+      doc.text("https://github.com/KoalaFacts/HeroCryptoCsvParser", 20, 290);
 
       // Save
       doc.save(`tax-report-AU-${taxYear}.pdf`);
@@ -436,7 +436,7 @@ function App() {
               <div className="flex items-center space-x-4">
                 <div className="hidden sm:flex items-center space-x-3">
                   <a
-                    href="https://github.com/BeingCiteable/HeroCryptoCsvParser"
+                    href="https://github.com/KoalaFacts/HeroCryptoCsvParser"
                     className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-base-content/60 hover:text-base-content transition-colors duration-200"
                   >
                     <svg
@@ -450,7 +450,7 @@ function App() {
                     GitHub
                   </a>
                   <a
-                    href="https://www.npmjs.com/package/@beingciteable/hero-csv-crypto-parser"
+                    href="https://www.npmjs.com/package/@koalafacts/hero-crypto-csv-parser"
                     className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-base-content/60 hover:text-base-content transition-colors duration-200"
                   >
                     <svg
@@ -463,6 +463,9 @@ function App() {
                     </svg>
                     npm
                   </a>
+                  <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-base-content/70 bg-base-200/50 rounded-lg">
+                    v{VERSION}
+                  </span>
                 </div>
                 <div className="relative">
                   <button
@@ -1539,7 +1542,7 @@ console.log(report.summary);`}
                         {/* CTA Buttons */}
                         <div className="flex flex-col gap-3">
                           <a
-                            href="https://github.com/BeingCiteable/HeroCryptoCsvParser#-tax-reporting-new"
+                            href="https://github.com/KoalaFacts/HeroCryptoCsvParser#-tax-reporting-new"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
@@ -1561,7 +1564,7 @@ console.log(report.summary);`}
                             Read Documentation
                           </a>
                           <a
-                            href="https://github.com/BeingCiteable/HeroCryptoCsvParser/tree/main/docs"
+                            href="https://github.com/KoalaFacts/HeroCryptoCsvParser/tree/main/docs"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center justify-center px-6 py-3 bg-white text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50 transition-all duration-200 border border-emerald-200 text-sm"
@@ -1709,7 +1712,7 @@ console.log(report.summary);`}
 
                     <div className="flex flex-col gap-3">
                       <a
-                        href="https://github.com/BeingCiteable/HeroCryptoCsvParser/issues/new?assignees=&labels=exchange-request&template=exchange_support_request.md&title=Add+support+for+[Exchange+Name]"
+                        href="https://github.com/KoalaFacts/HeroCryptoCsvParser/issues/new?assignees=&labels=exchange-request&template=exchange_support_request.md&title=Add+support+for+[Exchange+Name]"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
@@ -1731,7 +1734,7 @@ console.log(report.summary);`}
                         Submit Request
                       </a>
                       <a
-                        href="https://github.com/BeingCiteable/HeroCryptoCsvParser/discussions"
+                        href="https://github.com/KoalaFacts/HeroCryptoCsvParser/discussions"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center px-5 py-2.5 bg-white text-orange-600 rounded-xl font-semibold hover:bg-orange-50 transition-all duration-200 border border-orange-200 text-sm"
@@ -1770,7 +1773,7 @@ console.log(report.summary);`}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                   <a
-                    href="https://github.com/BeingCiteable/HeroCryptoCsvParser"
+                    href="https://github.com/KoalaFacts/HeroCryptoCsvParser"
                     className="inline-flex items-center px-8 py-4 bg-white text-primary rounded-xl font-semibold hover:bg-white/90 transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
                     <svg
@@ -1784,7 +1787,7 @@ console.log(report.summary);`}
                     Star on GitHub
                   </a>
                   <a
-                    href="https://www.npmjs.com/package/@beingciteable/hero-csv-crypto-parser"
+                    href="https://www.npmjs.com/package/@koalafacts/hero-crypto-csv-parser"
                     className="inline-flex items-center px-8 py-4 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition-all duration-200 border border-white/20"
                   >
                     <svg

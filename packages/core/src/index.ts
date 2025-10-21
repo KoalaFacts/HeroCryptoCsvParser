@@ -1,3 +1,7 @@
+// Package version - imported from package.json to maintain single source of truth
+import packageJson from "../package.json" with { type: "json" };
+export const VERSION = packageJson.version;
+
 export { BatchEntryRecord } from "./core/BatchEntryRecord";
 export {
   FieldFormatterContext,
