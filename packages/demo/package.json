@@ -15,21 +15,21 @@
   "dependencies": {
     "@koalafacts/hero-crypto-csv-parser": "file:../core",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.1.14",
+    "@tailwindcss/vite": "^4.1.15",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
-    "daisyui": "^5.1.29",
+    "daisyui": "^5.3.7",
     "jspdf": "^3.0.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tailwindcss": "^4.1.14"
+    "tailwindcss": "^4.1.15"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.5",
+    "@biomejs/biome": "^2.2.6",
     "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.1",
+    "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.0.4",
     "typescript": "^5.9.3",
-    "vite": "^7.1.9"
+    "vite": "^7.1.11"
   }
 }
