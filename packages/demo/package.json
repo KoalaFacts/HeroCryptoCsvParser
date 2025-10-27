@@ -18,7 +18,7 @@
     "@tailwindcss/vite": "^4.1.15",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
-    "daisyui": "^5.3.7",
+    "daisyui": "^5.3.10",
     "jspdf": "^3.0.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
